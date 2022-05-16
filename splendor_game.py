@@ -976,27 +976,26 @@ def all_possible_actions() -> list[Action]:
             current_actions_list.append((reserve_a_card,
                                          {'level': level, 'index': index}))
     all_actions['reserve_a_card'] = current_actions_list
-    # TODO purchasing any slot on table with all 
-    # combinations of 10 tokens as input
-    # TODO purchasing any slot in reserved with all 
-    # combinations of 10 tokens as input
+    # Purchasing any slot on table with all combinations
+    # of wildcard token
     current_actions_list = []
-    for token_input in product(range(8), range(8), range(8),
-                               range(8), range(8), range(6)):
-        if sum(token_input) <= 10:
+    for token_input in product(range(6), range(6), range(6),
+                               range(6), range(6)):
+        if sum(token_input) <= 5:
             for level in range(1, 4):
                 for index in range(4):
                     current_actions_list.append(
                         (purchase_a_card,
                          {'level': level,
                           'index': index,
-                          'tokens': {colors[0]: token_input[0],
-                                     colors[1]: token_input[1],
-                                     colors[2]: token_input[2],
-                                     colors[3]: token_input[3],
-                                     colors[4]: token_input[4],
-                                     "yellow": token_input[5]}}))
+                          'yellow_replaces': {colors[0]: token_input[0],
+                                              colors[1]: token_input[1],
+                                              colors[2]: token_input[2],
+                                              colors[3]: token_input[3],
+                                              colors[4]: token_input[4]}}))
     all_actions['purchase_a_card'] = current_actions_list
+    # TODO purchasing any slot in reserved with all
+    # combinations of 10 tokens as input
     return all_actions
 
 # TODO generate all possible actions
@@ -1132,3 +1131,8 @@ all_actions = all_possible_actions()
 #print(all_actions)
 for action_type in all_actions:
     print(f"Number of {action_type}: {len(all_actions[action_type])}")
+# %%
+# =============================================================================
+# for a in all_actions['purchase_a_card']:
+#     print(a[1]['yellow_replaces'])
+# =============================================================================
