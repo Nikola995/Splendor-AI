@@ -45,6 +45,15 @@ class Bank:
          # Yellow is the wildcard
          "yellow": 5}))
 
+    def _can_remove_token(self, amount_to_remove: dict[str, int],
+                          threshold=0) -> bool:
+        """Check if tokens of given colors can be removed."""
+        for color in amount_to_remove:
+            if (self.token_available[color] - amount_to_remove[color]
+                    < threshold):
+                return False
+        return True
+
     # TODO: change game errors to return False
     def _remove_token(self, amount_to_remove: dict[str, int],
                       threshold=0, verbose=0) -> None:
@@ -61,7 +70,7 @@ class Bank:
         Raises
         ------
         IncorrectInputError
-            Raised if invalid color names are given
+            Raise if invalid color names are given
 
         TokenThresholdError
             Raise if the amount of tokens removed for a given color leaves the
@@ -70,16 +79,12 @@ class Bank:
         if not set(amount_to_remove.keys()).issubset(
                 self.token_available.keys()):
             raise IncorrectInputError("Invalid colors were given")
-        for color in amount_to_remove:
-            if (self.token_available[color] - amount_to_remove[color]
-                    < threshold):
-                raise TokenThresholdError("Tried to take "
-                                          f"{amount_to_remove[color]}"
-                                          f" {color} tokens, only "
-                                          f"{self.token_available[color]}"
-                                          " available")
-            else:
+        if self._can_remove_token(amount_to_remove, threshold):
+            for color in amount_to_remove:
                 self.token_available[color] -= amount_to_remove[color]
+            else:
+                raise TokenThresholdError("Tried to take more tokens"
+                                          "than available in the bank")
 
     # TODO: Add an input type check
     def add_token(self, amount_to_add: dict[str, int]) -> None:
@@ -101,6 +106,7 @@ class Bank:
             self.token_available[color] += amount_to_add[color]
 
     # TODO: change game errors to return False
+    # TODO: Add an proper input type check
     def remove_3_different_color_tokens(self, color_list: list[str],
                                         verbose=0) -> None:
         """Remove 3 tokens of different color from the bank.
@@ -124,7 +130,10 @@ class Bank:
         if 'yellow' in color_list:
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
-        self._remove_token(dict.fromkeys(color_list, 1))
+        try:
+            self._remove_token(dict.fromkeys(color_list, 1))
+        except TokenThresholdError as TTE:
+            print(TTE)
 
     # TODO: add an input type check
     # TODO: change game errors to return False
@@ -149,8 +158,10 @@ class Bank:
         if color == 'yellow':
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
-
-        self._remove_token({color: 2}, 2)
+        try:
+            self._remove_token({color: 2}, threshold=2)
+        except TokenThresholdError as TTE:
+            print(TTE)
 
 
 @dataclass(order=True)
@@ -181,6 +192,13 @@ class Player:
     # Prestige points
     prestige_points: int = 0
 
+    def _can_remove_token(self, amount_to_remove: dict[str, int]) -> bool:
+        """Check if tokens of given colors can be removed."""
+        for color in amount_to_remove:
+            if (self.token_reserved[color] - amount_to_remove[color] < 0):
+                return False
+        return True
+    
     # TODO: add a docstring
     # TODO: create an action_check for this
     def remove_token(self, amount_to_remove: dict[str, int]) -> None:
@@ -207,41 +225,39 @@ class Player:
         if not set(amount_to_remove.keys()).issubset(
                 self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
-        for color in amount_to_remove:
-            if self.token_reserved[color] - amount_to_remove[color] < 0:
-                raise TokenThresholdError("Tried to take"
-                                          f" {amount_to_remove[color]}"
-                                          f" {color} tokens from "
-                                          f"{self.player_id}, only "
-                                          f"{self.token_reserved[color]} "
-                                          "available")
-            else:
+        if self._can_remove_token(amount_to_remove):
+            for color in amount_to_remove:
                 self.token_reserved[color] -= amount_to_remove[color]
+            else:
+                raise TokenThresholdError("Tried to take more tokens"
+                                          f"from {self.player_id} than"
+                                          "available")
+
+    def _can_add_token(self, amount_to_add: dict[str, int]) -> bool:
+        """Check if tokens of given colors can be added."""
+        if (sum(self.token_reserved.values()) +
+                sum(amount_to_add.values()) > 10):
+            return False
+        else:
+            return True
 
     # TODO: add a docstring
     # TODO: create an action_check for this
     def add_token(self, amount_to_add: dict[str, int]) -> None:
         if not set(amount_to_add.keys()).issubset(self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
-        token_total = 0
-        for color in self.token_reserved:
-            token_total += self.token_reserved[color]
-        token_total_to_add = 0
-        for color in amount_to_add:
-            token_total_to_add += amount_to_add[color]
-        if token_total + token_total_to_add > 10:
+        if self._can_add_token(amount_to_add):
+            for color in amount_to_add:
+                self.token_reserved[color] += amount_to_add[color]
+        else:
             raise TooManyTokensForPlayerError("A player cannot have more than "
-                                              "10 tokens in total, currently "
-                                              f"has {token_total} and tried to"
-                                              f" add {token_total_to_add}")
-        for color in amount_to_add:
-            self.token_reserved[color] += amount_to_add[color]
+                                              "10 tokens in total reserved")
 
     # TODO: add a docstring
     # TODO: add an input type check
     # TODO: change to not have yellow_replaces as input
     def can_purchase_card(self, card: Card,
-                     yellow_replaces: dict[str, int]) -> bool:
+                          yellow_replaces: dict[str, int]) -> bool:
         if not set(yellow_replaces.keys()).issubset(
                 self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
