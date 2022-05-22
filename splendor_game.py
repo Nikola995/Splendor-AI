@@ -32,9 +32,11 @@ class IncorrectInputError(Exception):
 
 
 # %%% Game entities
-# TODO Make it a singleton (refactor)
+# TODO Make it a singleton (refactor) (maybe?)
 @dataclass
 class Bank:
+    """A representation of the unreserved tokens in the game."""
+
     # Available tokens per color (type)
     token_available: dict[str, int] = field(default_factory=lambda: (
         {"green": 7,
@@ -54,9 +56,8 @@ class Bank:
                 return False
         return True
 
-    # TODO: change game errors to return False
     def _remove_token(self, amount_to_remove: dict[str, int],
-                      threshold=0, verbose=0) -> None:
+                      threshold=0, verbose=0) -> bool:
         """Remove an amount of tokens for given colors.
 
         (*Use in action functions only for wildcard (yellow), other colors
@@ -82,12 +83,16 @@ class Bank:
         if self._can_remove_token(amount_to_remove, threshold):
             for color in amount_to_remove:
                 self.token_available[color] -= amount_to_remove[color]
-            else:
-                raise TokenThresholdError("Tried to take more tokens"
-                                          "than available in the bank")
+            return True
+        else:
+            return False
+# =============================================================================
+#             raise TokenThresholdError("Tried to take more tokens"
+#                                       "than available in the bank")
+# =============================================================================
 
-    # TODO: Add an input type check
-    def add_token(self, amount_to_add: dict[str, int]) -> None:
+    # TODO If a maximum threshold is added, add a False scenario
+    def add_token(self, amount_to_add: dict[str, int]) -> bool:
         """Add an amount of tokens for given colors.
 
         Parameters
@@ -104,11 +109,10 @@ class Bank:
             raise IncorrectInputError("Invalid colors were given")
         for color in amount_to_add:
             self.token_available[color] += amount_to_add[color]
+        return True
 
-    # TODO: change game errors to return False
-    # TODO: Add an proper input type check
     def remove_3_different_color_tokens(self, color_list: list[str],
-                                        verbose=0) -> None:
+                                        verbose=0) -> bool:
         """Remove 3 tokens of different color from the bank.
 
         Parameters
@@ -121,23 +125,15 @@ class Bank:
         IncorrectInputError
             Raised if 3 colors are not given, or an incorrect color is given,
             or 'yellow' is given
-
-        TokenThresholdError
-            Bank has 0 tokens of a given color, can't remove 1.
         """
         if len(color_list) != 3:
             raise IncorrectInputError("3 colors were not given")
         if 'yellow' in color_list:
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
-        try:
-            self._remove_token(dict.fromkeys(color_list, 1))
-        except TokenThresholdError as TTE:
-            print(TTE)
+        return self._remove_token(dict.fromkeys(color_list, 1))
 
-    # TODO: add an input type check
-    # TODO: change game errors to return False
-    def remove_2_same_color_tokens(self, color: str, verbose=0) -> None:
+    def remove_2_same_color_tokens(self, color: str, verbose=0) -> bool:
         """Remove 2 tokens of the same color from the bank.
 
         Only if the bank has 4 tokens of that color available.
@@ -158,14 +154,13 @@ class Bank:
         if color == 'yellow':
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
-        try:
-            self._remove_token({color: 2}, threshold=2)
-        except TokenThresholdError as TTE:
-            print(TTE)
+        return self._remove_token({color: 2}, threshold=2)
 
 
 @dataclass(order=True)
 class Player:
+    """A representation of a player entity within the game."""
+
     # TODO make it a user account with elo (in the future)
     # For now just use a string name
     player_id: str
@@ -198,40 +193,23 @@ class Player:
             if (self.token_reserved[color] - amount_to_remove[color] < 0):
                 return False
         return True
-    
+
     # TODO: add a docstring
-    # TODO: create an action_check for this
-    def remove_token(self, amount_to_remove: dict[str, int]) -> None:
-        """dafg.
-
-        Parameters
-        ----------
-        amount_to_remove : dict[str, int]
-            DESCRIPTION.
-
-        Raises
-        ------
-        IncorrectInputError
-            DESCRIPTION.
-        TokenThresholdError
-            DESCRIPTION.
-
-        Returns
-        -------
-        None
-            DESCRIPTION.
-
-        """
+    def remove_token(self, amount_to_remove: dict[str, int]) -> bool:
         if not set(amount_to_remove.keys()).issubset(
                 self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
         if self._can_remove_token(amount_to_remove):
             for color in amount_to_remove:
                 self.token_reserved[color] -= amount_to_remove[color]
-            else:
-                raise TokenThresholdError("Tried to take more tokens"
-                                          f"from {self.player_id} than"
-                                          "available")
+            return True
+        else:
+            return False
+# =============================================================================
+#             raise TokenThresholdError("Tried to take more tokens"
+#                                       f"from {self.player_id} than"
+#                                       "available")
+# =============================================================================
 
     def _can_add_token(self, amount_to_add: dict[str, int]) -> bool:
         """Check if tokens of given colors can be added."""
@@ -242,20 +220,22 @@ class Player:
             return True
 
     # TODO: add a docstring
-    # TODO: create an action_check for this
-    def add_token(self, amount_to_add: dict[str, int]) -> None:
+    def add_token(self, amount_to_add: dict[str, int]) -> bool:
         if not set(amount_to_add.keys()).issubset(self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
         if self._can_add_token(amount_to_add):
             for color in amount_to_add:
                 self.token_reserved[color] += amount_to_add[color]
+            return True
         else:
-            raise TooManyTokensForPlayerError("A player cannot have more than "
-                                              "10 tokens in total reserved")
+            return False
+# =============================================================================
+#             raise TooManyTokensForPlayerError("A player cannot have more"
+#                                               " than 10 tokens in total"
+#                                               " reserved")
+# =============================================================================
 
     # TODO: add a docstring
-    # TODO: add an input type check
-    # TODO: change to not have yellow_replaces as input
     def can_purchase_card(self, card: Card,
                           yellow_replaces: dict[str, int]) -> bool:
         if not set(yellow_replaces.keys()).issubset(
@@ -275,7 +255,7 @@ class Player:
                 return False
         return True
 
-    # TODO: add an input type check
+    # TODO: add an input type check, and with that change output to bool
     def add_to_owned_cards(self, card: Card) -> None:
         """Add card to list of owned cards.
 
@@ -293,6 +273,7 @@ class Player:
     # TODO: add an input type check
     def is_eligible_for_noble(self, noble: Noble, verbose=0) -> bool:
         """Check if the player is eligible to own the noble.
+
         If the player's owned bonuses are more or equal to the
         required bonuses of the noble, they are eligible.
 
@@ -305,7 +286,6 @@ class Player:
         -------
         bool
             Eligibility of the player to own the noble
-
         """
         for color in noble.bonus_required:
             # If the player doesn't have enough bonuses for the noble
@@ -314,7 +294,7 @@ class Player:
         # If all the checks pass, that must mean the player is eligible
         return True
 
-    # TODO: add an input type check
+    # TODO: add an input type check, and with that change output to bool
     def add_to_owned_nobles(self, noble: Noble) -> None:
         """Add noble to list of owned nobles.
 
@@ -338,55 +318,59 @@ Action = Callable[[Player, Bank], None]
 
 
 # TODO add a docstring
-# TODO change func to return bool
 def reserve_3_different_color_tokens(player: Player, bank: Bank,
                                      color_list: list[str],
-                                     verbose=0) -> None:
-    try:
+                                     verbose=0) -> bool:
+    if (bank._can_remove_token(dict.fromkeys(color_list, 1)) and
+            player._can_add_token(dict.fromkeys(color_list, 1))):
         bank.remove_3_different_color_tokens(color_list)
         player.add_token(dict.fromkeys(color_list, 1))
         if verbose == 1:
             print(f"{player.player_id} has reserved a {color_list[0]}, "
                   f"{color_list[1]} and {color_list[2]} token")
-    except Exception as e:
-        raise ActionNotPossibleError(str(e))
+        return True
+    else:
+        return False
 
 
 # TODO add a docstring
-# TODO change func to return bool
 def reserve_2_same_color_tokens(player: Player, bank: Bank,
-                                color: str, verbose=0) -> None:
-    try:
+                                color: str, verbose=0) -> bool:
+    if (bank._can_remove_token({color: 2}) and
+            player._can_add_token({color: 2})):
         bank.remove_2_same_color_tokens(color)
         player.add_token({color: 2})
         if verbose == 1:
             print(f"{player.player_id} has reserved 2 {color} tokens")
-    except Exception as e:
-        raise ActionNotPossibleError(str(e))
+        return True
+    else:
+        return False
 
 
 # TODO add a docstring
-# TODO change func to return bool (false if exception)
-# TODO test if the try statement reverts if the player has >10 tokens
+# TODO input type check for card
 def reserve_a_card(player: Player, bank: Bank, card: Card, card_id: str,
                    verbose=0) -> bool:
-    if len(player.cards_reserved) == 3:
-        raise ActionNotPossibleError("Player has 3 reserved cards, "
-                                     "can't reserve more")
-    try:
-        player.cards_reserved[card_id] = (card)
-        if bank.token_available['yellow'] > 0:
-            bank._remove_token({'yellow': 1})
-            player.add_token({'yellow': 1})
-        if verbose == 1:
-            print(f"{player.player_id} has reserved {card_id}")
-        return True
-    except Exception as e:
-        raise ActionNotPossibleError(str(e))
+    # Should never have more than 3 reserved cards, but just in case use >=
+    if len(player.cards_reserved) >= 3:
+        return False
+# =============================================================================
+#         raise ActionNotPossibleError("Player has 3 reserved cards, "
+#                                      "can't reserve more")
+# =============================================================================
+    if (bank._can_remove_token({'yellow': 1}) and
+            player._can_add_token({'yellow': 1})):
+        bank._remove_token({'yellow': 1})
+        player.add_token({'yellow': 1})
+    # The card is reserved even if there isn't a wildcard token to reserve
+    player.cards_reserved[card_id] = (card)
+    if verbose == 1:
+        print(f"{player.player_id} has reserved {card_id}")
+    return True
 
 
 # TODO add a docstring
-def _purchase_check(remaning_cost: int, card: Card, card_id:  str,
+def _purchase_check_and_own(remaning_cost: int, card: Card, card_id:  str,
                     player: Player, is_reserved: bool) -> bool:
     if remaning_cost == 0:
         player.add_to_owned_cards(card)
@@ -399,6 +383,7 @@ def _purchase_check(remaning_cost: int, card: Card, card_id:  str,
 
 
 # TODO add a docstring
+# TODO input type checks
 def purchase_a_card(player: Player, bank: Bank, card_id: str,
                     card: Card = None, is_reserved: bool = False,
                     yellow_replaces: dict[str, int] = {"green": 0,
@@ -407,74 +392,73 @@ def purchase_a_card(player: Player, bank: Bank, card_id: str,
                                                        "black": 0,
                                                        "red": 0},
                     verbose=0) -> bool:
-    try:
-        # If the action is purchasing a reserved card
-        if is_reserved:
-            # Get the card by card id
-            card = player.cards_reserved[card_id]
-        if player.can_purchase_card(card, yellow_replaces):
-            card_token_cost = deepcopy(card.token_cost)
-            # Reduce the cost by the owned bonuses
-            for color in player.bonus_owned:
-                if player.bonus_owned[color] > card_token_cost[color]:
-                    card_token_cost[color] = 0
-                else:
-                    card_token_cost[color] -= player.bonus_owned[color]
-            # If the card can be purchased by just bonuses
-            if _purchase_check(remaning_cost=sum(card_token_cost.values()),
-                               card=card, card_id=card_id, player=player,
-                               is_reserved=is_reserved):
-                if verbose == 1:
-                    print(f"{player.player_id} purchased "
-                          f"{card_id} with bonuses")
-                return True
-
-            # Reduce the cost by the yellow tokens per color
-            for color in yellow_replaces:
-                if card_token_cost[color] - yellow_replaces[color] >= 0:
-                    card_token_cost[color] -= yellow_replaces[color]
-                else:
-                    raise IncorrectInputError("Too many yellow tokens given "
-                                              f"for color {color}")
-            # Give all the yellow tokens back to the bank
-            player.remove_token({'yellow': sum(yellow_replaces.values())})
-            bank.add_token({'yellow': sum(yellow_replaces.values())})
-
-            # If the card can be purchased by just yellow tokens
-            if _purchase_check(remaning_cost=sum(card_token_cost.values()),
-                               card=card, card_id=card_id, player=player,
-                               is_reserved=is_reserved):
-                if verbose == 1:
-                    print(f"{player.player_id} purchased {card_id} with "
-                          "wildcard tokens")
-                return True
-
-            # Finish the purchase with the reserved tokens
-            for color in card.token_cost:
-                if card_token_cost[color] > 0:
-                    # Give the tokens back to the bank
-                    player.remove_token({color: card_token_cost[color]})
-                    bank.add_token({color: card_token_cost[color]})
-                    card_token_cost[color] = 0
-
-            # If the card can be purchased by just yellow tokens
-            if _purchase_check(remaning_cost=sum(card_token_cost.values()),
-                               card=card, card_id=card_id, player=player,
-                               is_reserved=is_reserved):
-                if verbose == 1:
-                    print(f"{player.player_id} has purchased {card_id}"
-                          " with tokens")
-                return True
-            # Something went horribly wrong if you get here
-            raise ActionNotPossibleError("The card still has a cost to it, "
-                                         "something went horribly wrong")
-        else:
+    # If the action is purchasing a reserved card
+    if is_reserved:
+        # Get the card by card id
+        card = player.cards_reserved[card_id]
+    if player.can_purchase_card(card, yellow_replaces):
+        card_token_cost = deepcopy(card.token_cost)
+        # Reduce the cost by the owned bonuses
+        for color in player.bonus_owned:
+            if player.bonus_owned[color] > card_token_cost[color]:
+                card_token_cost[color] = 0
+            else:
+                card_token_cost[color] -= player.bonus_owned[color]
+        # If the card was purchased with just bonuses
+        if _purchase_check_and_own(remaning_cost=sum(card_token_cost.values()),
+                                   card=card, card_id=card_id, player=player,
+                                   is_reserved=is_reserved):
             if verbose == 1:
-                print(f"{player.player_id} cannot purchase {card_id}"
-                      " with tokens")
-            return False
-    except Exception as e:
-        raise ActionNotPossibleError(str(e))
+                print(f"{player.player_id} purchased "
+                      f"{card_id} with bonuses")
+            return True
+
+        # Reduce the cost by the yellow tokens per color
+        for color in yellow_replaces:
+            if card_token_cost[color] - yellow_replaces[color] >= 0:
+                card_token_cost[color] -= yellow_replaces[color]
+            else:
+                # TODO Issue 11
+                raise IncorrectInputError("Too many yellow tokens given "
+                                          f"for color {color}")
+        # Give all the yellow tokens back to the bank
+        player.remove_token({'yellow': sum(yellow_replaces.values())})
+        bank.add_token({'yellow': sum(yellow_replaces.values())})
+
+        # If the card was purchased by just yellow tokens
+        if _purchase_check_and_own(remaning_cost=sum(card_token_cost.values()),
+                                   card=card, card_id=card_id, player=player,
+                                   is_reserved=is_reserved):
+            if verbose == 1:
+                print(f"{player.player_id} purchased {card_id} with "
+                      "wildcard tokens")
+            return True
+
+        # Finish the purchase with the reserved tokens
+        for color in card.token_cost:
+            if card_token_cost[color] > 0:
+                # Transfer the amount of tokens remaining in the cost
+                # from the player to the bank
+                player.remove_token({color: card_token_cost[color]})
+                bank.add_token({color: card_token_cost[color]})
+                card_token_cost[color] = 0
+
+        # If the card was purchased by reserved tokens
+        if _purchase_check_and_own(remaning_cost=sum(card_token_cost.values()),
+                                   card=card, card_id=card_id, player=player,
+                                   is_reserved=is_reserved):
+            if verbose == 1:
+                print(f"{player.player_id} has purchased {card_id}"
+                      " with reserved tokens")
+            return True
+        # Something went horribly wrong if you get here
+        raise ActionNotPossibleError("The card still has a cost to it, "
+                                     "something went horribly wrong")
+    else:
+        if verbose == 1:
+            print(f"{player.player_id} cannot purchase {card_id}"
+                  " with tokens")
+        return False
 
 
 # %%% Game custom errors
@@ -495,11 +479,12 @@ class TurnNotOverError(Exception):
 
 
 # %% Game mechanics
-# TODO add docstring
 # TODO add a game_started and game_finished flags and not allow actions
 # game_started = False or game_finished = True
 @dataclass
 class Game:
+    """A representation of the whole process of playing the game."""
+
     # %% Game Assets
     _num_players: int = 0
     players: list[Player] = field(default_factory=list)
@@ -663,7 +648,6 @@ class Game:
         """
         return self.curr_player_index >= self._num_players
 
-    # TODO Switch from raising error if not over to return bool
     def end_turn(self, verbose=0) -> bool:
         """Reset the player move order and increment the number of turns."""
         if not self.is_turn_over():
@@ -691,7 +675,12 @@ class Game:
         return False
 
     def end_move_for_player(self, verbose=0) -> None:
-        """End the player's move and do a noble check for them."""
+        """End the player's move and do a noble check for them.
+
+        Assume player has completed an action this turn.
+        *Should only be called in succefully performed action methods
+        in Game.
+        """
         # Do a noble check for the player
         if self.noble_check_for_player(self.players[self.curr_player_index],
                                        verbose) and verbose == 1:
@@ -738,16 +727,13 @@ class Game:
         bool
             Whether or not the action was performed succesfully
         """
-        try:
-            # Perform token-related action
-            action(player=self.players[self.curr_player_index],
-                   bank=self.bank, verbose=verbose)
+        # Perform token-related action
+        if action(player=self.players[self.curr_player_index],
+                  bank=self.bank, verbose=verbose):
             # If reached here, action was completed, so end their move
             self.end_move_for_player(verbose)
             return True
-        except Exception as e:
-            if verbose == 1:
-                print(str(e))
+        else:
             return False
 
     def _card_action_on_table(self, action: Action,
@@ -803,69 +789,59 @@ class Game:
         bool
             Whether or not the action was performed succesfully
         """
-        # Card-related actions
-        try:
-            # If the action is purchasing a reserved card (specific flag)
-            if is_reserved:
-                # Perform card-related action
-                if action(player=self.players[self.curr_player_index],
-                          bank=self.bank, card_id=card_id,
-                          is_reserved=is_reserved, verbose=verbose):
-                    # If reached here, action was completed,
-                    # so end their move
-                    self.end_move_for_player(verbose)
-                    return True
-                else:
-                    # If action wasn't performed and no error was raised
-                    return False
-            # if the action is reserving a card or
-            # purchasing a card on the table
-            if card_level == 1:
-                if self._card_action_on_table(
-                        action=action, card_id=card_id,
-                        cards_on_table=self.cards_on_table_level_1,
-                        cards_deck=self.cards_deck_level_1,
-                        verbose=verbose):
-                    # If reached here, action was completed, so end their move
-                    self.end_move_for_player(verbose)
-                    return True
-                else:
-                    # If action wasn't performed and no error was raised
-                    return False
-            elif card_level == 2:
-                if self._card_action_on_table(
-                        action=action, card_id=card_id,
-                        cards_on_table=self.cards_on_table_level_2,
-                        cards_deck=self.cards_deck_level_2,
-                        verbose=verbose):
-                    # If reached here, action was completed, so end their move
-                    self.end_move_for_player(verbose)
-                    return True
-                else:
-                    # If action wasn't performed and no error was raised
-                    return False
-            elif card_level == 3:
-                if self._card_action_on_table(
-                        action=action, card_id=card_id,
-                        cards_on_table=self.cards_on_table_level_3,
-                        cards_deck=self.cards_deck_level_3,
-                        verbose=verbose):
-                    # If reached here, action was completed, so end their move
-                    self.end_move_for_player(verbose)
-                    return True
-                else:
-                    # If action wasn't performed and no error was raised
-                    return False
+        # If the action is purchasing a reserved card (specific flag)
+        if is_reserved:
+            # Perform card-related action
+            if action(player=self.players[self.curr_player_index],
+                      bank=self.bank, card_id=card_id,
+                      is_reserved=is_reserved, verbose=verbose):
+                # If reached here, action was completed,
+                # so end their move
+                self.end_move_for_player(verbose)
+                return True
             else:
-                raise IncorrectInputError('Card level was an incorrect input')
-            raise IncorrectInputError('Card id was an incorrect input')
-        except Exception as e:
-            raise e
-# =============================================================================
-#             if verbose == 1:
-#                 print(str(e))
-#             return False
-# =============================================================================
+                # If action wasn't performed
+                return False
+        # if the action is reserving a card or
+        # purchasing a card on the table
+        if card_level == 1:
+            if self._card_action_on_table(
+                    action=action, card_id=card_id,
+                    cards_on_table=self.cards_on_table_level_1,
+                    cards_deck=self.cards_deck_level_1,
+                    verbose=verbose):
+                # If reached here, action was completed, so end their move
+                self.end_move_for_player(verbose)
+                return True
+            else:
+                # If action wasn't performed and no error was raised
+                return False
+        elif card_level == 2:
+            if self._card_action_on_table(
+                    action=action, card_id=card_id,
+                    cards_on_table=self.cards_on_table_level_2,
+                    cards_deck=self.cards_deck_level_2,
+                    verbose=verbose):
+                # If reached here, action was completed, so end their move
+                self.end_move_for_player(verbose)
+                return True
+            else:
+                # If action wasn't performed and no error was raised
+                return False
+        elif card_level == 3:
+            if self._card_action_on_table(
+                    action=action, card_id=card_id,
+                    cards_on_table=self.cards_on_table_level_3,
+                    cards_deck=self.cards_deck_level_3,
+                    verbose=verbose):
+                # If reached here, action was completed, so end their move
+                self.end_move_for_player(verbose)
+                return True
+            else:
+                # If action wasn't performed and no error was raised
+                return False
+        # Something went horribly wrong if you get here
+        raise IncorrectInputError("The card level given was not between 1-3")
     # TODO Maybe merge the different action types
     # TODO Add verbosity for failed actions
     # TODO Add verbose = 2 (ex. sucessful token taken from bank,
@@ -926,7 +902,7 @@ class Game:
                 print("Token cost:")
                 print("Green\tWhite\tBlue\tBlack\tRed")
                 for color in card.token_cost:
-                    print(f'{card.token_cost[color]:<5}',end='\t')
+                    print(f'{card.token_cost[color]:<5}', end='\t')
                 print('\n')
             for card_id in self.cards_on_table_level_2:
                 print("Card_id\tLevel\tBonus\tPrestige Points")
@@ -936,7 +912,7 @@ class Game:
                 print("Token cost:")
                 print("Green\tWhite\tBlue\tBlack\tRed")
                 for color in card.token_cost:
-                    print(f'{card.token_cost[color]:<5}',end='\t')
+                    print(f'{card.token_cost[color]:<5}', end='\t')
                 print('\n')
             for card_id in self.cards_on_table_level_3:
                 print("Card_id\tLevel\tBonus\tPrestige Points")
@@ -946,7 +922,7 @@ class Game:
                 print("Token cost:")
                 print("Green\tWhite\tBlue\tBlack\tRed")
                 for color in card.token_cost:
-                    print(f'{card.token_cost[color]:<5}',end='\t')
+                    print(f'{card.token_cost[color]:<5}', end='\t')
                 print('\n')
             # TODO Print Nobles
             print('\nNobles:')
