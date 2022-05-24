@@ -194,8 +194,27 @@ class Player:
                 return False
         return True
 
-    # TODO: add a docstring
     def remove_token(self, amount_to_remove: dict[str, int]) -> bool:
+        """Remove tokens of given colors by the amount given for each.
+
+        Will be unsuccessful if the given amount for any given color is
+        more than the amount reserved by the player (for that color).
+
+        Parameters
+        ----------
+        amount_to_remove : dict[str, int]
+            A dict of colors (keys) and amount of tokens to remove (values)
+
+        Raises
+        ------
+        IncorrectInputError
+            Raise if an invalid color was given in amount_to_remove.
+
+        Returns
+        -------
+        bool
+            Whether or not the tokens were removed from the player.
+        """
         if not set(amount_to_remove.keys()).issubset(
                 self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
@@ -219,8 +238,27 @@ class Player:
         else:
             return True
 
-    # TODO: add a docstring
     def add_token(self, amount_to_add: dict[str, int]) -> bool:
+        """Add tokens of given colors by the amount given for each.
+
+        Will be unsuccessful if sum amount of all tokens added plus the sum
+        amount of all tokens reserved by the player is more than 10.
+
+        Parameters
+        ----------
+        amount_to_add : dict[str, int]
+            A dict of colors (keys) and amount of tokens to add (values).
+
+        Raises
+        ------
+        IncorrectInputError
+            Raise if an invalid color was given in amount_to_add.
+
+        Returns
+        -------
+        bool
+            Whether or not the tokens were added to the player.
+        """
         if not set(amount_to_add.keys()).issubset(self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
         if self._can_add_token(amount_to_add):
@@ -253,9 +291,35 @@ class Player:
         # The card is reserved even if there isn't a wildcard token to reserve
         self.cards_reserved[card_id] = (card)
 
-    # TODO: add a docstring
     def can_purchase_card(self, card: Card,
                           yellow_replaces: dict[str, int]) -> bool:
+        """Check if the player can purchase the given card.
+
+        Returns True if the sum for each color of owned bonuses,
+        yellow tokens given as collateral and reserved tokens of the player
+        is >= than the cost of tokens of the card for those colors.
+
+        Parameters
+        ----------
+        card : Card
+            The card that the player wants to purchase.
+        yellow_replaces : dict[str, int]
+            A dict of colors (keys) and amount of yellow tokens
+            given to replace tokens for each given color (values).
+
+        Raises
+        ------
+        IncorrectInputError
+            Raises in two case:
+                If an invalid color was given in yellow_replaces.
+                if the sum of tokens (values) in yellow_replaces is more
+                than the amount of tokens in token_reserved['yellow']
+
+        Returns
+        -------
+        bool
+            Whether or not the player can purchase the card.
+        """
         if not set(yellow_replaces.keys()).issubset(
                 self.token_reserved.keys()):
             raise IncorrectInputError("Invalid colors were given")
@@ -335,10 +399,30 @@ class ActionNotPossibleError(Exception):
 Action = Callable[[Player, Bank], None]
 
 
-# TODO add a docstring
 def reserve_3_different_color_tokens(player: Player, bank: Bank,
                                      color_list: list[str],
                                      verbose=0) -> bool:
+    """Reserve 1 token of 3 different colors for the player.
+
+    The action will be successful if the requested tokens can be removed from
+    the given bank and can be added to the given player.
+
+    Parameters
+    ----------
+    player : Player
+        The player that will receive the requested tokens.
+    bank : Bank
+        The bank that will give the requested tokens.
+    color_list : list[str]
+        A list of 3 colors that represent 1 token each.
+    verbose : TYPE, optional
+        Describe the entire process if >0. The default is 0.
+
+    Returns
+    -------
+    bool
+        Whether or not the action was successful.
+    """
     if (bank._can_remove_token(dict.fromkeys(color_list, 1)) and
             player._can_add_token(dict.fromkeys(color_list, 1))):
         bank.remove_3_different_color_tokens(color_list)
@@ -351,9 +435,29 @@ def reserve_3_different_color_tokens(player: Player, bank: Bank,
         return False
 
 
-# TODO add a docstring
 def reserve_2_same_color_tokens(player: Player, bank: Bank,
                                 color: str, verbose=0) -> bool:
+    """Reserve 2 token of a given color for the player.
+
+    The action will be successful if the requested tokens can be removed from
+    the given bank and can be added to the given player.
+
+    Parameters
+    ----------
+    player : Player
+        The player that will receive the requested tokens.
+    bank : Bank
+        The bank that will give the requested tokens.
+    color : str
+        The color of the requested tokens.
+    verbose : TYPE, optional
+        Describe the entire process if >0. The default is 0.
+
+    Returns
+    -------
+    bool
+        Whether or not the action was successful.
+    """
     if (bank._can_remove_token({color: 2}) and
             player._can_add_token({color: 2})):
         bank.remove_2_same_color_tokens(color)
@@ -365,10 +469,32 @@ def reserve_2_same_color_tokens(player: Player, bank: Bank,
         return False
 
 
-# TODO add a docstring
-# TODO input type check for card
 def reserve_a_card(player: Player, bank: Bank, card: Card, card_id: str,
                    verbose=0) -> bool:
+    """Reserve the given card for the player.
+
+    The action will be successful if given card can be added to the given
+    player. If possible, a wildcard token will be removed from the given
+    bank and will be added to the given player.
+
+    Parameters
+    ----------
+    player : Player
+        The player that will reserve the requested card.
+    bank : Bank
+        The bank that will give the wildcard token (if possible).
+    card : Card
+        The card that will be reserved by the player.
+    card_id : str
+        The id by which the card is referenced.
+    verbose : TYPE, optional
+        Describe the entire process if >0. The default is 0.
+
+    Returns
+    -------
+    bool
+        Whether or not the action was successful.
+    """
     if player.can_reserve_card():
         # Give the player a wildcard token, if one is available in the bank
         if (bank._can_remove_token({'yellow': 1}) and
@@ -384,9 +510,9 @@ def reserve_a_card(player: Player, bank: Bank, card: Card, card_id: str,
         return False
 
 
-# TODO add a docstring
 def _purchase_check_and_own(remaning_cost: int, card: Card, card_id:  str,
                             player: Player, is_reserved: bool) -> bool:
+    """Give the card to the player if they have given the required cost."""
     if remaning_cost == 0:
         player.add_to_owned_cards(card)
         # If the card is reserved, remove from there
@@ -397,7 +523,6 @@ def _purchase_check_and_own(remaning_cost: int, card: Card, card_id:  str,
         return False
 
 
-# TODO add a docstring
 # TODO input type checks
 def purchase_a_card(player: Player, bank: Bank, card_id: str,
                     card: Card = None, is_reserved: bool = False,
@@ -407,6 +532,47 @@ def purchase_a_card(player: Player, bank: Bank, card_id: str,
                                                        "black": 0,
                                                        "red": 0},
                     verbose=0) -> bool:
+    """Purchase the given card for the player.
+
+    The action will be successful if given card can be purchased the given
+    player. First the owned bonuses discount the price of the card (for each
+    color) (if the player has enough bonuses the card can be purchased without
+    spending any tokens), then the given wildcard (yellow) tokens for each
+    color reduce the price of the card (the card can be purchased with just
+    wildcard tokens), and finally the card will be purchased with the reserved
+    tokens for each color (the amount is the remaining cost for each color).
+    All tokens that the player offers will be added to the given bank.
+
+    Parameters
+    ----------
+    player : Player
+        The player that will purchase the requested card.
+    bank : Bank
+        The bank that will recieve the given token by the player.
+    card : Card
+        The card that will be purchased by the player.
+    card_id : str
+        The id by which the card is referenced.
+    is_reserved : bool, optional
+        A flag given if the card is reserved by the player.
+        The default is False.
+    yellow_replaces : dict[str, int], optional
+        A dict of colors (keys) and amount of yellow tokens
+        given to replace tokens for each given color (values).
+    verbose : TYPE, optional
+        Describe the entire process if >0. The default is 0.
+
+    Raises
+    ------
+    ActionNotPossibleError
+        Precautionary error (should never be raised) if the card
+        has remaining cost but wasn't purchased.
+
+    Returns
+    -------
+    bool
+        Whether or not the action was successful.
+    """
     # If the action is purchasing a reserved card
     if is_reserved:
         # Get the card by card id
@@ -554,6 +720,7 @@ class Game:
             print(f"Bank created for {self._num_players} players")
 
     def _generate_shuffle_pick_nobles(self, verbose=0) -> None:
+        """Generate and shuffle and pick the nobles for the game."""
         nobles_list = generate_nobles()
         shuffle(nobles_list)
         # Get n + 1 nobles for n players
@@ -564,6 +731,7 @@ class Game:
                   f"{self._num_players} players")
 
     def _generate_shuffle_cards(self, verbose=0) -> None:
+        """Generate and shuffle the cards for the game."""
         # Import cards from pickle file (fastest)
         (self.cards_deck_level_1,
          self.cards_deck_level_2,
@@ -584,8 +752,8 @@ class Game:
         if verbose == 1:
             print("Cards added, shuffled and 4 of each kind set on table")
 
-    # TODO add a docstring
     def initialize_new_game(self, num_players=4, verbose=0) -> None:
+        """Initialize a new game for predetermined number of players."""
         if verbose:
             print("Initializing New Game")
             print(f"Number of players:{num_players}")
@@ -864,8 +1032,8 @@ class Game:
     # %% Game state representation
     #            -> numpy.matrix():
 
-    # TODO Create a docstring
     def state(self, dense=0, verbose=0):
+        """Return the state of the game."""
         # TODO implement a state representation
         # TODO add a game_id asset
         # This means also get state for players, bank, cards on table
@@ -1005,22 +1173,25 @@ def all_possible_actions() -> list[Action]:
     # combinations of 10 tokens as input
     return all_actions
 
+
 # TODO generate all possible actions
 def all_legal_actions_for_current_player(game: Game) -> list[Action]:
     """Return all legal actions for the current player to move."""
     all_actions = []
     player = game.current_player_to_move()
-    # TODO all combinations of 3 different tokens 
-    
+    # TODO all combinations of 3 different tokens
+
     # TODO all colors for 2 tokens
-    
+
     # TODO reserving any slot on table
-    
+
     # TODO purchasing any slot on table
     return all_actions
+
+
 # %% Running the game script
-# TODO Create a docstring
 def end_game_turn(game: Game, verbose=0) -> Player:
+    """End the turn in the game if possible."""
     # If all players have made a move (the turn is over)
     if game.is_turn_over():
         # Check if the game is over
