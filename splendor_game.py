@@ -235,6 +235,24 @@ class Player:
 #                                               " reserved")
 # =============================================================================
 
+    def can_reserve_card(self) -> bool:
+        """Check if player has less than 3 reserved cards."""
+        # Should never have more than 3 reserved cards, but just in case use >=
+        if len(self.cards_reserved) >= 3:
+            return False
+        else:
+            return True
+# =============================================================================
+#             raise ActionNotPossibleError("Player has 3 reserved cards, "
+#                                          "can't reserve more")
+# =============================================================================
+
+    # TODO: add an input type check, and with that change output to bool
+    def add_to_reserved_cards(self, card: Card, card_id: str) -> None:
+        """Add card to dict of reserved cards."""
+        # The card is reserved even if there isn't a wildcard token to reserve
+        self.cards_reserved[card_id] = (card)
+
     # TODO: add a docstring
     def can_purchase_card(self, card: Card,
                           yellow_replaces: dict[str, int]) -> bool:
@@ -351,27 +369,24 @@ def reserve_2_same_color_tokens(player: Player, bank: Bank,
 # TODO input type check for card
 def reserve_a_card(player: Player, bank: Bank, card: Card, card_id: str,
                    verbose=0) -> bool:
-    # Should never have more than 3 reserved cards, but just in case use >=
-    if len(player.cards_reserved) >= 3:
+    if player.can_reserve_card():
+        # Give the player a wildcard token, if one is available in the bank
+        if (bank._can_remove_token({'yellow': 1}) and
+                player._can_add_token({'yellow': 1})):
+            bank._remove_token({'yellow': 1})
+            player.add_token({'yellow': 1})
+        # Add the card to the dict of reserved cards of the player
+        player.add_to_reserved_cards(card, card_id)
+        if verbose == 1:
+            print(f"{player.player_id} has reserved {card_id}")
+        return True
+    else:
         return False
-# =============================================================================
-#         raise ActionNotPossibleError("Player has 3 reserved cards, "
-#                                      "can't reserve more")
-# =============================================================================
-    if (bank._can_remove_token({'yellow': 1}) and
-            player._can_add_token({'yellow': 1})):
-        bank._remove_token({'yellow': 1})
-        player.add_token({'yellow': 1})
-    # The card is reserved even if there isn't a wildcard token to reserve
-    player.cards_reserved[card_id] = (card)
-    if verbose == 1:
-        print(f"{player.player_id} has reserved {card_id}")
-    return True
 
 
 # TODO add a docstring
 def _purchase_check_and_own(remaning_cost: int, card: Card, card_id:  str,
-                    player: Player, is_reserved: bool) -> bool:
+                            player: Player, is_reserved: bool) -> bool:
     if remaning_cost == 0:
         player.add_to_owned_cards(card)
         # If the card is reserved, remove from there
