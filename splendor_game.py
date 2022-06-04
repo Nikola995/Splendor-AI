@@ -523,7 +523,7 @@ class Reserve2SameColorTokens(Action):
             Whether or not the action will be successful.
         """
         color = self.params['color']
-        if (bank._can_remove_token({color: 2}) and
+        if (bank._can_remove_token({color: 2}, threshold=2) and
                 player._can_add_token({color: 2})):
             return True
         else:
@@ -1123,10 +1123,8 @@ class Game:
             return False
 
     # %% Possible & Legal Actions
-    # TODO generate all possible actions
-    def all_possible_actions(self) -> list[Action]:
-        """Return all possible actions."""
-        all_actions = {}
+    def _all_possible_reserve_3_different_color_tokens(self) -> list[Action]:
+        """Return all possible actions of this type."""
         current_actions_list = []
         # TODO Change to enum when refactoring
         colors = ["green", "white", "blue", "black", "red"]
@@ -1135,13 +1133,22 @@ class Game:
             current_actions_list.append(
                 Reserve3DifferentColorTokens(params={'color_list':
                                                      list(colors_combo_3)}))
-        all_actions['reserve_3_different_color_tokens'] = current_actions_list
+        return current_actions_list
+
+    def _all_possible_reserve_2_same_color_tokens(self) -> list[Action]:
+        """Return all possible actions of type Reserve2SameColorTokens."""
+        current_actions_list = []
+        # TODO Change to enum when refactoring
+        colors = ["green", "white", "blue", "black", "red"]
         # All colors for 2 tokens
         current_actions_list = []
         for color in colors:
             current_actions_list.append(
                 Reserve2SameColorTokens(params={'color': color}))
-        all_actions['reserve_2_same_color_tokens'] = current_actions_list
+        return current_actions_list
+
+    def _all_possible_reserve_card(self) -> list[Action]:
+        """Return all possible actions of type ReserveCard."""
         # Reserving any card slot on table
         current_actions_list = []
         # TODO With fix with creating Table class, get card by
@@ -1161,11 +1168,15 @@ class Game:
         for card_id in self.cards_on_table_level_3:
             current_actions_list.append(
                 ReserveCard(params={'card_id': card_id}))
+        return current_actions_list
 
-        all_actions['reserve_card'] = current_actions_list
+    def _all_possible_purchase_card(self) -> list[Action]:
+        """Return all possible actions of type PurchaseCard."""
         # Purchasing any slot on table with all combinations
         # of wildcard token
         current_actions_list = []
+        # TODO Change to enum when refactoring
+        colors = ["green", "white", "blue", "black", "red"]
         # TODO With fix with creating Table class, get card by
         # table index (ex level=1, card=4), not by generating card_id
 # =============================================================================
@@ -1194,57 +1205,85 @@ class Game:
                                    colors[3]: token_input[3],
                                    colors[4]: token_input[4]}
                 for card_id in curr_player.cards_reserved:
+                    card = curr_player.cards_reserved[card_id]
                     current_actions_list.append(
                         PurchaseCard(
-                            params={'card_id': card_id,
+                            params={'card': card,
+                                    'card_id': card_id,
                                     'is_reserved': True,
                                     'yellow_replaces': yellow_replaces}))
                 for card_id in self.cards_on_table_level_1:
+                    card = self.cards_on_table_level_1[card_id]
                     current_actions_list.append(
                         PurchaseCard(
-                            params={'card_id': card_id,
+                            params={'card': card,
+                                    'card_id': card_id,
                                     'is_reserved': False,
                                     'yellow_replaces': yellow_replaces}))
                 for card_id in self.cards_on_table_level_2:
+                    card = self.cards_on_table_level_2[card_id]
                     current_actions_list.append(
                         PurchaseCard(
-                            params={'card_id': card_id,
+                            params={'card': card,
+                                    'card_id': card_id,
                                     'is_reserved': False,
                                     'yellow_replaces': yellow_replaces}))
                 for card_id in self.cards_on_table_level_3:
+                    card = self.cards_on_table_level_3[card_id]
                     current_actions_list.append(
                         PurchaseCard(
-                            params={'card_id': card_id,
+                            params={'card': card,
+                                    'card_id': card_id,
                                     'is_reserved': False,
                                     'yellow_replaces': yellow_replaces}))
-        all_actions['purchase_card'] = current_actions_list
-        # TODO purchasing any slot in reserved with all
-        # combinations of 10 tokens as input
+        return current_actions_list
+
+    def all_possible_actions(self) -> list[Action]:
+        """Return all possible actions."""
+        all_actions = {}
+        # Reserve3DifferentColorTokens
+        actions_list = self._all_possible_reserve_3_different_color_tokens()
+        all_actions['reserve_3_different_color_tokens'] = actions_list
+        # Reserve2SameColorTokens
+        actions_list = self._all_possible_reserve_2_same_color_tokens()
+        all_actions['reserve_2_same_color_tokens'] = actions_list
+        # ReserveCard
+        actions_list = self._all_possible_reserve_card()
+        all_actions['reserve_card'] = actions_list
+        # PurchaseCard
+        actions_list = self._all_possible_purchase_card()
+        all_actions['purchase_card'] = actions_list
         return all_actions
 
-    # TODO generate all possible actions
-    def all_legal_actions_for_current_player(self) -> list[Action]:
-        """Return all legal actions for the current player to move."""
+    def all_legal_actions_of_list(self,
+                                  action_list: list[Action]) -> list[Action]:
+        """Return all legal actions from given list of actions.
+
+        These are calculated for the current player to move.
+        Usually the list should be of one action type.
+        """
+        legal_action_list = []
+        player = self.current_player_to_move()
+        bank = self.bank
+        for action in action_list:
+            try:
+                if action.can_perform(player, bank):
+                    legal_action_list.append(action)
+            except IncorrectInputError as e:
+                continue
+        return legal_action_list
+
+    def all_legal_actions(self) -> list[Action]:
+        """Return all legal actions from all possible actions.
+
+        These are calculated for the current player to move.
+        """
         all_legal_actions = {}
-        player = game.current_player_to_move()
-        actions = self.all_possible_actions()
-        # TODO all combinations of 3 different tokens
-        player_total_tokens = sum(player.token_reserved.values())
-        tokens_3_diff = []
-        # If the player has more than 7 tokens then we don't have
-        # to check for every possible combination of tokens
-        if player_total_tokens > 7:
-            all_actions['reserve_3_different_color_tokens'] = tokens_3_diff
-        else:
-            for action_and_params in actions['reserve_3_different_color_tokens']:
-                
-                print(sum(game.current_player_to_move().token_reserved.values()))
-        # TODO all colors for 2 tokens
-
-        # TODO reserving any slot on table
-
-        # TODO purchasing any slot on table
-        return all_actions
+        all_actions = self.all_possible_actions()
+        for action_type in all_actions:
+            all_legal_actions[action_type] = self.all_legal_actions_of_list(
+                all_actions[action_type])
+        return all_legal_actions
     # %% Game state representation
     #            -> numpy.matrix():
 
@@ -1495,3 +1534,26 @@ for a in all_actions['reserve_card']:
 for a in all_actions['purchase_card']:
     if a.params['is_reserved']:
         print(a.print_string())
+# %%%
+legal_actions = game.all_legal_actions()
+for action_type in legal_actions:
+    print(f"Number of legal {action_type}: {len(legal_actions[action_type])}")
+# %%%
+temp_tokens = game.bank.token_available
+game.bank.token_available = {"green": 4, "white": 1,
+                    "blue": 1, "black": 4,
+                    "red": 0}
+    
+legal_actions = game.all_legal_actions()
+for action_type in legal_actions:
+    print(f"Number of legal {action_type}: {len(legal_actions[action_type])}")
+game.bank.token_available = temp_tokens
+# %%%
+temp_tokens = game.current_player_to_move().token_reserved['black']
+game.current_player_to_move().token_reserved['black'] = 4
+    
+legal_actions = game.all_legal_actions()
+for action_type in legal_actions:
+    print(f"Number of legal {action_type}: {len(legal_actions[action_type])}")
+game.current_player_to_move().token_reserved['black'] = temp_tokens
+# %%%
