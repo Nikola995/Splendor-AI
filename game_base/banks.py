@@ -37,6 +37,7 @@ class Bank:
     def remove_3_unique_color_tokens(self,
                                      colors: Tuple[Token, Token, Token]) -> bool:
         """Remove 3 tokens of unique colors from the bank.
+        Assumes can_remove_token check was made.
 
         Parameters
         ----------
@@ -58,6 +59,27 @@ class Bank:
             self.token_available[color] -= 1
         return True
 
+    def remove_2_same_color_tokens(self, color: Token) -> bool:
+        """Remove 2 tokens of the same color from the bank.
+        Assumes can_remove_token check was made.
+
+        Parameters
+        ----------
+        color : Token
+            Color for the 2 tokens
+
+        Raises
+        ------
+        IncorrectInputError
+            Raised if wildcard color is given
+        """
+        # TODO: Remove the sanity checks if never raised and need speed-up.
+        if color == Token.YELLOW:
+            raise IncorrectInputError("Yellow token cannot be removed without"
+                                      " reserving a card")
+        self.token_available[color] -= 2
+        return True
+
     # TODO If a maximum threshold is added, add a False scenario
     def add_token(self, amount_to_add: dict[str, int]) -> bool:
         """Add an amount of tokens for given colors.
@@ -77,26 +99,3 @@ class Bank:
         for color in amount_to_add:
             self.token_available[color] += amount_to_add[color]
         return True
-
-    def remove_2_same_color_tokens(self, color: str, verbose=0) -> bool:
-        """Remove 2 tokens of the same color from the bank.
-
-        Only if the bank has 4 tokens of that color available.
-
-        Parameters
-        ----------
-        color_list : str
-            Color for 2 tokens
-
-        Raises
-        ------
-        IncorrectInputError
-            Raised if an incorrect color is given,
-            or 'yellow' is given
-        TokenThresholdError
-            Bank has less than 4 tokens of a given color, can't remove 2.
-        """
-        if color == Token.YELLOW:
-            raise IncorrectInputError("Yellow token cannot be removed without"
-                                      " reserving a card")
-        return self._remove_token({color: 2}, threshold=2)
