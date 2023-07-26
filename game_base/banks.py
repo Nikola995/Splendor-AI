@@ -80,6 +80,14 @@ class Bank:
         self.token_available[color] -= 2
         return True
 
+    def remove_wildcard_token(self) -> bool:
+        """Removes a single wildcard token from the bank.
+        Assumes can_remove_token check was made and function call is
+        only done while a player reserves a card.
+        """
+        self.token_available[Token.YELLOW] -= 1
+        return True
+
     # TODO If a maximum threshold is added, add a False scenario
     def add_token(self, amount_to_add: dict[str, int]) -> bool:
         """Add an amount of tokens for given colors.
