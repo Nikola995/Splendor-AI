@@ -1,5 +1,5 @@
 from dataclasses import dataclass, InitVar
-from typing import Tuple
+from typing import Tuple, Dict
 from utils import IncorrectInputError
 from tokens import TokenBag, Token
 
@@ -23,7 +23,7 @@ class Bank:
             case other: raise ValueError("Cannot initialize a bank for "
                                          f"{num_players}, only 2, 3 or 4")
 
-    def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
+    def can_remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
         for color in amount_to_remove:
             match amount_to_remove[color]:
@@ -88,22 +88,15 @@ class Bank:
         self.token_available[Token.YELLOW] -= 1
         return True
 
-    # TODO If a maximum threshold is added, add a False scenario
-    def add_token(self, amount_to_add: dict[str, int]) -> bool:
-        """Add an amount of tokens for given colors.
+    def add_token(self, amount_to_add: Dict[Token, int]) -> bool:
+        """Add an amount of tokens for given colors to the bank.
+        Function call is only done while a player purchases a card.
 
         Parameters
         ----------
-        amount_to_add : dict[str,int]
-            A dict of colors (keys) and amount of tokens to add (values)
-
-        Raises
-        ------
-        IncorrectInputError
-            Raised if invalid color names are given
+        amount_to_add : Dict[Token, int]
+            A dict of colors and corresponding amount of tokens to add.
         """
-        if not set(amount_to_add.keys()).issubset(self.token_available.keys()):
-            raise IncorrectInputError("Invalid colors were given")
         for color in amount_to_add:
             self.token_available[color] += amount_to_add[color]
         return True
