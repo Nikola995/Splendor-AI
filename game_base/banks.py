@@ -22,16 +22,18 @@ class Bank:
             case other: raise ValueError("Cannot initialize a bank for "
                                          f"{num_players}, only 2, 3 or 4")
 
-    def _can_remove_token(self, amount_to_remove: dict[str, int],
-                          threshold=0) -> bool:
+    def _can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
         for color in amount_to_remove:
-            if (self.token_available[color] - amount_to_remove[color]
-                    < threshold):
-                return False
+            match amount_to_remove[color]:
+                case 2: return False if self.token_available[color] < 4 else None
+                case 1: return False if self.token_available[color] < 1 else None
+                case other: raise ValueError("Can only remove 1 or 2 tokens "
+                                             "per color, tried to remove "
+                                             f"{other}")
         return True
 
-    def _remove_token(self, amount_to_remove: dict[str, int],
+    def _remove_token(self, amount_to_remove: dict[Token, int],
                       threshold=0, verbose=0) -> bool:
         """Remove an amount of tokens for given colors.
 
