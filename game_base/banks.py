@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, InitVar
 from utils import IncorrectInputError
+from tokens import TokenBag, Token
 
 
 # TODO Make it a singleton (refactor) (maybe?)
@@ -7,15 +8,19 @@ from utils import IncorrectInputError
 class Bank:
     """A representation of the unreserved tokens in the game."""
 
-    # Available tokens per color (type)
-    token_available: dict[str, int] = field(default_factory=lambda: (
-        {"green": 7,
-         "white": 7,
-         "blue": 7,
-         "black": 7,
-         "red": 7,
-         # Yellow is the wildcard
-         "yellow": 5}))
+    token_available: TokenBag
+    num_players: InitVar[int] = 4
+
+    def __post_init__(self, num_players: int):
+        match num_players:
+            case 4: self.token_available = TokenBag(standard_amount=7,
+                                                    wildcard_amount=5)
+            case 3: self.token_available = TokenBag(standard_amount=5,
+                                                    wildcard_amount=5)
+            case 2: self.token_available = TokenBag(standard_amount=4,
+                                                    wildcard_amount=5)
+            case other: raise ValueError("Cannot initialize a bank for "
+                                         f"{num_players}, only 2, 3 or 4")
 
     def _can_remove_token(self, amount_to_remove: dict[str, int],
                           threshold=0) -> bool:
@@ -98,7 +103,7 @@ class Bank:
         """
         if len(color_list) != 3:
             raise IncorrectInputError("3 colors were not given")
-        if 'yellow' in color_list:
+        if Token.YELLOW in color_list:
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
         return self._remove_token(dict.fromkeys(color_list, 1))
@@ -121,7 +126,7 @@ class Bank:
         TokenThresholdError
             Bank has less than 4 tokens of a given color, can't remove 2.
         """
-        if color == 'yellow':
+        if color == Token.YELLOW:
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
         return self._remove_token({color: 2}, threshold=2)

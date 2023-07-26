@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from cards import Card
 from nobles import Noble
+from tokens import Token
 from utils import IncorrectInputError
 
 @dataclass(order=True)
@@ -12,12 +13,13 @@ class Player:
     player_id: str
     # Reserved tokens per color (type)
     token_reserved: dict[str, int] = field(default_factory=lambda: (
-        {"green": 0,
-         "white": 0,
-         "blue": 0,
-         "black": 0,
-         "red": 0,
-         "yellow": 0}))
+        {Token.GREEN: 0,
+         Token.WHITE: 0,
+         Token.BLUE: 0,
+         Token.BLACK: 0,
+         Token.RED: 0,
+         # Yellow is the wildcard
+         Token.YELLOW: 0}))
     # Owned Cards
     cards_owned: list[Card] = field(default_factory=list)
     # Reserved Cards
