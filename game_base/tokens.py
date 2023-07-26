@@ -11,8 +11,8 @@ class Token(Enum):
     YELLOW = auto()
 
 
-@dataclass
-class TokenBag:
+@dataclass(slots=True)
+class TokenBag():
     
     tokens: Dict[Token, int] = field(init=False)
     standard_amount: InitVar[int] = 0
