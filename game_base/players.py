@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 from cards import Card
 from nobles import Noble
-from tokens import Token
+from .tokens import Token, TokenBag
 from utils import IncorrectInputError
 
-@dataclass(order=True)
+@dataclass(order=True, slots=True)
 class Player:
     """A representation of a player entity within the game."""
 
@@ -12,26 +12,15 @@ class Player:
     # For now just use a string name
     player_id: str
     # Reserved tokens per color (type)
-    token_reserved: dict[str, int] = field(default_factory=lambda: (
-        {Token.GREEN: 0,
-         Token.WHITE: 0,
-         Token.BLUE: 0,
-         Token.BLACK: 0,
-         Token.RED: 0,
-         # Yellow is the wildcard
-         Token.YELLOW: 0}))
+    token_reserved: TokenBag = field(default_factory=TokenBag)
     # Owned Cards
     cards_owned: list[Card] = field(default_factory=list)
     # Reserved Cards
     cards_reserved: dict[str, Card] = field(default_factory=dict)
     # Owned Nobles
     nobles_owned: list[Noble] = field(default_factory=list)
-    # Bonuses per color (type)
-    bonus_owned: dict[str, int] = field(default_factory=lambda: ({"green": 0,
-                                                                  "white": 0,
-                                                                  "blue": 0,
-                                                                  "black": 0,
-                                                                  "red": 0}))
+    # Bonuses per color (type), Wildcard is unused
+    bonus_owned: TokenBag = field(default_factory=TokenBag)
     # Prestige points
     prestige_points: int = 0
 
