@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from players import Player
 from banks import Bank
 from tokens import Token
+from cards import Card
 from copy import deepcopy
 from utils import ActionNotPossibleError, IncorrectInputError
 
@@ -58,7 +59,7 @@ class Reserve3UniqueColorTokens(Action):
         player.add_token(dict.fromkeys(colors, 1))
 
     def __str__(self) -> str:
-        return (f"reserved 3 tokens of unique colors.")
+        return ("reserved 3 tokens of unique colors.")
 
 
 @dataclass
@@ -94,23 +95,27 @@ class Reserve2SameColorTokens(Action):
         player.add_token({color: 2})
 
     def __str__(self) -> str:
-        return (f"reserved 2 tokens of the same color.")
+        return ("reserved 2 tokens of the same color.")
 
 
+# TODO: Change the interactions with Cards (remove card_id)
 @dataclass
 class ReserveCard(Action):
     """Reserve the given card for the player.
 
-    On initialization provide a dict with:
-        - a key 'card' that contains the card.
-        - a key 'card_id' that contains the card_id.
+    Additionally, if it is possible transfer 1 wildcard token
+    from the bank to the player.
 
     Parameters
     ----------
+    player : Player
+        The player that will receive the requested card & wildcard token.
+    bank : Bank
+        The bank that will give the requested wildcard token.
     card : Card
         The card that will be reserved by the player.
-    card_id : str
-        The id by which the card is referenced.
+    card_id: str
+        The id by which the Card is stored in the player's inventory.
     """
 
     def can_perform(self, player: Player, bank: Bank) -> bool:
@@ -118,56 +123,22 @@ class ReserveCard(Action):
 
         The action will be successful if :
             - the player has less than 3 reserved cards.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will reserve the requested card.
-
-        Returns
-        -------
-        bool
-            Whether or not the action will be successful.
         """
-        if player.can_reserve_card():
-            return True
-        else:
-            return False
+        return player.can_reserve_card()
 
-    def perform(self, player: Player, bank: Bank, verbose=0) -> None:
-        """Give the card to the player as a reserved card.
-
-        Additionally, if it is possible transfer one yellow (wildcard)
-        token from the bank to the player.
-
-        The card is given on initialization of the Action.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will receive the requested tokens.
-        bank : Bank
-            The bank that will give the requested tokens.
+    def perform(self, player: Player, bank: Bank,
+                card: Card, card_id: str) -> None:
+        """Add the card to the player's reserved cards.
         """
-        card = self.params['card']
-        card_id = self.params['card_id']
-        # Add the card to the dict of reserved cards of the player
         player.add_to_reserved_cards(card, card_id)
-        if verbose == 1:
-            print(f"{player.player_id} has reserved {card_id}")
-        # Give the player a wildcard token
-        # if the transfer is possible
-        if (bank._can_remove_token({'yellow': 1}) and
-                player._can_add_token({'yellow': 1})):
-            bank._remove_token({'yellow': 1})
-            player.add_token({'yellow': 1})
-            if verbose == 1:
-                print("A wildcard token has been given to "
-                      f"{player.player_id}")
-        pass
+        # Give the player 1 wildcard token, if the transfer is possible
+        if (bank.can_remove_token({Token.YELLOW}) and
+                player.can_add_token({Token.YELLOW})):
+            bank.remove_wildcard_token()
+            player.add_token({Token.YELLOW})
 
     def __str__(self) -> str:
-        return f"reserve {self.params['card_id']}"
+        return "reserved a card."
 
 
 @dataclass
