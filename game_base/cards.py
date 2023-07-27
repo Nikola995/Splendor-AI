@@ -1,15 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May  2 21:53:17 2022
-
-@author: Nikola
-"""
 from dataclasses import dataclass, field
 from random import shuffle
 import pandas as pd
 import pickle
 from os import path
-from tokens import Token, TokenBag
+from .tokens import Token, TokenBag
 
 @dataclass(order = True, frozen = True)
 class Card:
@@ -24,7 +18,7 @@ class Card:
     #Color of the bonus gem given by owning the card
     bonus_color: Token
     #Number of prestige points given by owning the card
-    prestige_points: int = 0
+    prestige_points: int
     #Number of tokens required to purchase the card per color (type)
     token_cost: TokenBag
     

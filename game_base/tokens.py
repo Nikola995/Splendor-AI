@@ -14,7 +14,7 @@ class Token(Enum):
 @dataclass(slots=True)
 class TokenBag:
     
-    tokens: Dict[Token, int] = field(init=False)
+    tokens: Dict[Token, int]
     standard_amount: InitVar[int] = 0
     wildcard_amount: InitVar[Optional[int]] = None
     
