@@ -57,6 +57,10 @@ class Bank:
                                       " reserving a card")
         for color in colors:
             self.token_available[color] -= 1
+            if self.token_available[color] < 0:
+                # Should only happen if you don't do the can_remove_token check
+                raise ValueError(f"Too many {color} tokens "
+                                 "were taken from the bank")
         return True
 
     def remove_2_same_color_tokens(self, color: Token) -> bool:
@@ -78,6 +82,10 @@ class Bank:
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
         self.token_available[color] -= 2
+        if self.token_available[color] < 2:
+            # Should only happen if you don't do the can_remove_token check
+            raise ValueError(f"Too many {color} tokens "
+                             "were taken from the bank")
         return True
 
     def remove_wildcard_token(self) -> bool:
@@ -86,6 +94,10 @@ class Bank:
         only done while a player reserves a card.
         """
         self.token_available[Token.YELLOW] -= 1
+        if self.token_available[Token.YELLOW] < 0:
+            # Should only happen if you don't do the can_remove_token check
+            raise ValueError(f"Too many {Token.YELLOW} tokens "
+                             "were taken from the bank")
         return True
 
     def add_token(self, amount_to_add: Dict[Token, int]) -> bool:
