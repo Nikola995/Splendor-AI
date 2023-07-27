@@ -5,6 +5,7 @@ from nobles import Noble
 from .tokens import Token, TokenBag
 from utils import IncorrectInputError
 
+
 @dataclass(order=True, slots=True)
 class Player:
     """A representation of a player entity within the game."""
@@ -50,7 +51,7 @@ class Player:
                                  f" the player {self.player_id}")
         return True
 
-    def _can_add_token(self, amount_to_add: dict[str, int]) -> bool:
+    def can_add_token(self, amount_to_add: Dict[Token, int]) -> bool:
         """Check if tokens of given colors can be added."""
         if (sum(self.token_reserved.values()) +
                 sum(amount_to_add.values()) > 10):
@@ -58,40 +59,25 @@ class Player:
         else:
             return True
 
-    def add_token(self, amount_to_add: dict[str, int]) -> bool:
+    def add_token(self, amount_to_add: Dict[Token, int]) -> bool:
         """Add tokens of given colors by the amount given for each.
-
-        Will be unsuccessful if sum amount of all tokens added plus the sum
-        amount of all tokens reserved by the player is more than 10.
+        Assumes can_remove_token check was made.
+        Function call is only done when a player reserves a card or
+        reserves tokens from the bank.
 
         Parameters
         ----------
-        amount_to_add : dict[str, int]
-            A dict of colors (keys) and amount of tokens to add (values).
-
-        Raises
-        ------
-        IncorrectInputError
-            Raise if an invalid color was given in amount_to_add.
-
-        Returns
-        -------
-        bool
-            Whether or not the tokens were added to the player.
+        amount_to_add : Dict[Token, int]
+            A dict of colors and corresponding amount of tokens to add.
         """
-        if not set(amount_to_add.keys()).issubset(self.token_reserved.keys()):
-            raise IncorrectInputError("Invalid colors were given")
-        if self._can_add_token(amount_to_add):
-            for color in amount_to_add:
-                self.token_reserved[color] += amount_to_add[color]
-            return True
-        else:
-            return False
-# =============================================================================
-#             raise TooManyTokensForPlayerError("A player cannot have more"
-#                                               " than 10 tokens in total"
-#                                               " reserved")
-# =============================================================================
+        if (sum(self.token_reserved.values()) +
+                sum(amount_to_add.values()) > 10):
+            # Should only happen if you don't do the can_add_token check
+            raise ValueError("Too many tokens were given to"
+                             f" the player {self.player_id}")
+        for color in amount_to_add:
+            self.token_reserved[color] += amount_to_add[color]
+        return True
 
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""
