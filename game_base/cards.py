@@ -6,9 +6,10 @@ Created on Mon May  2 21:53:17 2022
 """
 from dataclasses import dataclass, field
 from random import shuffle
+import pandas as pd
 import pickle
 from os import path
-
+from tokens import Token, TokenBag
 
 @dataclass(order = True, frozen = True)
 class Card:
@@ -21,23 +22,17 @@ class Card:
     #Difficulty of purchasing development card
     level: int
     #Color of the bonus gem given by owning the card
-    bonus_color: str
+    bonus_color: Token
     #Number of prestige points given by owning the card
     prestige_points: int = 0
     #Number of tokens required to purchase the card per color (type)
-    token_cost: dict[str,int] = field(default_factory=lambda: ({"green":0,
-                                           "white":0,
-                                           "blue":0,
-                                           "black":0,
-                                           "red":0}))
+    token_cost: TokenBag
     
     def __post_init__(self):
         #Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
         
 def generate_cards_from_csv(save_to_pickle = False):
-    import pandas as pd
-    
     csv_file_path = path.join(path.dirname(__file__), 'splendor_cards_list.csv')
     cards_df = pd.read_csv(csv_file_path,header=1)
     cards_df['Level'] = cards_df['Level'].fillna(method='ffill')
@@ -54,20 +49,18 @@ def generate_cards_from_csv(save_to_pickle = False):
     cards_3 = []
     for index,row in cards_df.iterrows():
         card = Card(level = int(row['Level']), prestige_points = int(row['PV']),
-                    token_cost = {"green":int(row['(g)reen']),
-                                  "white":int(row['(w)hite']),
-                                  "blue":int(row['bl(u)e']),
-                                  "black":int(row['blac(k)']),
-                                  "red":int(row['(r)ed'])},
-                    bonus_color=row['Gem color'])
-        if card.level == 1:
-            cards_1.append(card)
-        elif card.level == 2:
-            cards_2.append(card)
-        elif card.level == 3:
-            cards_3.append(card)
-        else:
-            raise Exception('Card level is not 1, 2 or 3')
+                    token_cost = {Token.GREEN:int(row['(g)reen']),
+                                  Token.WHITE:int(row['(w)hite']),
+                                  Token.BLUE:int(row['bl(u)e']),
+                                  Token.BLACK:int(row['blac(k)']),
+                                  Token.RED:int(row['(r)ed'])},
+                    bonus_color=Token[row['Gem color'].upper()])
+        match card.level:
+            case 1: cards_1.append(card)
+            case 2: cards_2.append(card)
+            case 3: cards_3.append(card)
+            case other: raise Exception('Card level is not 1, 2 or 3')
+            
     
     if save_to_pickle:
         pickle_file_path = path.join(path.dirname(__file__), 'cards_lists.pickle')
