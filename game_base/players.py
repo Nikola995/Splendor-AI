@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Dict
 from cards import Card
 from nobles import Noble
 from .tokens import Token, TokenBag
@@ -24,48 +25,30 @@ class Player:
     # Prestige points
     prestige_points: int = 0
 
-    def _can_remove_token(self, amount_to_remove: dict[str, int]) -> bool:
+    def can_remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
         for color in amount_to_remove:
             if (self.token_reserved[color] - amount_to_remove[color] < 0):
                 return False
         return True
 
-    def remove_token(self, amount_to_remove: dict[str, int]) -> bool:
+    def remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
         """Remove tokens of given colors by the amount given for each.
-
-        Will be unsuccessful if the given amount for any given color is
-        more than the amount reserved by the player (for that color).
+        Assumes can_remove_token check was made.
+        Function call is only done while a player purchases a card.
 
         Parameters
         ----------
-        amount_to_remove : dict[str, int]
-            A dict of colors (keys) and amount of tokens to remove (values)
-
-        Raises
-        ------
-        IncorrectInputError
-            Raise if an invalid color was given in amount_to_remove.
-
-        Returns
-        -------
-        bool
-            Whether or not the tokens were removed from the player.
+        amount_to_remove : Dict[Token, int]
+            A dict of colors and corresponding amount of tokens to remove.
         """
-        if not set(amount_to_remove.keys()).issubset(
-                self.token_reserved.keys()):
-            raise IncorrectInputError("Invalid colors were given")
-        if self._can_remove_token(amount_to_remove):
-            for color in amount_to_remove:
-                self.token_reserved[color] -= amount_to_remove[color]
-            return True
-        else:
-            return False
-# =============================================================================
-#             raise TokenThresholdError("Tried to take more tokens"
-#                                       f"from {self.player_id} than"
-#                                       "available")
-# =============================================================================
+        for color in amount_to_remove:
+            self.token_reserved[color] -= amount_to_remove[color]
+            if self.token_available[color] < 0:
+                # Should only happen if you don't do the can_remove_token check
+                raise ValueError(f"Too many {color} tokens were taken from"
+                                 f" the player {self.player_id}")
+        return True
 
     def _can_add_token(self, amount_to_add: dict[str, int]) -> bool:
         """Check if tokens of given colors can be added."""
