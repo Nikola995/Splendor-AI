@@ -133,7 +133,6 @@ class Player:
                 return False
         return True
 
-    # TODO: add an input type check, and with that change output to bool
     def add_to_owned_cards(self, card: Card) -> None:
         """Add card to list of owned cards.
 
@@ -148,28 +147,17 @@ class Player:
         self.bonus_owned[card.bonus_color] += 1
         self.prestige_points += card.prestige_points
 
-    # TODO: add an input type check
-    def is_eligible_for_noble(self, noble: Noble, verbose=0) -> bool:
+    def is_eligible_for_noble(self, noble: Noble) -> bool:
         """Check if the player is eligible to own the noble.
-
-        If the player's owned bonuses are more or equal to the
-        required bonuses of the noble, they are eligible.
 
         Parameters
         ----------
         noble : Noble
             The noble whose bonuses we check against
-
-        Returns
-        -------
-        bool
-            Eligibility of the player to own the noble
         """
         for color in noble.bonus_required:
-            # If the player doesn't have enough bonuses for the noble
             if self.bonus_owned[color] < noble.bonus_required[color]:
                 return False
-        # If all the checks pass, that must mean the player is eligible
         return True
 
     # TODO: add an input type check, and with that change output to bool
