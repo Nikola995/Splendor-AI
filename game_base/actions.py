@@ -63,67 +63,38 @@ class Reserve3UniqueColorTokens(Action):
 
 @dataclass
 class Reserve2SameColorTokens(Action):
-    """Reserve 2 token of the color for the player.
-
-    On initialization provide a dict with a key 'color'
-    that contains a color
+    """Reserve 2 token of the same color for the player.
 
     Parameters
     ----------
-    color : str
-        The color of the requested tokens.
+    player : Player
+        The player that will receive the requested tokens.
+    bank : Bank
+        The bank that will give the requested tokens.
+    color : Token
+        Color for the 2 tokens
     """
 
-    def can_perform(self, player: Player, bank: Bank) -> bool:
+    def can_perform(self, player: Player, bank: Bank, color: Token) -> bool:
         """Check if the requested tokens can be reserved.
 
-        The action will be successful if :
-            - The given bank holds the requested amount of tokens
-            - The player won't have more than 10 tokens in total at
-              the end of the action.
-
-        The color is given on initialization of the Action.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will receive the requested tokens.
-        bank : Bank
-            The bank that will give the requested tokens.
-
-        Returns
-        -------
-        bool
-            Whether or not the action will be successful.
+        The action will be successful if all of the following is true:
+            - The bank holds the requested amount of tokens before
+            the action is performed.
+            - The player won't have more than 10 tokens in total after
+            the action is performed.
         """
-        color = self.params['color']
-        if (bank._can_remove_token({color: 2}, threshold=2) and
-                player._can_add_token({color: 2})):
-            return True
-        else:
-            return False
+        return (bank.can_remove_token({color: 2})
+                and player.can_add_token({color: 2}))
 
-    def perform(self, player: Player, bank: Bank, verbose=0) -> None:
+    def perform(self, player: Player, bank: Bank, color: Token) -> None:
         """Transfer the requested tokens from the bank to the player.
-
-        The color is given on initialization of the Action.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will receive the requested tokens.
-        bank : Bank
-            The bank that will give the requested tokens.
         """
-        color = self.params['color']
         bank.remove_2_same_color_tokens(color)
         player.add_token({color: 2})
-        if verbose == 1:
-            print(f"{player.player_id} has reserved 2 {color} tokens")
-        pass
 
     def __str__(self) -> str:
-        return (f"reserve 2 {self.params['color']} tokens.")
+        return (f"reserved 2 tokens of the same color.")
 
 
 @dataclass
