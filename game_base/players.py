@@ -86,13 +86,14 @@ class Player:
             return False
         else:
             return True
-# =============================================================================
-#             raise ActionNotPossibleError("Player has 3 reserved cards, "
-#                                          "can't reserve more")
-# =============================================================================
 
+    # TODO: Look into modifying the data structure for cards_reserved
     def add_to_reserved_cards(self, card: Card, card_id: str) -> None:
-        """Add card to dict of reserved cards."""
+        """Add card to dict of reserved cards.
+        Assumes can_reserve_card check was made."""
+        if len(self.cards_reserved) > 2:
+            raise ValueError(f"Player {self.player_id} has too many"
+                             "reserved cards")
         # The card is reserved even if there isn't a wildcard token to reserve
         self.cards_reserved[card_id] = (card)
 
