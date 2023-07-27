@@ -35,14 +35,14 @@ class Bank:
         return True
 
     def remove_3_unique_color_tokens(self,
-                                     colors: Tuple[Token, Token, Token]) -> bool:
+                                     colors: Tuple[Token, Token, Token]) -> None:
         """Remove 3 tokens of unique colors from the bank.
         Assumes can_remove_token check was made.
 
         Parameters
         ----------
         color_list : Tuple[Token, Token, Token]
-            Tuple containing 3 token colors
+            Tuple containing 3 unique token colors
 
         Raises
         ------
@@ -50,6 +50,8 @@ class Bank:
             Raised if 3 unique colors are not given or wildcard is given
         """
         # TODO: Remove the sanity checks if never raised and need speed-up.
+        if len(colors) != 3:
+            raise IncorrectInputError("The number of token colors was not 3")
         if len(set(colors)) != 3:
             raise IncorrectInputError("The 3 token colors were not unique")
         if Token.YELLOW in colors:
@@ -61,9 +63,8 @@ class Bank:
                 # Should only happen if you don't do the can_remove_token check
                 raise ValueError(f"Too many {color} tokens "
                                  "were taken from the bank")
-        return True
 
-    def remove_2_same_color_tokens(self, color: Token) -> bool:
+    def remove_2_same_color_tokens(self, color: Token) -> None:
         """Remove 2 tokens of the same color from the bank.
         Assumes can_remove_token check was made.
 
@@ -86,9 +87,8 @@ class Bank:
             # Should only happen if you don't do the can_remove_token check
             raise ValueError(f"Too many {color} tokens "
                              "were taken from the bank")
-        return True
 
-    def remove_wildcard_token(self) -> bool:
+    def remove_wildcard_token(self) -> None:
         """Removes a single wildcard token from the bank.
         Assumes can_remove_token check was made and function call is
         only done while a player reserves a card.
@@ -98,9 +98,8 @@ class Bank:
             # Should only happen if you don't do the can_remove_token check
             raise ValueError(f"Too many {Token.YELLOW} tokens "
                              "were taken from the bank")
-        return True
 
-    def add_token(self, amount_to_add: Dict[Token, int]) -> bool:
+    def add_token(self, amount_to_add: Dict[Token, int]) -> None:
         """Add an amount of tokens for given colors to the bank.
         Function call is only done while a player purchases a card.
 
@@ -111,4 +110,3 @@ class Bank:
         """
         for color in amount_to_add:
             self.token_available[color] += amount_to_add[color]
-        return True

@@ -28,7 +28,7 @@ class Player:
                 return False
         return True
 
-    def remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
+    def remove_token(self, amount_to_remove: Dict[Token, int]) -> None:
         """Remove tokens of given colors by the amount given for each.
         Assumes can_remove_token check was made.
         Function call is only done while a player purchases a card.
@@ -44,7 +44,6 @@ class Player:
                 # Should only happen if you don't do the can_remove_token check
                 raise ValueError(f"Too many {color} tokens were taken from"
                                  f" the player {self.player_id}")
-        return True
 
     def can_add_token(self, amount_to_add: Dict[Token, int]) -> bool:
         """Check if tokens of given colors can be added."""
@@ -54,7 +53,7 @@ class Player:
         else:
             return True
 
-    def add_token(self, amount_to_add: Dict[Token, int]) -> bool:
+    def add_token(self, amount_to_add: Dict[Token, int]) -> None:
         """Add tokens of given colors by the amount given for each.
         Assumes can_remove_token check was made.
         Function call is only done when a player reserves a card or
@@ -72,7 +71,6 @@ class Player:
                              f" the player {self.player_id}")
         for color in amount_to_add:
             self.token_reserved[color] += amount_to_add[color]
-        return True
 
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""

@@ -12,7 +12,7 @@ class Token(Enum):
 
 
 @dataclass(slots=True)
-class TokenBag():
+class TokenBag:
     
     tokens: Dict[Token, int] = field(init=False)
     standard_amount: InitVar[int] = 0
