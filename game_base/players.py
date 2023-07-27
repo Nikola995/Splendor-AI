@@ -3,7 +3,6 @@ from typing import Dict
 from cards import Card
 from nobles import Noble
 from .tokens import Token, TokenBag
-from utils import IncorrectInputError
 
 
 @dataclass(order=True, slots=True)
@@ -13,17 +12,13 @@ class Player:
     # TODO make it a user account with elo (in the future)
     # For now just use a string name
     player_id: str
-    # Reserved tokens per color (type)
     token_reserved: TokenBag = field(default_factory=TokenBag)
-    # Owned Cards
-    cards_owned: list[Card] = field(default_factory=list)
-    # Reserved Cards
     cards_reserved: dict[str, Card] = field(default_factory=dict)
-    # Owned Nobles
-    nobles_owned: list[Noble] = field(default_factory=list)
-    # Bonuses per color (type), Wildcard is unused
+    cards_owned: list[Card] = field(default_factory=list)
+    # Bonuses from Owned Cards, Wildcard in TokenBag is unused
     bonus_owned: TokenBag = field(default_factory=TokenBag)
-    # Prestige points
+    nobles_owned: list[Noble] = field(default_factory=list)
+    # Metric for winning the game. >= 15 is eligible to win the game
     prestige_points: int = 0
 
     def can_remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
@@ -160,8 +155,7 @@ class Player:
                 return False
         return True
 
-    # TODO: add an input type check, and with that change output to bool
-    def add_to_owned_nobles(self, noble: Noble) -> None:
+    def add_noble(self, noble: Noble) -> None:
         """Add noble to list of owned nobles.
 
         Automatically adds bonus and prestige points from card
