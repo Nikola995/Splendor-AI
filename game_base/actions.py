@@ -196,7 +196,7 @@ class PurchaseCard(Action):
         remaining_cost = deepcopy(card.token_cost)
         # 1. Reduce the cost by the owned bonuses
         for color in remaining_cost:
-            remaining_cost[color] = min((remaining_cost[color] -
+            remaining_cost[color] = max((remaining_cost[color] -
                                          player.bonus_owned[color]), 0)
         # Transfer the card if the total remaining cost == 0
         if sum(remaining_cost.values()) == 0:
@@ -204,7 +204,7 @@ class PurchaseCard(Action):
             return None
         # 2. Reduce the cost by collateral wildcard tokens
         for color in remaining_cost:
-            remaining_cost[color] = min((remaining_cost[color] -
+            remaining_cost[color] = max((remaining_cost[color] -
                                          wildcard_collaterals[color]), 0)
         # Transfer the collateral wildcard tokens from the player to the bank
         player.remove_token({Token.YELLOW: sum(wildcard_collaterals.values())})
