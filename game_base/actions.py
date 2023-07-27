@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Tuple, List
+from typing import Any, Tuple, List, Dict
 from abc import ABC, abstractmethod
 from players import Player
 from banks import Bank
@@ -14,7 +14,7 @@ class Action(ABC):
     """Abstract class for representation of an action performed by a player."""
 
     @abstractmethod
-    def can_perform(self, player: Player, bank: Bank, **kwargs) -> bool:
+    def can_perform(self, player: Player, **kwargs) -> bool:
         """Abstract method for checking if the action can be performed."""
         pass
 
@@ -141,166 +141,82 @@ class ReserveCard(Action):
         return "reserved a card."
 
 
+# TODO: Change the interactions with Cards (remove card_id)
 @dataclass
 class PurchaseCard(Action):
     """Purchase the given card for the player.
 
-    On initialization provide a dict with:
-        - a key 'card' that contains the card.
-        - a key 'card_id' that contains the card_id.
-        - a key 'is_reserved' that contains a is_reserved flag
-          for the card.
-        - a key 'yellow_replaces' that contains a dict of
-          colors (as keys) and amounts (as values).
-
     Parameters
     ----------
+    player : Player
+        The player that will receive the requested card & wildcard token.
+    bank : Bank
+        The bank that will give the requested wildcard token.
     card : Card
-        The card that will be purchased by the player.
-    card_id : str
-        The id by which the card is referenced.
-    is_reserved : bool, optional
-        A flag for whether the card is already reserved by the player.
-    yellow_replaces : dict[str, int], optional
-        A dict of colors (keys) and amount of yellow tokens
-        given to replace tokens for each given color (values).
+        The card that will be reserved by the player.
+    card_id: str
+        The id by which the Card is stored in the player's inventory.
+    wildcard_collaterals: Dict[Token, int]
+        The number of Tokens that are replaced by wildcard tokens in the
+        player's reserved_tokens
     """
 
-    def can_perform(self, player: Player, bank: Bank) -> bool:
-        """Check if the player can purchase the card.
+    def can_perform(self, player: Player, card: Card) -> bool:
+        """Check if the player can purchase the given card.
 
-        The action will be successful if :
-            - if the sum of each color of owned bonuses,
-              yellow tokens given as collateral and
-              reserved tokens of the player
-              is >= than the cost of tokens of the card for those colors.
-
-        The card is given on initialization of the Action.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will purchase the requested card.
-
-        Returns
-        -------
-        bool
-            Whether or not the action will be successful.
+        Returns True if the sum of each color of owned bonuses,
+        reserved tokens of the player and wildcard tokens given as collateral
+        is >= than the cost of tokens of the card for those colors.
         """
-        card = self.params['card']
-        yellow_replaces = self.params['yellow_replaces']
-        if player.can_purchase_card(card, yellow_replaces):
-            return True
-        else:
-            return False
+        return player.can_purchase_card(card)
 
-    def _give_card(self, player: Player, remaning_cost: int) -> bool:
-        """Give the card to the player if there is no remaining cost."""
-        card = self.params['card']
-        card_id = self.params['card_id']
-        is_reserved = self.params['is_reserved']
+    def _give_card(self, player: Player, card: Card, card_id: str) -> None:
+        """Give the card to the player."""
+        # If the card is reserved, remove from there
+        if card_id in player.cards_reserved:
+            player.cards_reserved.pop(card_id)
+        player.add_to_owned_cards(card)
 
-        if remaning_cost == 0:
-            # If the card is reserved, remove from there
-            if is_reserved:
-                player.cards_reserved.pop(card_id)
-            player.add_to_owned_cards(card)
-            return True
-        else:
-            return False
-
-    def perform(self, player: Player, bank: Bank, verbose=0) -> None:
+    def perform(self, player: Player, bank: Bank,
+                card: Card, card_id: str,
+                wildcard_collaterals: Dict[Token, int]) -> None:
         """Purchase the card for the player.
 
         The process of purchasing a card follows this process:
-            - First, the owned bonuses discount the price of the card
-              (for each color) (if the player has enough bonuses
-              the card can be purchased without spending any tokens)
-            - Second, the given wildcard (yellow) tokens as collateral
-              for each color reduce the price of the card
-              (the card can be purchased with just wildcard tokens)
-            - Finally the card will be purchased with the reserved tokens
-              for each color (the amount is the remaining cost for each color).
-
-        All tokens that the player offers will be added to the given bank.
-        After the purchase is complete, give the card to the player
-        as an owned card.
-
-        The card is given on initialization of the Action.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will give the requested tokens
-            for the cost of the card.
-        bank : Bank
-            The bank that will receive the requested tokens
-            for the cost of the card.
-
-        Raises
-        ------
-        ActionNotPossibleError
-            Precautionary error (should never be raised) if the card
-            has remaining cost but wasn't purchased.
+            1. The owned bonuses discount the price of the card
+            (for the corresponding color)
+            (the card can be purchased with just bonuses)
+            2. The collateral wildcard tokens discount the price of the card
+            (for the corresponding color) & removed from the player's inventory
+            (the card can be purchased with just wildcard tokens)
+            3. The reserved tokens are removed from the player's inventory
+            by the remaining amount of the card cost
+            (for the corresponding color)
         """
-        card = self.params['card']
-        card_id = self.params['card_id']
-        is_reserved = self.params['is_reserved']
-        yellow_replaces = self.params['yellow_replaces']
-        card_token_cost = deepcopy(card.token_cost)
-
-        # Reduce the cost by the owned bonuses
-        for color in player.bonus_owned:
-            if player.bonus_owned[color] > card_token_cost[color]:
-                card_token_cost[color] = 0
-            else:
-                card_token_cost[color] -= player.bonus_owned[color]
-        # If the card was purchased with just bonuses
-        if self._give_card(player=player,
-                           remaning_cost=sum(card_token_cost.values())):
-            if verbose == 1:
-                print(f"{player.player_id} purchased {card_id} with bonuses")
+        remaining_cost = deepcopy(card.token_cost)
+        # 1. Reduce the cost by the owned bonuses
+        for color in remaining_cost:
+            remaining_cost[color] = min((remaining_cost[color] -
+                                         player.bonus_owned[color]), 0)
+        # Transfer the card if the total remaining cost == 0
+        if sum(remaining_cost.values()) == 0:
+            self._give_card(player, card, card_id)
             return None
-
-        # Reduce the cost by the yellow tokens per color
-        for color in yellow_replaces:
-            if card_token_cost[color] - yellow_replaces[color] >= 0:
-                card_token_cost[color] -= yellow_replaces[color]
-            else:
-                # TODO Issue 11
-                raise IncorrectInputError("Too many yellow tokens given "
-                                          f"for color {color}")
-        # Give all the yellow tokens back to the bank
-        player.remove_token({'yellow': sum(yellow_replaces.values())})
-        bank.add_token({'yellow': sum(yellow_replaces.values())})
-
-        # If the card was purchased by just yellow tokens
-        if self._give_card(player=player,
-                           remaning_cost=sum(card_token_cost.values())):
-            if verbose == 1:
-                print(f"{player.player_id} purchased {card_id} with "
-                      "wildcard tokens")
+        # 2. Reduce the cost by collateral wildcard tokens
+        for color in remaining_cost:
+            remaining_cost[color] = min((remaining_cost[color] -
+                                         wildcard_collaterals[color]), 0)
+        # Transfer the collateral wildcard tokens from the player to the bank
+        player.remove_token({Token.YELLOW: sum(wildcard_collaterals.values())})
+        bank.add_token({Token.YELLOW: sum(wildcard_collaterals.values())})
+        # Transfer the card if the total remaining cost == 0
+        if sum(remaining_cost.values()) == 0:
+            self._give_card(player, card, card_id)
             return None
-
-        # Finish the purchase with the reserved tokens
-        for color in card.token_cost:
-            if card_token_cost[color] > 0:
-                # Transfer the amount of tokens remaining in the cost
-                # from the player to the bank
-                player.remove_token({color: card_token_cost[color]})
-                bank.add_token({color: card_token_cost[color]})
-                card_token_cost[color] = 0
-
-        # If the card was purchased by reserved tokens
-        if self._give_card(player=player,
-                           remaning_cost=sum(card_token_cost.values())):
-            if verbose == 1:
-                print(f"{player.player_id} has purchased {card_id}"
-                      " with reserved tokens")
-            return None
-        # Something went horribly wrong if you get here
-        raise ActionNotPossibleError("The card still has a cost to it, "
-                                     "something went horribly wrong")
+        # 3. Purchase the remaining cost with the player's reserved tokens
+        player.remove_token(remaining_cost)
+        bank.add_token(remaining_cost)
+        self._give_card(player, card, card_id)
 
     def __str__(self) -> str:
-        return f"purchase {self.params['card_id']}"
+        return "purchased a card."
