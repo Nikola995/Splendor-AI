@@ -1,100 +1,64 @@
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Tuple, List
 from abc import ABC, abstractmethod
 from players import Player
 from banks import Bank
+from tokens import Token
 from copy import deepcopy
 from utils import ActionNotPossibleError, IncorrectInputError
+
 
 @dataclass
 class Action(ABC):
     """Abstract class for representation of an action performed by a player."""
 
-    params: dict[str, Any] = field(default_factory=dict)
-
     @abstractmethod
-    def can_perform(self, player: Player, bank: Bank) -> bool:
+    def can_perform(self, player: Player, bank: Bank, **kwargs) -> bool:
         """Abstract method for checking if the action can be performed."""
         pass
 
     @abstractmethod
-    def perform(self, player: Player, bank: Bank) -> bool:
+    def perform(self, player: Player, bank: Bank, **kwargs) -> bool:
         """Abstract method for performing the action in the game."""
-        pass
-
-    @abstractmethod
-    def print_string(self) -> str:
-        """Abstract method for giving a print value in string form."""
         pass
 
 
 @dataclass
-class Reserve3DifferentColorTokens(Action):
-    """Reserve 1 token of 3 different colors for the player.
-
-    On initialization provide a dict with a key 'color_list'
-    that contains a list of 3 colors
+class Reserve3UniqueColorTokens(Action):
+    """Reserve 1 token of 3 unique colors for the player.
 
     Parameters
     ----------
-    color_list : list[str]
-        A list of 3 colors that represent 1 token each.
+    player : Player
+        The player that will receive the requested tokens.
+    bank : Bank
+        The bank that will give the requested tokens.
+    colors: Tuple[Token, Token, Token]
+        Tuple containing 3 unique token colors
     """
 
-    def can_perform(self, player: Player, bank: Bank) -> bool:
+    def can_perform(self, player: Player, bank: Bank,
+                    colors: Tuple[Token, Token, Token]) -> bool:
         """Check if the requested tokens can be reserved.
 
-        The action will be successful if :
-            - The given bank holds the requested amount of tokens
-            - The player won't have more than 10 tokens in total at
-              the end of the action.
-
-        The color list is given on initialization of the Action.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will receive the requested tokens.
-        bank : Bank
-            The bank that will give the requested tokens.
-
-        Returns
-        -------
-        bool
-            Whether or not the action will be successful.
+        The action will be successful if all of the following is true:
+            - The bank holds the requested amount of tokens before
+            the action is performed.
+            - The player won't have more than 10 tokens in total after
+            the action is performed.
         """
-        color_list = self.params['color_list']
-        if (bank._can_remove_token(dict.fromkeys(color_list, 1)) and
-                player._can_add_token(dict.fromkeys(color_list, 1))):
-            return True
-        else:
-            return False
+        return (bank.can_remove_token(dict.fromkeys(colors, 1))
+                and player.can_add_token(dict.fromkeys(colors, 1)))
 
-    def perform(self, player: Player, bank: Bank, verbose=0) -> None:
+    def perform(self, player: Player, bank: Bank,
+                colors: Tuple[Token, Token, Token]) -> None:
         """Transfer the requested tokens from the bank to the player.
-
-        The color list is given on initialization of the Action.
-
-        Parameters
-        ----------
-        player : Player
-            The player that will receive the requested tokens.
-        bank : Bank
-            The bank that will give the requested tokens.
         """
-        color_list = self.params['color_list']
-        bank.remove_3_different_color_tokens(color_list)
-        player.add_token(dict.fromkeys(color_list, 1))
-        if verbose == 1:
-            print(f"{player.player_id} has reserved a {color_list[0]}, "
-                  f"{color_list[1]} and {color_list[2]} token")
-        pass
+        bank.remove_3_unique_color_tokens(colors)
+        player.add_token(dict.fromkeys(colors, 1))
 
-    def print_string(self) -> str:
-        """Give a string to print representing the action."""
-        color_list = self.params['color_list']
-        return (f"reserve a {color_list[0]}, {color_list[1]} and "
-                f"{color_list[2]} token")
+    def __str__(self) -> str:
+        return (f"reserved 3 tokens of unique colors.")
 
 
 @dataclass
@@ -158,8 +122,7 @@ class Reserve2SameColorTokens(Action):
             print(f"{player.player_id} has reserved 2 {color} tokens")
         pass
 
-    def print_string(self) -> str:
-        """Give a string to print representing the action."""
+    def __str__(self) -> str:
         return (f"reserve 2 {self.params['color']} tokens.")
 
 
@@ -232,8 +195,7 @@ class ReserveCard(Action):
                       f"{player.player_id}")
         pass
 
-    def print_string(self) -> str:
-        """Give a string to print representing the action."""
+    def __str__(self) -> str:
         return f"reserve {self.params['card_id']}"
 
 
@@ -398,6 +360,5 @@ class PurchaseCard(Action):
         raise ActionNotPossibleError("The card still has a cost to it, "
                                      "something went horribly wrong")
 
-    def print_string(self) -> str:
-        """Give a string to print representing the action."""
+    def __str__(self) -> str:
         return f"purchase {self.params['card_id']}"
