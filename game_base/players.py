@@ -44,7 +44,7 @@ class Player:
         """
         for color in amount_to_remove:
             self.token_reserved[color] -= amount_to_remove[color]
-            if self.token_available[color] < 0:
+            if self.token_reserved[color] < 0:
                 # Should only happen if you don't do the can_remove_token check
                 raise ValueError(f"Too many {color} tokens were taken from"
                                  f" the player {self.player_id}")
