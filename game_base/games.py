@@ -68,16 +68,13 @@ class Game:
                                        "the start of the game")
         self.players.remove(player)
 
-    def _generate_shuffle_pick_nobles(self, verbose=0) -> None:
+    def _generate_nobles(self) -> None:
         """Generate and shuffle and pick the nobles for the game."""
         nobles_list = generate_nobles()
         shuffle(nobles_list)
         # Get n + 1 nobles for n players
-        for index, noble in enumerate(nobles_list[0:self._num_players + 1]):
+        for index, noble in enumerate(nobles_list[0:len(self.players) + 1]):
             self.nobles[f'noble_{index}'] = noble
-        if verbose == 1:
-            print(f"{len(self.nobles)} nobles added for "
-                  f"{self._num_players} players")
 
     def _generate_shuffle_cards(self, verbose=0) -> None:
         """Generate and shuffle the cards for the game."""
@@ -108,7 +105,7 @@ class Game:
                 "A game has to have at least 2 players")
         # Generate the game assets
         self.bank = Bank(num_players=len(self.players))
-        self._generate_shuffle_pick_nobles()
+        self._generate_nobles()
         self._generate_shuffle_cards()
 
     # %% Active Game methods
