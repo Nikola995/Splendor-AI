@@ -8,6 +8,7 @@ from .tokens import Token, TokenBag
 CARDS_FILE_PATH_CSV = 'splendor_cards_list.csv'
 CARDS_FILE_PATH_PICKLE = 'cards_manager_collection.pickle'
 
+
 @dataclass(order=True, frozen=True, slots=True)
 class Card:
     '''
@@ -28,6 +29,7 @@ class Card:
     def __post_init__(self):
         # Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
+
 
 @dataclass(slots=True)
 class CardManager:
@@ -58,9 +60,45 @@ class CardManager:
                                               else None)
 
 
+@dataclass(slots=True)
 class CardManagerCollection:
     """Contains the card managers for all card levels."""
-    pass
+    managers: list[CardManager]
+
+    def get_manager(self, card_level: int) -> CardManager:
+        """Returns the card manager for the given card level."""
+        for manager in self.managers:
+            if manager.card_level == card_level:
+                return manager
+        raise ValueError(f"There is no cards manager for level {card_level}")
+
+    def get_deck(self, card_level: int) -> list[Card]:
+        """Returns the card deck for the given card level."""
+        for manager in self.managers:
+            if manager.card_level == card_level:
+                return manager.deck
+        raise ValueError(f"There is no cards deck for level {card_level}")
+
+    def get_all_decks(self) -> list[list[Card]]:
+        """Returns all of the card decks."""
+        return [manager.deck for manager in self.managers]
+
+    def get_table(self, card_level: int) -> list[Card]:
+        """Returns the card table for the given card level."""
+        for manager in self.managers:
+            if manager.card_level == card_level:
+                return manager.table
+        raise ValueError(f"There is no cards table for level {card_level}")
+
+    def get_all_tables(self) -> list[list[Card]]:
+        """Returns all of the card tables."""
+        return [manager.table for manager in self.managers]
+
+    def remove_card_from_tables(self, card: Card) -> None:
+        """Removes the given card from the appropriate table."""
+        for manager in self.managers:
+            if manager.card_level == card.level:
+                manager.remove_card_from_table(card)
 
 
 class CardGenerator:
@@ -74,7 +112,7 @@ class CardGenerator:
         cards_df['(g)reen'] = cards_df['(g)reen'].fillna(0)
         cards_df['(r)ed'] = cards_df['(r)ed'].fillna(0)
         cards_df['blac(k)'] = cards_df['blac(k)'].fillna(0)
-
+        # Create cards from their info
         cards_1 = []
         cards_2 = []
         cards_3 = []
@@ -91,6 +129,9 @@ class CardGenerator:
                 case 2: cards_2.append(card)
                 case 3: cards_3.append(card)
                 case other: raise Exception('Card level is not 1, 2 or 3')
+        return CardManagerCollection([CardManager(cards_1),
+                                      CardManager(cards_2),
+                                      CardManager(cards_3)])
 
     def save_to_pickle(self, cards_data: CardManagerCollection,
                        filepath: str = 'cards_lists.pickle') -> None:
