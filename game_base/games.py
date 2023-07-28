@@ -10,7 +10,8 @@ from actions import (Action, Reserve3DifferentColorTokens,
                      Reserve2SameColorTokens, ReserveCard,
                      PurchaseCard)
 from utils import (TooManyPlayersError, NotEnoughPlayersError,
-                   GameNotOverError, IncorrectInputError)
+                   GameNotOverError, IncorrectInputError,
+                   GameInitializedError)
 
 @dataclass
 class GameMechanicsStandard:
@@ -31,7 +32,6 @@ class Game:
     """A representation of the whole process of playing the game."""
 
     # %% Game Assets
-    _num_players: int = 0
     players: list[Player] = field(default_factory=list)
     # TODO Make the player order customizable - now it's FCFS
     bank: Bank = field(default_factory=Bank)
@@ -47,18 +47,19 @@ class Game:
     nobles: dict[str, Noble] = field(default_factory=dict)
 
     # TODO (after basic functionalities) create a game history record
-    num_turns: int = 1
+    # Game information
+    state: GameState = GameState.NOT_STARTED
+    num_turns: int = 0
     curr_player_index: int = 0
 
     # %% Game initialization methods
-    def _add_player(self, new_player, verbose=0) -> None:
-        if self._num_players == 4:
-            raise TooManyPlayersError("Can't add more players, "
-                                      "4 is the maximum")
+    def add_player(self, new_player: Player) -> None:
+        if self.state != GameState.NOT_STARTED:
+            raise GameInitializedError("Players can only be added before "
+                                       "the start of the game")
+        if len(self.players) == 4:
+            raise TooManyPlayersError("A game can't have more than 4 players")
         self.players.append(new_player)
-        if verbose == 1:
-            print(f"Player {new_player.player_id} has joined the game")
-        self._num_players = self._num_players + 1
 
     def _create_bank(self, verbose=0) -> None:
         if self._num_players < 2:

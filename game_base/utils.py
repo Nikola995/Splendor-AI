@@ -25,6 +25,10 @@ class TooManyPlayersError(Exception):
     pass
 
 
+class GameInitializedError(Exception):
+    pass
+
+
 class GameNotOverError(Exception):
     pass
 
