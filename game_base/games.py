@@ -5,7 +5,7 @@ from itertools import combinations, product
 from players import Player
 from banks import Bank
 from nobles import Noble, NobleGenerator
-from cards import Card, generate_cards_from_pickle
+from cards import Card, CardGenerator, CardManagerCollection
 from actions import (Action, Reserve3DifferentColorTokens,
                      Reserve2SameColorTokens, ReserveCard,
                      PurchaseCard)
@@ -21,38 +21,43 @@ class GameMechanicsStandard:
     pass
 
 
-@dataclass
 class GameState(Enum):
     NOT_STARTED = auto()
     IN_PROGRESS = auto()
     FINISHED = auto()
 
 
-@dataclass
-class Game:
-    """A representation of the whole process of playing the game."""
-
-    # %% Game Assets
-    players: list[Player] = field(default_factory=list)
-    # TODO Make the player order customizable - now it's FCFS
-    bank: Bank = field(default_factory=Bank)
-    # All of the cards not visible separated by level
-    cards_deck_level_1: list[Card] = field(default_factory=list)
-    cards_deck_level_2: list[Card] = field(default_factory=list)
-    cards_deck_level_3: list[Card] = field(default_factory=list)
-    # All of the cards visible separated by level
-    cards_on_table_level_1: dict[str, Card] = field(default_factory=dict)
-    cards_on_table_level_2: dict[str, Card] = field(default_factory=dict)
-    cards_on_table_level_3: dict[str, Card] = field(default_factory=dict)
-    # All the available nobles
-    nobles: list[Noble] = field(default_factory=list)
-
-    # TODO (after basic functionalities) create a game history record
-    # Game information
+@dataclass(slots=True)
+class GameMetaData:
     state: GameState = GameState.NOT_STARTED
-    num_turns: int = 0
+    curr_turn: int = 0
     curr_player_index: int = 0
 
+    def change_game_state(self, new_state: GameState) -> None:
+        """Changes the current state of the game."""
+        match new_state:
+            case GameState.NOT_STARTED:
+                raise ValueError("Game should have been initialized as "
+                                 "NOT_STARTED")
+            case GameState.IN_PROGRESS:
+                self.state = new_state
+                self.curr_turn = 1
+            case GameState.FINISHED:
+                self.state = new_state
+
+
+@dataclass(slots=True)
+class Game:
+    """A representation of the whole process of playing the game."""
+    # TODO add a game turn & moves record
+    # Game information
+    meta_data: GameMetaData = field(default_factory=GameMetaData)
+    # %% Game Assets
+    players: list[Player] = field(default_factory=list)
+    bank: Bank = field(default_factory=Bank)
+    cards: CardManagerCollection = field(default_factory=lambda: 
+        (CardGenerator.generate_cards(shuffled=True)))
+    nobles: list[Noble] = field(default_factory=list)
     # %% Game initialization methods
     def add_player(self, player: Player) -> None:
         if self.state != GameState.NOT_STARTED:
@@ -68,28 +73,7 @@ class Game:
                                        "the start of the game")
         self.players.remove(player)
 
-    def _generate_shuffle_cards(self, verbose=0) -> None:
-        """Generate and shuffle the cards for the game."""
-        # Import cards from pickle file (fastest)
-        (self.cards_deck_level_1,
-         self.cards_deck_level_2,
-         self.cards_deck_level_3) = generate_cards_from_pickle()
-        # Shuffle the decks
-        shuffle(self.cards_deck_level_1)
-        shuffle(self.cards_deck_level_2)
-        shuffle(self.cards_deck_level_3)
-        # Pop the last 4 cards of each deck and add them to the table
-        for i in range(4):
-            # generate a card id for all the popped cards
-            c_id = f'card_{len(self.cards_deck_level_1)}'
-            self.cards_on_table_level_1[c_id] = self.cards_deck_level_1.pop()
-            c_id = f'card_{len(self.cards_deck_level_2) + 40}'
-            self.cards_on_table_level_2[c_id] = self.cards_deck_level_2.pop()
-            c_id = f'card_{len(self.cards_deck_level_3) + 70}'
-            self.cards_on_table_level_3[c_id] = self.cards_deck_level_3.pop()
-        if verbose == 1:
-            print("Cards added, shuffled and 4 of each kind set on table")
-
+    # TODO Add customizable player order pre-initialization - now only FCFS
     def initialize(self) -> None:
         """Initialize a new game for currently added players."""
         if len(self.players) < 2:
@@ -98,13 +82,13 @@ class Game:
         # Generate the game assets
         self.bank = Bank(num_players=len(self.players))
         self.nobles = NobleGenerator.generate_nobles(len(self.players))
-        self._generate_shuffle_cards()
+        self.meta_data.change_game_state(GameState.IN_PROGRESS)
 
-    # %% Active Game methods
-    def is_game_over(self) -> bool:  # noqa : D301
+    # %% Active Game mechanics
+    def is_game_over(self) -> bool:
         """Check if at least one of the players reached 15 prestige points.
 
-        Called at the end of each turn \
+        Called at the end of each turn
         after all the players performed an action
 
         Returns
