@@ -4,7 +4,7 @@ from random import shuffle
 from itertools import combinations, product
 from players import Player
 from banks import Bank
-from nobles import Noble, generate_nobles
+from nobles import Noble, NobleGenerator
 from cards import Card, generate_cards_from_pickle
 from actions import (Action, Reserve3DifferentColorTokens,
                      Reserve2SameColorTokens, ReserveCard,
@@ -45,7 +45,7 @@ class Game:
     cards_on_table_level_2: dict[str, Card] = field(default_factory=dict)
     cards_on_table_level_3: dict[str, Card] = field(default_factory=dict)
     # All the available nobles
-    nobles: dict[str, Noble] = field(default_factory=dict)
+    nobles: list[Noble] = field(default_factory=list)
 
     # TODO (after basic functionalities) create a game history record
     # Game information
@@ -67,14 +67,6 @@ class Game:
             raise GameInitializedError("Players can only be removed before "
                                        "the start of the game")
         self.players.remove(player)
-
-    def _generate_nobles(self) -> None:
-        """Generate and shuffle and pick the nobles for the game."""
-        nobles_list = generate_nobles()
-        shuffle(nobles_list)
-        # Get n + 1 nobles for n players
-        for index, noble in enumerate(nobles_list[0:len(self.players) + 1]):
-            self.nobles[f'noble_{index}'] = noble
 
     def _generate_shuffle_cards(self, verbose=0) -> None:
         """Generate and shuffle the cards for the game."""
@@ -105,7 +97,7 @@ class Game:
                 "A game has to have at least 2 players")
         # Generate the game assets
         self.bank = Bank(num_players=len(self.players))
-        self._generate_nobles()
+        self.nobles = NobleGenerator.generate_nobles(len(self.players))
         self._generate_shuffle_cards()
 
     # %% Active Game methods
