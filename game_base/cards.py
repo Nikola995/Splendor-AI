@@ -100,9 +100,18 @@ class CardManagerCollection:
             if manager.card_level == card.level:
                 manager.remove_card_from_table(card)
 
+    def shuffle_decks(self) -> None:
+        """Shuffle all of the decks."""
+        [shuffle(manager.deck) for manager in self.managers]
+
+    def fill_tables(self) -> None:
+        """Fill all of the tables."""
+        [manager.fill_table() for manager in self.managers]
+
 
 class CardGenerator:
     """Generates a CardManagerCollection containing all of the cards."""
+
     def generate_from_csv(self) -> CardManagerCollection:
         """Generates the CardManagerCollection from the original card info
         in the .csv file."""
@@ -143,7 +152,7 @@ class CardGenerator:
         with open(filepath, 'wb') as f:
             pickle.dump(cards_data, f)
 
-    def generate_cards(self, shuffled=True):
+    def generate_cards(self, shuffled=True) -> CardManagerCollection:
         """Returns the CardManagerCollection from the pickle file
         if it exists, or generated from the .csv file,
         shuffling the decks if requested.
@@ -154,4 +163,5 @@ class CardGenerator:
         else:
             with open(CARDS_FILE_PATH_PICKLE, 'rb') as f:
                 cards_data = pickle.load(f)
-        return cards_data.shuffle_decks() if shuffled else cards_data
+        cards_data.shuffle_decks() if shuffled else None
+        return cards_data
