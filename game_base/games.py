@@ -68,29 +68,6 @@ class Game:
                                        "the start of the game")
         self.players.remove(player)
 
-    def _create_bank(self, verbose=0) -> None:
-        if self._num_players < 2:
-            raise NotEnoughPlayersError("Can't create bank for "
-                                        f"{self._num_players} players, 2 is "
-                                        "the minimum")
-        self.bank = Bank()
-        if self._num_players == 3:
-            # Remove 2 tokens for each non-wildcard color if 3 players
-            self.bank._remove_token({"green": 2,
-                                     "white": 2,
-                                     "blue": 2,
-                                     "black": 2,
-                                     "red": 2})
-        elif self._num_players == 2:
-            # Remove 3 tokens for each non-wildcard color if 2 players
-            self.bank._remove_token({"green": 3,
-                                     "white": 3,
-                                     "blue": 3,
-                                     "black": 3,
-                                     "red": 3})
-        if verbose == 1:
-            print(f"Bank created for {self._num_players} players")
-
     def _generate_shuffle_pick_nobles(self, verbose=0) -> None:
         """Generate and shuffle and pick the nobles for the game."""
         nobles_list = generate_nobles()
@@ -124,22 +101,15 @@ class Game:
         if verbose == 1:
             print("Cards added, shuffled and 4 of each kind set on table")
 
-    def initialize_new_game(self, num_players=4, verbose=0) -> None:
-        """Initialize a new game for predetermined number of players."""
-        if verbose:
-            print("Initializing New Game")
-            print(f"Number of players:{num_players}")
-        # TODO Add player names/accounts as input
-        # Add the players
-        for i in range(num_players):
-            player_i = Player(f"Player_{i}")
-            self._add_player(player_i, verbose)
-        # After all the players have been added, create the bank
-        self._create_bank(verbose)
-        self._generate_shuffle_pick_nobles(verbose)
-        self._generate_shuffle_cards(verbose)
-        if verbose:
-            print("New Game Initialized")
+    def initialize(self) -> None:
+        """Initialize a new game for currently added players."""
+        if len(self.players) < 2:
+            raise NotEnoughPlayersError(
+                "A game has to have at least 2 players")
+        # Generate the game assets
+        self.bank = Bank(num_players=len(self.players))
+        self._generate_shuffle_pick_nobles()
+        self._generate_shuffle_cards()
 
     # %% Active Game methods
     def is_game_over(self) -> bool:  # noqa : D301
