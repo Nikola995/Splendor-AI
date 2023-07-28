@@ -9,16 +9,10 @@ from cards import Card, CardGenerator, CardManagerCollection
 from actions import (Action, Reserve3DifferentColorTokens,
                      Reserve2SameColorTokens, ReserveCard,
                      PurchaseCard)
+from action_sets import ActionSet, StandardActionSet
 from utils import (TooManyPlayersError, NotEnoughPlayersError,
                    GameNotOverError, IncorrectInputError,
                    GameInitializedError)
-
-
-@dataclass
-class GameMechanicsStandard:
-    # Game should have initialize after players are added
-    # and then just run, where a GameMechanics instance processes turns until game is over
-    pass
 
 
 class GameState(Enum):
@@ -54,11 +48,13 @@ class Game:
     meta_data: GameMetaData = field(default_factory=GameMetaData)
     # %% Game Assets
     players: list[Player] = field(default_factory=list)
-    bank: Bank = field(default_factory=Bank)
-    cards: CardManagerCollection = field(default_factory=lambda: 
-        (CardGenerator.generate_cards(shuffled=True)))
+    bank: Bank = field(default_factory=None)
+    cards: CardManagerCollection = field(default_factory=lambda:
+                                         (CardGenerator.generate_cards(shuffled=True)))
     nobles: list[Noble] = field(default_factory=list)
+    actions: ActionSet = field(default_factory=StandardActionSet)
     # %% Game initialization methods
+
     def add_player(self, player: Player) -> None:
         if self.state != GameState.NOT_STARTED:
             raise GameInitializedError("Players can only be added before "
@@ -84,7 +80,8 @@ class Game:
         self.nobles = NobleGenerator.generate_nobles(len(self.players))
         self.meta_data.change_game_state(GameState.IN_PROGRESS)
 
-    # %% Active Game mechanics
+    # %% Active game methods
+
     def is_game_over(self) -> bool:
         """Check if at least one of the players reached 15 prestige points.
 
