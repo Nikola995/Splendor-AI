@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from random import shuffle
 from itertools import combinations, product
 from players import Player
@@ -11,9 +12,20 @@ from actions import (Action, Reserve3DifferentColorTokens,
 from utils import (TooManyPlayersError, NotEnoughPlayersError,
                    GameNotOverError, IncorrectInputError)
 
-# %% Game mechanics
-# TODO add a game_started and game_finished flags and not allow actions
-# game_started = False or game_finished = True
+@dataclass
+class GameMechanicsStandard:
+    # Game should have initialize after players are added
+    # and then just run, where a GameMechanics instance processes turns until game is over
+    pass
+
+
+@dataclass
+class GameState(Enum):
+    NOT_STARTED = auto()
+    IN_PROGRESS = auto()
+    FINISHED = auto()
+
+
 @dataclass
 class Game:
     """A representation of the whole process of playing the game."""
