@@ -102,7 +102,10 @@ class CardManagerCollection:
 
 
 class CardGenerator:
+    """Generates a CardManagerCollection containing all of the cards."""
     def generate_from_csv(self) -> CardManagerCollection:
+        """Generates the CardManagerCollection from the original card info
+        in the .csv file."""
         cards_df = pd.read_csv(CARDS_FILE_PATH_CSV, header=1)
         cards_df['Level'] = cards_df['Level'].fillna(method='ffill')
         cards_df['Gem color'] = cards_df['Gem color'].fillna(method='ffill')
@@ -135,22 +138,16 @@ class CardGenerator:
 
     def save_to_pickle(self, cards_data: CardManagerCollection,
                        filepath: str = 'cards_lists.pickle') -> None:
+        """Save the CardManagerCollection from the original card info
+        in a .pickle file."""
         with open(filepath, 'wb') as f:
             pickle.dump(cards_data, f)
 
     def generate_cards(self, shuffled=True):
-        '''Get all the cards formatted in the Card class saved in a pickle file
-
-        Returns tuple (cards_1, cards_2, cards_3)
-        -------
-        cards_1 : list[Card]
-            All cards with level 1\n
-        cards_2 : list[Card]
-            All cards with level 2\n
-        cards_3 : list[Card]
-            All cards with level 3
-
-        '''
+        """Returns the CardManagerCollection from the pickle file
+        if it exists, or generated from the .csv file,
+        shuffling the decks if requested.
+        """
         if not path.exists(CARDS_FILE_PATH_PICKLE):
             cards_data = self.generate_from_csv()
             self.save_to_pickle(cards_data)
