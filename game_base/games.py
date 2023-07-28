@@ -13,6 +13,7 @@ from utils import (TooManyPlayersError, NotEnoughPlayersError,
                    GameNotOverError, IncorrectInputError,
                    GameInitializedError)
 
+
 @dataclass
 class GameMechanicsStandard:
     # Game should have initialize after players are added
@@ -53,13 +54,19 @@ class Game:
     curr_player_index: int = 0
 
     # %% Game initialization methods
-    def add_player(self, new_player: Player) -> None:
+    def add_player(self, player: Player) -> None:
         if self.state != GameState.NOT_STARTED:
             raise GameInitializedError("Players can only be added before "
                                        "the start of the game")
         if len(self.players) == 4:
             raise TooManyPlayersError("A game can't have more than 4 players")
-        self.players.append(new_player)
+        self.players.append(player)
+
+    def remove_player(self, player: Player) -> None:
+        if self.state != GameState.NOT_STARTED:
+            raise GameInitializedError("Players can only be removed before "
+                                       "the start of the game")
+        self.players.remove(player)
 
     def _create_bank(self, verbose=0) -> None:
         if self._num_players < 2:
