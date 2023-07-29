@@ -13,7 +13,7 @@ class Action(ABC):
     """Abstract class for representation of an action performed by a player."""
 
     @abstractmethod
-    def can_perform(self, player: Player, **kwargs) -> bool:
+    def can_perform(self, player: Player, bank: Bank) -> bool:
         """Abstract method for checking if the action can be performed."""
         pass
 
@@ -117,8 +117,9 @@ class ReserveCard(Action):
     """
     card: Card
 
-    def can_perform(self, player: Player, **kwargs) -> bool:
+    def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the player can reserve the card.
+        (bank is unused, but added to comply with generic Action.)
 
         The action will be successful if :
             - the player has less than 3 reserved cards.
@@ -140,7 +141,6 @@ class ReserveCard(Action):
         return "reserved a card."
 
 
-# TODO: Change the interactions with Cards (remove card_id)
 @dataclass(slots=True)
 class PurchaseCard(Action):
     """Purchase the given card for the player.
@@ -159,8 +159,9 @@ class PurchaseCard(Action):
     """
     card: Card
 
-    def can_perform(self, player: Player, **kwargs) -> bool:
+    def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the player can purchase the given card.
+        (bank is unused, but added to comply with generic Action.)
 
         Returns True if the sum of each color of owned bonuses,
         reserved tokens of the player and wildcard tokens given as collateral
