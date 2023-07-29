@@ -3,11 +3,10 @@ from enum import Enum, auto
 from players import Player
 from banks import Bank
 from nobles import Noble, NobleGenerator
-from cards import Card, CardGenerator, CardManagerCollection
+from cards import CardGenerator, CardManagerCollection
 from actions import Action
 from action_sets import ActionSet, StandardActionSet
-from utils import (TooManyPlayersError, NotEnoughPlayersError,
-                   GameNotOverError, GameInitializedError)
+from utils import (GameInitializedError)
 
 
 class GameState(Enum):
@@ -55,7 +54,7 @@ class Game:
             raise GameInitializedError("Players can only be added before "
                                        "the start of the game")
         if len(self.players) == 4:
-            raise TooManyPlayersError("A game can't have more than 4 players")
+            raise ValueError("A game can't have more than 4 players")
         self.players.append(player)
 
     def remove_player(self, player: Player) -> None:
@@ -68,8 +67,7 @@ class Game:
     def initialize(self) -> None:
         """Initialize a new game for currently added players."""
         if len(self.players) < 2:
-            raise NotEnoughPlayersError(
-                "A game has to have at least 2 players")
+            raise ValueError("A game can't begin without at least 2 players")
         # Generate the game assets
         self.bank = Bank(num_players=len(self.players))
         self.nobles = NobleGenerator.generate_nobles(len(self.players))
@@ -143,95 +141,3 @@ class Game:
         self.noble_check_for_current_player()
         # End the turn for the player
         self.meta_data.curr_player_index += 1
-    # %% Game state representation
-    #            -> numpy.matrix():
-
-    def state(self, dense=0, verbose=0):
-        """Return the state of the game."""
-        # TODO implement a state representation
-        # TODO add a game_id asset
-        # This means also get state for players, bank, cards on table
-        # dense - if true, return values as int (ex. player blue tokens = 5)
-        # else return as sparse matrix (
-        # (ex. player blue tokens = [1 1 1 1 1 0 0]))
-        # verbose - print out the state in pretty string
-        if verbose == 1:
-            # Print global game assets
-            print('Current game state')
-            print(f'\tCurrent turn: {self.num_turns}')
-            print('\tCurrent player to move: '
-                  f'{self.players[self.curr_player_index].player_id}')
-            # Print bank
-            print('\nBank tokens available:')
-            print('Color\tAmount')
-            for color in self.bank.token_available:
-                print(f'{color:<5}\t{self.bank.token_available[color]}')
-            # Print players
-            print('\nPlayers stats')
-            for player in self.players:
-                print(f'{player.player_id}')
-                print(f'Prestige points: {player.prestige_points}')
-                print('Color\tReserved tokens\tOwned bonuses')
-                for color in player.bonus_owned:
-                    print(f'{color:<5}\t'
-                          f'{player.token_reserved[color]:<15}\t'
-                          f'{player.bonus_owned[color]}')
-                print(f"yellow\t{player.token_reserved['yellow']}")
-                if player.cards_reserved:
-                    print('\nReserved cards:')
-                    for card_id in player.cards_reserved:
-                        card = player.cards_reserved[card_id]
-                        print(f'{card_id:<6}\tLevel: {card.level}\t'
-                              f'\nPrestige points: {card.prestige_points}'
-                              f'\tBonus: {card.bonus_color}'
-                              '\nToken cost:')
-                        for color in card.token_cost:
-                            if card.token_cost[color] > 0:
-                                print(f'{color:<5}\t'
-                                      f'{card.token_cost[color]}')
-            print("\nCards on the Table")
-            # Print all cards on the Table
-            for card_id in self.cards_on_table_level_1:
-                print("Card_id\tLevel\tBonus\tPrestige Points")
-                card = self.cards_on_table_level_1[card_id]
-                print(f'{card_id:<5}\t{card.level:<5}\t{card.bonus_color:<5}\t'
-                      f'{card.prestige_points:<10}')
-                print("Token cost:")
-                print("Green\tWhite\tBlue\tBlack\tRed")
-                for color in card.token_cost:
-                    print(f'{card.token_cost[color]:<5}', end='\t')
-                print('\n')
-            for card_id in self.cards_on_table_level_2:
-                print("Card_id\tLevel\tBonus\tPrestige Points")
-                card = self.cards_on_table_level_2[card_id]
-                print(f'{card_id:<5}\t{card.level:<5}\t{card.bonus_color:<5}\t'
-                      f'{card.prestige_points:<10}')
-                print("Token cost:")
-                print("Green\tWhite\tBlue\tBlack\tRed")
-                for color in card.token_cost:
-                    print(f'{card.token_cost[color]:<5}', end='\t')
-                print('\n')
-            for card_id in self.cards_on_table_level_3:
-                print("Card_id\tLevel\tBonus\tPrestige Points")
-                card = self.cards_on_table_level_3[card_id]
-                print(f'{card_id:<5}\t{card.level:<5}\t{card.bonus_color:<5}\t'
-                      f'{card.prestige_points:<10}')
-                print("Token cost:")
-                print("Green\tWhite\tBlue\tBlack\tRed")
-                for color in card.token_cost:
-                    print(f'{card.token_cost[color]:<5}', end='\t')
-                print('\n')
-            # TODO Print Nobles
-            print('\nNobles:')
-            for noble_id in self.nobles:
-                noble = self.nobles[noble_id]
-                print('Noble_id\tPrestige Points')
-                print(f'{noble_id:<5}\t{noble.prestige_points}')
-                print("Bonuses required:")
-                for color in noble.bonus_required:
-                    if noble.bonus_required[color] > 0:
-                        print(f'{color:<5}\t'
-                              f'{noble.bonus_required[color]}')
-                print('\n')
-
-        return None
