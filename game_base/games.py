@@ -101,7 +101,7 @@ class Game:
             self.meta_data.change_game_state(GameState.FINISHED)
         else:
             # Continue the game for another turn
-            self.meta_data.curr_turn += 1
+            self.meta_data.turns_played += 1
             self.meta_data.curr_player_index = 0
 
     def current_player(self) -> Player:
