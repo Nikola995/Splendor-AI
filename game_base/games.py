@@ -126,29 +126,23 @@ class Game:
         """
         # TODO: Add the usecase of multiple available nobles in one turn
         # # Currently just returns the first one
-        # TODO: Sanity check raise error if player hasn't made move
         for noble in self.nobles:
             if self.current_player().is_eligible_for_noble(noble):
                 self.current_player().add_noble(noble)
                 self.nobles.pop(noble)
                 break
 
-    def end_move_for_player(self, verbose=0) -> None:
-        """End the player's move and do a noble check for them.
-
-        Assume player has completed an action this turn.
-        *Should only be called in succefully performed action methods
-        in Game.
+    def make_move_for_current_player(self, action: Action, **kwargs) -> None:
+        """Performs the given action as the player's move and iterate the
+        current player index.
+        (Automatically makes the noble check after the action is performed.)
         """
-        # Do a noble check for the player
-        if self.noble_check_for_player(self.players[self.curr_player_index],
-                                       verbose) and verbose == 1:
-            print(f"{self.players[self.curr_player_index]} has gained a noble")
-        if verbose == 1:
-            print(f"{self.players[self.curr_player_index].player_id}'s "
-                  "turn has ended")
+        if not action.can_perform(self.current_player(), self.bank):
+            raise ValueError(f"Player can't perform {action}")
+        action.perform(player=self.current_player(), bank=self.bank, **kwargs)
+        self.noble_check_for_current_player()
         # End the turn for the player
-        self.curr_player_index += 1
+        self.meta_data.curr_player_index += 1
 
     # %% Action-related methods
     def _find_card_on_table_by_id(self, card_id: str) -> Card:
