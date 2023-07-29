@@ -94,6 +94,13 @@ class CardManagerCollection:
         """Returns all of the card tables."""
         return [manager.table for manager in self.managers]
 
+    def get_all_cards_on_tables(self) -> list[Card]:
+        """Returns a list of all cards on all tables."""
+        # TODO: Test this
+        # Flatten the list of tables
+        return [card for table in self.get_all_tables()
+                for card in table]
+
     def is_card_in_tables(self, card: Card) -> bool:
         """Checks if card is in any of the tables."""
         for manager in self.managers:
