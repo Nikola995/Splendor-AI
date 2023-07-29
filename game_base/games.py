@@ -83,8 +83,6 @@ class Game:
         """
         for player in self.players:
             if player.prestige_points >= 15:
-                # End the game if it is the final turn
-                self.meta_data.state = GameState.FINISHED
                 return True
         return False
 
@@ -104,33 +102,22 @@ class Game:
         # Return the winner
         return eligible_players[0]
 
-    def is_turn_over(self) -> bool:
-        """Check if all of the players have made an action.
-
-        The index of the player next to move has to be less then
-        the number of players.
-
-        Returns
-        -------
-        bool
-            State of the turn (is over or is ongoing)
-        """
-        return self.curr_player_index >= self._num_players
-
-    def end_turn(self, verbose=0) -> bool:
-        """Reset the player move order and increment the number of turns."""
-        if not self.is_turn_over():
-            if verbose == 1:
-                print("Turn is not over, there are still players to move")
-            return False
-        if verbose == 1:
-            print(f"End of Turn {self.num_turns}")
-        self.num_turns += 1
-        self.curr_player_index = 0
-        return True
+    def end_turn(self) -> None:
+        """Ends the current turn."""
+        if self.meta_data.curr_player_index < len(self.players) - 1:
+            raise ValueError("Turn isn't over, all of the players haven't "
+                             "made a move")
+        if self.is_final_turn():
+            # End the game if it is the final turn
+            self.meta_data.state = GameState.FINISHED
+        else:
+            # Continue the game for another turn
+            self.meta_data.curr_turn += 1
+            self.meta_data.curr_player_index = 0
 
     # TODO Add the usecase of multiple available nobles in one turn
     # Currently just returns the first one
+
     def noble_check_for_player(self, player: Player, verbose=0) -> bool:
         """Check all the available nobles if the player can own them."""
         # Assume bonuses were correctly added
