@@ -64,6 +64,15 @@ class GameInterfaceConsole(GameInterface):
             print("_______________________________________")
             print(str(player))
 
+    def show_game_cards_on_tables(self) -> None:
+        print("----------Cards on Tables--------------")
+        for card_level in range(1, 4):
+            print("_______________________________________")
+            print(f"----------Level {card_level}----------------------")
+            for idx, card in enumerate(self.game.cards.get_table(card_level)):
+                print(f"Card Index: {idx}")
+                print(str(card))
+
     def show_game_state(self, dense=0) -> None:
         """Prints the state of the game on the console."""
         # dense - if true, return values as int (ex. player blue tokens = 5)
@@ -78,36 +87,4 @@ class GameInterfaceConsole(GameInterface):
         self.show_game_nobles()
         self.show_game_bank()
         self.show_game_players()
-
-        print("\nCards on the Table")
-        # Print all cards on the Table
-        for card_id in self.cards_on_table_level_1:
-            print("Card_id\tLevel\tBonus\tPrestige Points")
-            card = self.cards_on_table_level_1[card_id]
-            print(f'{card_id:<5}\t{card.level:<5}\t{card.bonus_color:<5}\t'
-                  f'{card.prestige_points:<10}')
-            print("Token cost:")
-            print("Green\tWhite\tBlue\tBlack\tRed")
-            for color in card.token_cost:
-                print(f'{card.token_cost[color]:<5}', end='\t')
-            print('\n')
-        for card_id in self.cards_on_table_level_2:
-            print("Card_id\tLevel\tBonus\tPrestige Points")
-            card = self.cards_on_table_level_2[card_id]
-            print(f'{card_id:<5}\t{card.level:<5}\t{card.bonus_color:<5}\t'
-                  f'{card.prestige_points:<10}')
-            print("Token cost:")
-            print("Green\tWhite\tBlue\tBlack\tRed")
-            for color in card.token_cost:
-                print(f'{card.token_cost[color]:<5}', end='\t')
-            print('\n')
-        for card_id in self.cards_on_table_level_3:
-            print("Card_id\tLevel\tBonus\tPrestige Points")
-            card = self.cards_on_table_level_3[card_id]
-            print(f'{card_id:<5}\t{card.level:<5}\t{card.bonus_color:<5}\t'
-                  f'{card.prestige_points:<10}')
-            print("Token cost:")
-            print("Green\tWhite\tBlue\tBlack\tRed")
-            for color in card.token_cost:
-                print(f'{card.token_cost[color]:<5}', end='\t')
-            print('\n')
+        self.show_game_cards_on_tables()
