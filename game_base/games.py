@@ -140,6 +140,10 @@ class Game:
         if not action.can_perform(self.current_player(), self.bank):
             raise ValueError(f"Player can't perform {action}")
         action.perform(player=self.current_player(), bank=self.bank, **kwargs)
+        # If action with card wasn't purchasing a reserved card.
+        if hasattr(action, 'card'):
+            if self.cards.is_card_in_tables(action.card):
+                self.cards.remove_card_from_tables(action.card)
         self.noble_check_for_current_player()
         # End the turn for the player
         self.meta_data.curr_player_index += 1

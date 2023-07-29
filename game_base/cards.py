@@ -94,8 +94,16 @@ class CardManagerCollection:
         """Returns all of the card tables."""
         return [manager.table for manager in self.managers]
 
+    def is_card_in_tables(self, card: Card) -> bool:
+        """Checks if card is in any of the tables."""
+        for manager in self.managers:
+            if card in manager.table:
+                return True
+        return False
+
     def remove_card_from_tables(self, card: Card) -> None:
-        """Removes the given card from the appropriate table."""
+        """Removes the given card from the appropriate table.
+        (Replaces it with a card from the deck if possible, else None)"""
         for manager in self.managers:
             if manager.card_level == card.level:
                 manager.remove_card_from_table(card)
