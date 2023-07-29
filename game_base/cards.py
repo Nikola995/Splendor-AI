@@ -30,6 +30,15 @@ class Card:
         # Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
 
+    def __str__(self) -> str:
+        output = []
+        output.append(f"Card Cost")
+        output.append(str(self.token_cost))
+        output.append("Benefits of Purchasing Card")
+        output.append(f"Prestige points: {self.prestige_points}")
+        output.append(f"Bonus token: {self.bonus_color.name()}")
+        return '\n'.join(output)
+
 
 @dataclass(slots=True)
 class CardManager:
