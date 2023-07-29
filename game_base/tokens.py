@@ -43,5 +43,5 @@ class TokenBag:
             self.tokens[Token.YELLOW] = wildcard_amount
 
     def __str__(self) -> str:
-        return "\n".join([f"{color.name}: {self.tokens[color]}"
+        return "\n".join([f"{color.name:<5}: {self.tokens[color]}"
                           for color in self.tokens if self.tokens[color] > 0])
