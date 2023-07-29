@@ -135,6 +135,7 @@ class Game:
     def make_move_for_current_player(self, action: Action, **kwargs) -> None:
         """Performs the given action as the player's move and iterate the
         current player index.
+        (Allows **kwargs for action.)
         (Automatically makes the noble check after the action is performed.)
         """
         if not action.can_perform(self.current_player(), self.bank):
