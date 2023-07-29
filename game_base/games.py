@@ -115,20 +115,23 @@ class Game:
             self.meta_data.curr_turn += 1
             self.meta_data.curr_player_index = 0
 
-    # TODO Add the usecase of multiple available nobles in one turn
-    # Currently just returns the first one
+    def current_player(self) -> Player:
+        """Return the current player.
+        """
+        return self.players[self.meta_data.curr_player_index]
 
-    def noble_check_for_player(self, player: Player, verbose=0) -> bool:
-        """Check all the available nobles if the player can own them."""
-        # Assume bonuses were correctly added
-        # (faster than going through the list of owned cards every time)
-        for noble_id in self.nobles:
-            noble = self.nobles[noble_id]
-            if player.is_eligible_for_noble(noble, verbose):
-                player.add_to_owned_nobles(self.nobles)
-                self.nobles.pop(noble_id)
-                return True
-        return False
+    def noble_check_for_current_player(self) -> None:
+        """Automatically add a noble for the current player after their move.
+        (Assumes the player is eligible.)
+        """
+        # TODO: Add the usecase of multiple available nobles in one turn
+        # # Currently just returns the first one
+        # TODO: Sanity check raise error if player hasn't made move
+        for noble in self.nobles:
+            if self.current_player().is_eligible_for_noble(noble):
+                self.current_player().add_noble(noble)
+                self.nobles.pop(noble)
+                break
 
     def end_move_for_player(self, verbose=0) -> None:
         """End the player's move and do a noble check for them.
@@ -146,19 +149,6 @@ class Game:
                   "turn has ended")
         # End the turn for the player
         self.curr_player_index += 1
-
-    def current_player_to_move(self, verbose=0) -> Player:
-        """Return the current player to move.
-
-        Returns
-        -------
-        Player
-            Next player to perform an action (make a move)
-        """
-        if verbose == 1:
-            print("Current player to move is "
-                  f"{self.players[self.curr_player_index].player_id}")
-        return self.players[self.curr_player_index]
 
     # %% Action-related methods
     def _find_card_on_table_by_id(self, card_id: str) -> Card:
