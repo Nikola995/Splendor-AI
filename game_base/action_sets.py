@@ -6,7 +6,12 @@ from actions import (Action, Reserve2SameColorTokens,
                      Reserve3UniqueColorTokens, ReserveCard,
                      PurchaseCard)
 from players import Player
-from .tokens import Token
+from game_base.tokens import Token
+from utils import IncorrectInputError
+
+
+UNIQUE_3_TOKEN_COMBOS = combinations([Token.GREEN, Token.WHITE, Token.BLUE,
+                                      Token.BLACK, Token.RED], 3)
 
 
 @dataclass
@@ -35,9 +40,10 @@ def _all_possible_reserve_3_different_color_tokens(self) -> list[Action]:
     # All combinations of 3 different tokens
     for colors_combo_3 in combinations(colors, 3):
         current_actions_list.append(
-            Reserve3DifferentColorTokens(params={'color_list':
-                                                    list(colors_combo_3)}))
+            Reserve3UniqueColorTokens(params={'color_list':
+                                              list(colors_combo_3)}))
     return current_actions_list
+
 
 def _all_possible_reserve_2_same_color_tokens(self) -> list[Action]:
     """Return all possible actions of type Reserve2SameColorTokens."""
@@ -50,6 +56,7 @@ def _all_possible_reserve_2_same_color_tokens(self) -> list[Action]:
         current_actions_list.append(
             Reserve2SameColorTokens(params={'color': color}))
     return current_actions_list
+
 
 def _all_possible_reserve_card(self) -> list[Action]:
     """Return all possible actions of type ReserveCard."""
@@ -73,6 +80,7 @@ def _all_possible_reserve_card(self) -> list[Action]:
         current_actions_list.append(
             ReserveCard(params={'card_id': card_id}))
     return current_actions_list
+
 
 def _all_possible_purchase_card(self) -> list[Action]:
     """Return all possible actions of type PurchaseCard."""
@@ -101,13 +109,13 @@ def _all_possible_purchase_card(self) -> list[Action]:
 # =============================================================================
     curr_player = self.current_player_to_move()
     for token_input in product(range(6), range(6), range(6),
-                                range(6), range(6)):
+                               range(6), range(6)):
         if sum(token_input) <= 5:
             yellow_replaces = {colors[0]: token_input[0],
-                                colors[1]: token_input[1],
-                                colors[2]: token_input[2],
-                                colors[3]: token_input[3],
-                                colors[4]: token_input[4]}
+                               colors[1]: token_input[1],
+                               colors[2]: token_input[2],
+                               colors[3]: token_input[3],
+                               colors[4]: token_input[4]}
             for card_id in curr_player.cards_reserved:
                 card = curr_player.cards_reserved[card_id]
                 current_actions_list.append(
@@ -142,6 +150,7 @@ def _all_possible_purchase_card(self) -> list[Action]:
                                 'yellow_replaces': yellow_replaces}))
     return current_actions_list
 
+
 def all_possible_actions(self) -> list[Action]:
     """Return all possible actions."""
     all_actions = {}
@@ -159,8 +168,9 @@ def all_possible_actions(self) -> list[Action]:
     all_actions['purchase_card'] = actions_list
     return all_actions
 
+
 def all_legal_actions_of_list(self,
-                                action_list: list[Action]) -> list[Action]:
+                              action_list: list[Action]) -> list[Action]:
     """Return all legal actions from given list of actions.
 
     These are calculated for the current player to move.
@@ -176,6 +186,7 @@ def all_legal_actions_of_list(self,
         except IncorrectInputError as e:
             continue
     return legal_action_list
+
 
 def all_legal_actions(self) -> list[Action]:
     """Return all legal actions from all possible actions.
@@ -196,7 +207,7 @@ class StandardActionSet(ActionSet):
     actions: list[Action] = field(default_factory=lambda:
                                   ([Reserve2SameColorTokens, PurchaseCard,
                                     ReserveCard, Reserve3UniqueColorTokens]))
-    unique_3_token_combos: list(Tuple[Token, Token, Token])
+    token_combos: list(tuple(Token)) = UNIQUE_3_TOKEN_COMBOS
     # TODO Implement method for generating all 3 token combos
 
     def possible_actions(self, player: Player, **kwargs) -> list[Action]:
