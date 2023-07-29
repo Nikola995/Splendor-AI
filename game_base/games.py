@@ -28,11 +28,8 @@ class GameMetaData:
         self.state = new_state
 
     def __str__(self) -> str:
-        output = [f"Game is {self.game.meta_data.state.name}",
-                  f"Turns played: {self.game.meta_data.turns_played}"]
-        if self.game.meta_data.state == GameState.IN_PROGRESS:
-            output.append("Current player to move: "
-                          f"{self.game.current_player().player_id}")
+        output = [f"Game is {self.state.name}",
+                  f"Turns played: {self.turns_played}"]
         return "\n".join(output)
 
 

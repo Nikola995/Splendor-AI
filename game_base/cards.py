@@ -36,7 +36,7 @@ class Card:
         output.append(str(self.token_cost))
         output.append("Benefits of Purchasing Card")
         output.append(f"Prestige points: {self.prestige_points}")
-        output.append(f"Bonus token: {self.bonus_color.name()}")
+        output.append(f"Bonus token: {self.bonus_color.name}")
         return '\n'.join(output)
 
 

@@ -57,8 +57,8 @@ class Reserve3UniqueColorTokens(Action):
 
     def __str__(self) -> str:
         return (f"reserved 1 {self.colors[0].name.lower()}, "
-                f"{self.colors[1].name.lower()}, {self.colors[2].name.lower()}"
-                " tokens.")
+                f"{self.colors[1].name.lower()} and "
+                f"{self.colors[2].name.lower()} tokens.")
 
 
 @dataclass(slots=True)

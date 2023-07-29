@@ -47,6 +47,9 @@ class GameInterfaceConsole(GameInterface):
     def show_game_meta_data(self) -> None:
         print("----------Game meta-data---------------")
         print(str(self.game.meta_data))
+        if self.game.meta_data.state == GameState.IN_PROGRESS:
+            print("Current player to move: "
+                  f"{self.game.current_player().player_id}")
 
     def show_game_nobles(self) -> None:
         print("----------Available Nobles-------------")
