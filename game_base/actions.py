@@ -23,7 +23,7 @@ class Action(ABC):
         pass
 
 
-@dataclass
+@dataclass(slots=True)
 class Reserve3UniqueColorTokens(Action):
     """Reserve 1 token of 3 unique colors for the player.
 
@@ -36,9 +36,9 @@ class Reserve3UniqueColorTokens(Action):
     colors: Tuple[Token, Token, Token]
         Tuple containing 3 unique token colors
     """
+    colors: Tuple[Token, Token, Token]
 
-    def can_perform(self, player: Player, bank: Bank,
-                    colors: Tuple[Token, Token, Token]) -> bool:
+    def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the requested tokens can be reserved.
 
         The action will be successful if all of the following is true:
@@ -47,21 +47,22 @@ class Reserve3UniqueColorTokens(Action):
             - The player won't have more than 10 tokens in total after
             the action is performed.
         """
-        return (bank.can_remove_token(dict.fromkeys(colors, 1))
-                and player.can_add_token(dict.fromkeys(colors, 1)))
+        return (bank.can_remove_token(dict.fromkeys(self.colors, 1))
+                and player.can_add_token(dict.fromkeys(self.colors, 1)))
 
-    def perform(self, player: Player, bank: Bank,
-                colors: Tuple[Token, Token, Token]) -> None:
+    def perform(self, player: Player, bank: Bank) -> None:
         """Transfer the requested tokens from the bank to the player.
         """
-        bank.remove_3_unique_color_tokens(colors)
-        player.add_token(dict.fromkeys(colors, 1))
+        bank.remove_3_unique_color_tokens(self.colors)
+        player.add_token(dict.fromkeys(self.colors, 1))
 
     def __str__(self) -> str:
-        return ("reserved 3 tokens of unique colors.")
+        return (f"reserved 1 {self.colors[0].name.lower()}, "
+                f"{self.colors[1].name.lower()}, {self.colors[2].name.lower()}"
+                " tokens.")
 
 
-@dataclass
+@dataclass(slots=True)
 class Reserve2SameColorTokens(Action):
     """Reserve 2 token of the same color for the player.
 
@@ -74,8 +75,9 @@ class Reserve2SameColorTokens(Action):
     color : Token
         Color for the 2 tokens
     """
+    color: Token
 
-    def can_perform(self, player: Player, bank: Bank, color: Token) -> bool:
+    def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the requested tokens can be reserved.
 
         The action will be successful if all of the following is true:
@@ -84,21 +86,20 @@ class Reserve2SameColorTokens(Action):
             - The player won't have more than 10 tokens in total after
             the action is performed.
         """
-        return (bank.can_remove_token({color: 2})
-                and player.can_add_token({color: 2}))
+        return (bank.can_remove_token({self.color: 2})
+                and player.can_add_token({self.color: 2}))
 
-    def perform(self, player: Player, bank: Bank, color: Token) -> None:
+    def perform(self, player: Player, bank: Bank) -> None:
         """Transfer the requested tokens from the bank to the player.
         """
-        bank.remove_2_same_color_tokens(color)
-        player.add_token({color: 2})
+        bank.remove_2_same_color_tokens(self.color)
+        player.add_token({self.color: 2})
 
     def __str__(self) -> str:
-        return ("reserved 2 tokens of the same color.")
+        return (f"reserved 2 {self.color.name.lower()} tokens.")
 
 
-# TODO: Change the interactions with Cards (remove card_id)
-@dataclass
+@dataclass(slots=True)
 class ReserveCard(Action):
     """Reserve the given card for the player.
 
@@ -113,11 +114,10 @@ class ReserveCard(Action):
         The bank that will give the requested wildcard token.
     card : Card
         The card that will be reserved by the player.
-    card_id: str
-        The id by which the Card is stored in the player's inventory.
     """
+    card: Card
 
-    def can_perform(self, player: Player, bank: Bank) -> bool:
+    def can_perform(self, player: Player) -> bool:
         """Check if the player can reserve the card.
 
         The action will be successful if :
@@ -125,11 +125,10 @@ class ReserveCard(Action):
         """
         return player.can_reserve_card()
 
-    def perform(self, player: Player, bank: Bank,
-                card: Card, card_id: str) -> None:
+    def perform(self, player: Player, bank: Bank) -> None:
         """Add the card to the player's reserved cards.
         """
-        player.add_to_reserved_cards(card, card_id)
+        player.add_to_reserved_cards(self.card)
         # Give the player 1 wildcard token, if the transfer is possible
         if (bank.can_remove_token({Token.YELLOW}) and
                 player.can_add_token({Token.YELLOW})):
@@ -137,11 +136,12 @@ class ReserveCard(Action):
             player.add_token({Token.YELLOW})
 
     def __str__(self) -> str:
+        # TODO: Implement a card __str__
         return "reserved a card."
 
 
 # TODO: Change the interactions with Cards (remove card_id)
-@dataclass
+@dataclass(slots=True)
 class PurchaseCard(Action):
     """Purchase the given card for the player.
 
@@ -153,31 +153,29 @@ class PurchaseCard(Action):
         The bank that will give the requested wildcard token.
     card : Card
         The card that will be reserved by the player.
-    card_id: str
-        The id by which the Card is stored in the player's inventory.
     wildcard_collaterals: Dict[Token, int]
         The number of Tokens that are replaced by wildcard tokens in the
         player's reserved_tokens
     """
+    card: Card
 
-    def can_perform(self, player: Player, card: Card) -> bool:
+    def can_perform(self, player: Player) -> bool:
         """Check if the player can purchase the given card.
 
         Returns True if the sum of each color of owned bonuses,
         reserved tokens of the player and wildcard tokens given as collateral
         is >= than the cost of tokens of the card for those colors.
         """
-        return player.can_purchase_card(card)
+        return player.can_purchase_card(self.card)
 
-    def _give_card(self, player: Player, card: Card, card_id: str) -> None:
+    def _give_card(self, player: Player) -> None:
         """Give the card to the player."""
         # If the card is reserved, remove from there
-        if card_id in player.cards_reserved:
-            player.cards_reserved.pop(card_id)
-        player.add_to_owned_cards(card)
+        if self.card in player.cards_reserved:
+            player.cards_reserved.pop(self.card)
+        player.add_to_owned_cards(self.card)
 
     def perform(self, player: Player, bank: Bank,
-                card: Card, card_id: str,
                 wildcard_collaterals: Dict[Token, int]) -> None:
         """Purchase the card for the player.
 
@@ -192,14 +190,14 @@ class PurchaseCard(Action):
             by the remaining amount of the card cost
             (for the corresponding color)
         """
-        remaining_cost = deepcopy(card.token_cost)
+        remaining_cost = deepcopy(self.card.token_cost)
         # 1. Reduce the cost by the owned bonuses
         for color in remaining_cost:
             remaining_cost[color] = max((remaining_cost[color] -
                                          player.bonus_owned[color]), 0)
         # Transfer the card if the total remaining cost == 0
         if sum(remaining_cost.values()) == 0:
-            self._give_card(player, card, card_id)
+            self._give_card(player)
             return None
         # 2. Reduce the cost by collateral wildcard tokens
         for color in remaining_cost:
@@ -210,12 +208,13 @@ class PurchaseCard(Action):
         bank.add_token({Token.YELLOW: sum(wildcard_collaterals.values())})
         # Transfer the card if the total remaining cost == 0
         if sum(remaining_cost.values()) == 0:
-            self._give_card(player, card, card_id)
+            self._give_card(player)
             return None
         # 3. Purchase the remaining cost with the player's reserved tokens
         player.remove_token(remaining_cost)
         bank.add_token(remaining_cost)
-        self._give_card(player, card, card_id)
+        self._give_card(player)
 
     def __str__(self) -> str:
+        # TODO: Implement a card __str__
         return "purchased a card."
