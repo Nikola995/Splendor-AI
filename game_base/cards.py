@@ -29,6 +29,7 @@ class Card:
     def __post_init__(self):
         # Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
+        # TODO: Add Card ID str of num tokens ex. 1 green 2 red -> 100002
 
     def __str__(self) -> str:
         output = []

@@ -5,7 +5,7 @@ from games import Game, GameState
 from players import Player
 
 
-@dataclass
+@dataclass(slots=True)
 class GameInterface(ABC):
     """Abstract class for an interface that can interact with a game"""
     game: Game = field(default_factory=Game)
@@ -73,6 +73,7 @@ class GameInterfaceConsole(GameInterface):
             print("_______________________________________")
             print(f"----------Level {card_level}----------------------")
             for idx, card in enumerate(self.game.cards.get_table(card_level)):
+                # TODO: Change to card_id when implemented
                 print(f"Card Index: {idx}")
                 print(str(card))
 
