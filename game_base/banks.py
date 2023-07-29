@@ -1,7 +1,7 @@
 from dataclasses import dataclass, InitVar
 from typing import Tuple, Dict
 from utils import IncorrectInputError
-from .tokens import TokenBag, Token
+from game_base.tokens import TokenBag, Token
 
 
 # TODO Make it a singleton (refactor) (maybe?)

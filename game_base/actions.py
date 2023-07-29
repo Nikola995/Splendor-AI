@@ -3,7 +3,7 @@ from typing import Tuple, Dict
 from abc import ABC, abstractmethod
 from players import Player
 from banks import Bank
-from .tokens import Token
+from game_base.tokens import Token
 from cards import Card
 from copy import deepcopy
 

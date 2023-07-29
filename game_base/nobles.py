@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from random import shuffle
-from .tokens import Token, TokenBag
+from game_base.tokens import Token, TokenBag
 
 
 @dataclass(frozen=True, slots=True)

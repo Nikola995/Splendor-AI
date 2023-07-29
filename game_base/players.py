@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict
 from cards import Card
 from nobles import Noble
-from .tokens import Token, TokenBag
+from game_base.tokens import Token, TokenBag
 
 
 @dataclass(order=True, slots=True)

@@ -3,7 +3,7 @@ from random import shuffle
 import pandas as pd
 import pickle
 from os import path
-from .tokens import Token, TokenBag
+from game_base.tokens import Token, TokenBag
 
 CARDS_FILE_PATH_CSV = 'splendor_cards_list.csv'
 CARDS_FILE_PATH_PICKLE = 'cards_manager_collection.pickle'
@@ -37,10 +37,10 @@ class CardManager:
     all cards of the same level,"""
     # All of the not visible cards
     deck: list[Card]
-    # All of the visible cards
-    table: list[Card] = field(default_factory=list)
     # Difficulty of purchasing cards
     card_level: int
+    # All of the visible cards
+    table: list[Card] = field(default_factory=list)
 
     def __post_init__(self):
         self.card_level = self.deck[0].level
