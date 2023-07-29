@@ -77,53 +77,32 @@ class Game:
 
     # %% Active game methods
 
-    def is_game_over(self) -> bool:
+    def is_final_turn(self) -> bool:
         """Check if at least one of the players reached 15 prestige points.
-
-        Called at the end of each turn
-        after all the players performed an action
-
-        Returns
-        -------
-        Bool
-            State of the game (is over or is still ongoing)
-        """  # noqa : W605
+        Called at the end of each turn.
+        """
         for player in self.players:
             if player.prestige_points >= 15:
+                # End the game if it is the final turn
+                self.meta_data.state = GameState.FINISHED
                 return True
         return False
 
-    # TODO Switch from raising error if not over to return None
     def declare_winner(self) -> Player:
-        """Declare the winner of the game, if it's over.
-
-        If it's one player with >=15 prestige points, they are the winner.
-        If it's multiple players with >= 15 prestige points,
-        pick the one with the most prestige points.
-        if there is still a tie, choose the one with
-        the least number of owned development cards.
-
-        Returns
-        -------
-        Player
-            The winner of the game
+        """Declares the winner of the finished game.
         """
-        if not self.is_over():
-            # If the game is not over, don't declare a winner
-            raise GameNotOverError("None of the players have 15 or more "
-                                   "prestige points")
-        winner = []
-        # Get all the players with >= 15 prestige points
-        for player in self.players:
-            if player.prestige_points >= 15:
-                winner.append(player)
-        # If there's more than one sort by most prestige points, then by
-        # least owned cards
-        if len(winner) > 1:
-            winner = sorted(winner, key=lambda x: (-x.prestige_points,
-                                                   len(x.cards_owned)))
+        if self.meta_data.state != GameState.FINISHED:
+            raise ValueError("Game hasn't finished")
+        eligible_players = [player for player in self.players
+                            if player.prestige_points >= 15]
+        # If there's more than one eligible players,
+        # sort by most prestige points, then least owned cards
+        if len(eligible_players) > 1:
+            eligible_players = sorted(eligible_players,
+                                      key=lambda x: (-x.prestige_points,
+                                                     len(x.cards_owned)))
         # Return the winner
-        return winner[0]
+        return eligible_players[0]
 
     def is_turn_over(self) -> bool:
         """Check if all of the players have made an action.
@@ -278,7 +257,6 @@ class Game:
                 print("This action could not be performed")
             return False
 
-    
     # %% Game state representation
     #            -> numpy.matrix():
 
