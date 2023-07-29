@@ -117,7 +117,7 @@ class ReserveCard(Action):
     """
     card: Card
 
-    def can_perform(self, player: Player) -> bool:
+    def can_perform(self, player: Player, **kwargs) -> bool:
         """Check if the player can reserve the card.
 
         The action will be successful if :
@@ -159,7 +159,7 @@ class PurchaseCard(Action):
     """
     card: Card
 
-    def can_perform(self, player: Player) -> bool:
+    def can_perform(self, player: Player, **kwargs) -> bool:
         """Check if the player can purchase the given card.
 
         Returns True if the sum of each color of owned bonuses,
