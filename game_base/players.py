@@ -164,3 +164,16 @@ class Player:
         """
         self.nobles_owned.append(noble)
         self.prestige_points += noble.prestige_points
+
+    def __str__(self) -> str:
+        output = []
+        output.append(f"Player ID: {self.player_id}")
+        output.append(f"Prestige points: {self.prestige_points}")
+        output.append(f"Number of nobles: {len(self.nobles_owned)}")
+        output.append(f"Number of reserved cards: {len(self.cards_reserved)}")
+        output.append(f"Number of purchased cards: {len(self.cards_owned)}")
+        output.append(f"--Bonuses from purchased cards--")
+        output.append(str(self.bonus_owned))
+        output.append(f"--Reserved tokens--")
+        output.append(str(self.token_reserved))
+        return '\n'.join(output)
