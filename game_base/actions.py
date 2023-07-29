@@ -51,8 +51,7 @@ class Reserve3UniqueColorTokens(Action):
                 and player.can_add_token(dict.fromkeys(self.colors, 1)))
 
     def perform(self, player: Player, bank: Bank) -> None:
-        """Transfer the requested tokens from the bank to the player.
-        """
+        """Transfer the requested tokens from the bank to the player."""
         bank.remove_3_unique_color_tokens(self.colors)
         player.add_token(dict.fromkeys(self.colors, 1))
 
@@ -90,8 +89,7 @@ class Reserve2SameColorTokens(Action):
                 and player.can_add_token({self.color: 2}))
 
     def perform(self, player: Player, bank: Bank) -> None:
-        """Transfer the requested tokens from the bank to the player.
-        """
+        """Transfer the requested tokens from the bank to the player."""
         bank.remove_2_same_color_tokens(self.color)
         player.add_token({self.color: 2})
 
@@ -127,8 +125,7 @@ class ReserveCard(Action):
         return player.can_reserve_card()
 
     def perform(self, player: Player, bank: Bank) -> None:
-        """Add the card to the player's reserved cards.
-        """
+        """Add the card to the player's reserved cards."""
         player.add_to_reserved_cards(self.card)
         # Give the player 1 wildcard token, if the transfer is possible
         if (bank.can_remove_token({Token.YELLOW}) and

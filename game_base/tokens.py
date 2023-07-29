@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Dict, Optional
+from typing import Optional
 from dataclasses import dataclass, field, InitVar
 
 class Token(Enum):
@@ -13,7 +13,8 @@ class Token(Enum):
 
 @dataclass(slots=True)
 class TokenBag:
-    
+    """A collection that holds the amount of tokens for each color that
+    game entities use."""
     tokens: dict[Token, int] = field(default_factory=dict)
     standard_amount: InitVar[int] = 0
     wildcard_amount: InitVar[Optional[int]] = None

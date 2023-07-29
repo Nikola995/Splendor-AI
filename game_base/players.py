@@ -74,7 +74,7 @@ class Player:
 
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""
-        # Should never have more than 3 reserved cards, but just in case use >=
+        # Should be > 3 reserved cards, but just in case use >=
         if len(self.cards_reserved) >= 3:
             return False
         else:

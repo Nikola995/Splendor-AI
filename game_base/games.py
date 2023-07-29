@@ -76,19 +76,16 @@ class Game:
         self.meta_data.change_game_state(GameState.IN_PROGRESS)
 
     # %% Active game methods
-
     def is_final_turn(self) -> bool:
         """Check if at least one of the players reached 15 prestige points.
-        Called at the end of each turn.
-        """
+        Called at the end of each turn."""
         for player in self.players:
             if player.prestige_points >= 15:
                 return True
         return False
 
     def declare_winner(self) -> Player:
-        """Declares the winner of the finished game.
-        """
+        """Declares the winner of the finished game."""
         if self.meta_data.state != GameState.FINISHED:
             raise ValueError("Game hasn't finished")
         eligible_players = [player for player in self.players
@@ -116,14 +113,12 @@ class Game:
             self.meta_data.curr_player_index = 0
 
     def current_player(self) -> Player:
-        """Return the current player.
-        """
+        """Return the current player."""
         return self.players[self.meta_data.curr_player_index]
 
     def noble_check_for_current_player(self) -> None:
         """Automatically add a noble for the current player after their move.
-        (Assumes the player is eligible.)
-        """
+        (Assumes the player is eligible.)"""
         # TODO: Add the usecase of multiple available nobles in one turn
         # # Currently just returns the first one
         for noble in self.nobles:
@@ -148,91 +143,6 @@ class Game:
         self.noble_check_for_current_player()
         # End the turn for the player
         self.meta_data.curr_player_index += 1
-
-    # %% Action-related methods
-    def _find_card_on_table_by_id(self, card_id: str) -> Card:
-        """Find card by id by searching all the cards on table."""
-        if card_id in self.cards_on_table_level_1:
-            card = self.cards_on_table_level_1[card_id]
-        elif card_id in self.cards_on_table_level_2:
-            card = self.cards_on_table_level_2[card_id]
-        elif card_id in self.cards_on_table_level_3:
-            card = self.cards_on_table_level_3[card_id]
-        return card
-
-    def _remove_card_on_table_by_id(self, card_id: str) -> bool:
-        """Find card by id, remove from table and add new card from deck."""
-        # Find the card level and get the deck and the cards on table
-        if card_id in self.cards_on_table_level_1:
-            cards_on_table = self.cards_on_table_level_1
-            cards_deck = self.cards_deck_level_1
-        elif card_id in self.cards_on_table_level_2:
-            cards_on_table = self.cards_on_table_level_2
-            cards_deck = self.cards_deck_level_2
-        elif card_id in self.cards_on_table_level_3:
-            cards_on_table = self.cards_on_table_level_3
-            cards_deck = self.cards_deck_level_3
-        # Remove card from table
-        cards_on_table.pop(card_id)
-        # Add the next card from the deck (if there is one)
-        if len(cards_on_table) > 0:
-            new_card_id = f'card_{len(cards_deck)}'
-            cards_on_table[new_card_id] = cards_deck.pop()
-        return True
-
-    def perform_action_for_current_player(self, action: Action,
-                                          verbose=0) -> bool:
-        """Perform the given action for the current player to move.
-
-        Parameters
-        ----------
-        action : Action
-            The action to be performed with the initialized parameters.
-
-        verbose : int
-            If 1, will print output of the entire process,
-            If 0, will print nothing.
-
-        Returns
-        -------
-        bool
-            Whether or not the action was performed succesfully
-        """
-        curr_player = self.current_player_to_move()
-        if verbose == 1:
-            print(f"Attemping to {action.print_string()} for "
-                  f"{curr_player.player_id}")
-        # If it's a card-related action, find the card by id
-        # and set it as a parameter to the action
-        if 'card_id' in action.params:
-            card_id = action.params['card_id']
-            if 'is_reserved' in action.params:
-                is_reserved = action.params['is_reserved']
-            else:
-                is_reserved = False
-            if is_reserved:
-                card = curr_player.cards_reserved[card_id]
-            else:
-                card = self._find_card_on_table_by_id(card_id)
-
-            action.params['card'] = card
-
-        if action.can_perform(curr_player,
-                              self.bank):
-            action.perform(curr_player, self.bank, verbose)
-            # If it's a card-related action, find the card by id
-            # and remove it from the table (if it isn't reserved)
-            if 'card_id' in action.params:
-                if not is_reserved:
-                    self._remove_card_on_table_by_id(card_id)
-            # Action was completed, so end the player's move
-            self.end_move_for_player(verbose)
-            return True
-        else:
-            if verbose == 1:
-                print("This action could not be performed")
-            return False
-
     # %% Game state representation
     #            -> numpy.matrix():
 

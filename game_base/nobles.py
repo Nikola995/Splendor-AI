@@ -6,6 +6,7 @@ from game_base.tokens import Token, TokenBag
 
 @dataclass(frozen=True, slots=True)
 class Noble:
+    """Representation of the Noble cards."""
     # Number of bonuses per color required to acquire noble
     bonus_required: TokenBag
     # Number of prestige points the noble is worth
