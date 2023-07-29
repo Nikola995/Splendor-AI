@@ -18,20 +18,14 @@ class GameState(Enum):
 @dataclass(slots=True)
 class GameMetaData:
     state: GameState = GameState.NOT_STARTED
-    curr_turn: int = 0
+    turns_played: int = 0
     curr_player_index: int = 0
 
     def change_game_state(self, new_state: GameState) -> None:
         """Changes the current state of the game."""
-        match new_state:
-            case GameState.NOT_STARTED:
-                raise ValueError("Game should have been initialized as "
-                                 "NOT_STARTED")
-            case GameState.IN_PROGRESS:
-                self.state = new_state
-                self.curr_turn = 1
-            case GameState.FINISHED:
-                self.state = new_state
+        if new_state == GameState.NOT_STARTED:
+            raise ValueError("Game can't be changed to NOT_STARTED")
+        self.state = new_state
 
 
 @dataclass(slots=True)
@@ -50,7 +44,7 @@ class Game:
     # %% Game initialization methods
 
     def add_player(self, player: Player) -> None:
-        if self.state != GameState.NOT_STARTED:
+        if self.meta_data.state != GameState.NOT_STARTED:
             raise GameInitializedError("Players can only be added before "
                                        "the start of the game")
         if len(self.players) == 4:
@@ -58,7 +52,7 @@ class Game:
         self.players.append(player)
 
     def remove_player(self, player: Player) -> None:
-        if self.state != GameState.NOT_STARTED:
+        if self.meta_data.state != GameState.NOT_STARTED:
             raise GameInitializedError("Players can only be removed before "
                                        "the start of the game")
         self.players.remove(player)
@@ -104,7 +98,7 @@ class Game:
                              "made a move")
         if self.is_final_turn():
             # End the game if it is the final turn
-            self.meta_data.state = GameState.FINISHED
+            self.meta_data.change_game_state(GameState.FINISHED)
         else:
             # Continue the game for another turn
             self.meta_data.curr_turn += 1
