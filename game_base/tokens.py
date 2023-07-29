@@ -2,6 +2,7 @@ from enum import Enum, auto
 from typing import Optional
 from dataclasses import dataclass, field, InitVar
 
+
 class Token(Enum):
     GREEN = auto()
     WHITE = auto()
@@ -18,7 +19,7 @@ class TokenBag:
     tokens: dict[Token, int] = field(default_factory=dict)
     standard_amount: InitVar[int] = 0
     wildcard_amount: InitVar[Optional[int]] = None
-    
+
     def __post_init__(self, standard_amount: int,
                       wildcard_amount: Optional[int]):
         """Initialize the Token Bag with a standard amount of tokens
@@ -34,9 +35,13 @@ class TokenBag:
             Defaults to 0.
         """
         if (standard_amount < 0 or
-            (wildcard_amount is not None and wildcard_amount < 0)):
+                (wildcard_amount is not None and wildcard_amount < 0)):
             raise ValueError("TokenBag cannot work with negative values.")
         self.tokens = {token_color: standard_amount
                        for token_color in Token}
         if wildcard_amount is not None:
             self.tokens[Token.YELLOW] = wildcard_amount
+
+    def __str__(self) -> str:
+        return "\n".join([f"{color.name}: {self.tokens[color]}"
+                          for color in self.tokens if self.tokens[color] > 0])

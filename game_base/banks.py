@@ -110,3 +110,7 @@ class Bank:
         """
         for color in amount_to_add:
             self.token_available[color] += amount_to_add[color]
+
+    def __str__(self) -> str:
+        return ("Available Bank tokens:\n"
+                f"{self.token_available}")
