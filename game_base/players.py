@@ -13,7 +13,7 @@ class Player:
     # For now just use a string name
     player_id: str
     token_reserved: TokenBag = field(default_factory=TokenBag)
-    cards_reserved: dict[str, Card] = field(default_factory=dict)
+    cards_reserved: list[Card] = field(default_factory=list)
     cards_owned: list[Card] = field(default_factory=list)
     # Bonuses from Owned Cards, Wildcard in TokenBag is unused
     bonus_owned: TokenBag = field(default_factory=TokenBag)
@@ -80,15 +80,14 @@ class Player:
         else:
             return True
 
-    # TODO: Look into modifying the data structure for cards_reserved
-    def add_to_reserved_cards(self, card: Card, card_id: str) -> None:
+    def add_to_reserved_cards(self, card: Card) -> None:
         """Add card to dict of reserved cards.
         Assumes can_reserve_card check was made."""
         if len(self.cards_reserved) > 2:
             raise ValueError(f"Player {self.player_id} has too many"
                              "reserved cards")
         # The card is reserved even if there isn't a wildcard token to reserve
-        self.cards_reserved[card_id] = (card)
+        self.cards_reserved.append(card)
 
     # TODO: Write tests for this
     def can_purchase_card(self, card: Card) -> bool:
