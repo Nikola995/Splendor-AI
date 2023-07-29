@@ -12,6 +12,11 @@ class Noble:
     # Number of prestige points the noble is worth
     prestige_points: int = 3
 
+    def __str__(self) -> str:
+        return "\n".join([f"Prestige points: {self.prestige_points}",
+                          "Bonuses required:",
+                          f"{str(self.bonus_required)}"])
+
 
 @dataclass
 class NobleGenerator:
