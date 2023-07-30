@@ -23,10 +23,8 @@ class Player:
 
     def can_remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
-        for color in amount_to_remove:
-            if (self.token_reserved[color] - amount_to_remove[color] < 0):
-                return False
-        return True
+        return all([self.token_reserved[color] - amount_to_remove[color] >= 0
+                    for color in amount_to_remove])
 
     def remove_token(self, amount_to_remove: Dict[Token, int]) -> None:
         """Remove tokens of given colors by the amount given for each.
@@ -38,20 +36,17 @@ class Player:
         amount_to_remove : Dict[Token, int]
             A dict of colors and corresponding amount of tokens to remove.
         """
+        # Sanity check if you don't check before calling this fn
+        if not self.can_remove_token(amount_to_remove):
+            raise ValueError(f"Too many {color} tokens were taken from"
+                             f" the player {self.player_id}")
         for color in amount_to_remove:
             self.token_reserved[color] -= amount_to_remove[color]
-            if self.token_reserved[color] < 0:
-                # Should only happen if you don't do the can_remove_token check
-                raise ValueError(f"Too many {color} tokens were taken from"
-                                 f" the player {self.player_id}")
 
     def can_add_token(self, amount_to_add: Dict[Token, int]) -> bool:
         """Check if tokens of given colors can be added."""
-        if (sum(self.token_reserved.values()) +
-                sum(amount_to_add.values()) > 10):
-            return False
-        else:
-            return True
+        return (sum(self.token_reserved.values()) +
+                sum(amount_to_add.values()) <= 10)
 
     def add_token(self, amount_to_add: Dict[Token, int]) -> None:
         """Add tokens of given colors by the amount given for each.
@@ -64,9 +59,8 @@ class Player:
         amount_to_add : Dict[Token, int]
             A dict of colors and corresponding amount of tokens to add.
         """
-        if (sum(self.token_reserved.values()) +
-                sum(amount_to_add.values()) > 10):
-            # Should only happen if you don't do the can_add_token check
+        # Sanity check if you don't check before calling this fn
+        if not self.can_add_token():
             raise ValueError("Too many tokens were given to"
                              f" the player {self.player_id}")
         for color in amount_to_add:
@@ -74,19 +68,17 @@ class Player:
 
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""
-        # Should be > 3 reserved cards, but just in case use >=
-        if len(self.cards_reserved) >= 3:
-            return False
-        else:
-            return True
+        return len(self.cards_reserved) < 3
 
     def add_to_reserved_cards(self, card: Card) -> None:
         """Add card to dict of reserved cards.
         Assumes can_reserve_card check was made."""
-        if len(self.cards_reserved) > 2:
+        # Sanity check if you don't check before calling this fn
+        if not self.can_reserve_card():
             raise ValueError(f"Player {self.player_id} has too many"
                              "reserved cards")
-        # The card is reserved even if there isn't a wildcard token to reserve
+        # The wildcard token given when reserving a card should be handled
+        # in the Action, this method just reserves the card for the player
         self.cards_reserved.append(card)
 
     # TODO: Write tests for this
@@ -147,10 +139,8 @@ class Player:
         noble : Noble
             The noble whose bonuses we check against
         """
-        for color in noble.bonus_required:
-            if self.bonus_owned[color] < noble.bonus_required[color]:
-                return False
-        return True
+        return all([self.bonus_owned[color] >= noble.bonus_required[color]
+                    for color in noble.bonus_required])
 
     def add_noble(self, noble: Noble) -> None:
         """Add noble to list of owned nobles.
