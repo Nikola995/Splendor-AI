@@ -38,10 +38,9 @@ class Player:
         """
         # Sanity check if you don't check before calling this fn
         if not self.can_remove_token(amount_to_remove):
-            raise ValueError(f"Too many {color} tokens were taken from"
+            raise ValueError(f"Too many tokens were taken from"
                              f" the player {self.player_id}")
-        for color in amount_to_remove:
-            self.token_reserved[color] -= amount_to_remove[color]
+        self.token_reserved.remove(amount_to_remove)
 
     def can_add_token(self, amount_to_add: Dict[Token, int]) -> bool:
         """Check if tokens of given colors can be added."""
@@ -63,8 +62,7 @@ class Player:
         if not self.can_add_token():
             raise ValueError("Too many tokens were given to"
                              f" the player {self.player_id}")
-        for color in amount_to_add:
-            self.token_reserved[color] += amount_to_add[color]
+        self.token_reserved.add(amount_to_add)
 
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""
