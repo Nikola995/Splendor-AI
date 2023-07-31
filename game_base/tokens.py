@@ -42,6 +42,16 @@ class TokenBag:
         if wildcard_amount is not None:
             self.tokens[Token.YELLOW] = wildcard_amount
 
+    def add(self, amount: dict[Token, int]) -> None:
+        """Adds tokens of given colors by the amount given for each."""
+        for color in amount:
+            self.tokens[color] += amount[color]
+
+    def remove(self, amount: dict[Token, int]) -> None:
+        """Removes tokens of given colors by the amount given for each."""
+        for color in amount:
+            self.tokens[color] -= amount[color]
+
     def __str__(self) -> str:
         return "\n".join([f"{color.name:<5}: {self.tokens[color]}"
                           for color in self.tokens if self.tokens[color] > 0])
