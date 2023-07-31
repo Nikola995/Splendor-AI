@@ -128,10 +128,11 @@ class ReserveCard(Action):
         """Add the card to the player's reserved cards."""
         player.add_to_reserved_cards(self.card)
         # Give the player 1 wildcard token, if the transfer is possible
-        if (bank.can_remove_token({Token.YELLOW}) and
-                player.can_add_token({Token.YELLOW})):
+        single_wildcard = {Token.YELLOW: 1}
+        if (bank.can_remove_token(single_wildcard) and
+                player.can_add_token(single_wildcard)):
             bank.remove_wildcard_token()
-            player.add_token({Token.YELLOW})
+            player.add_token(single_wildcard)
 
     def __str__(self) -> str:
         # TODO: Implement a card __str__
