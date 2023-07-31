@@ -10,7 +10,8 @@ from copy import deepcopy
 
 @dataclass
 class Action(ABC):
-    """Abstract class for representation of an action performed by a player."""
+    """Abstract class for representation of an interaction by a player
+    with game assets."""
 
     @abstractmethod
     def can_perform(self, player: Player, bank: Bank) -> bool:
