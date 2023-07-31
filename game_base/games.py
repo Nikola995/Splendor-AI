@@ -17,6 +17,7 @@ class GameState(Enum):
 
 @dataclass(slots=True)
 class GameMetaData:
+    # TODO add a game turn & moves record
     state: GameState = GameState.NOT_STARTED
     turns_played: int = 0
     curr_player_index: int = 0
@@ -36,7 +37,6 @@ class GameMetaData:
 @dataclass(slots=True)
 class Game:
     """A representation of the whole process of playing the game."""
-    # TODO add a game turn & moves record
     # Game information
     meta_data: GameMetaData = field(default_factory=GameMetaData)
     # %% Game Assets

@@ -25,15 +25,21 @@ class Card:
     prestige_points: int
     # Number of tokens required to purchase the card per color
     token_cost: TokenBag
+    # Card ID
+    card_id: str = field(init=False)
 
     def __post_init__(self):
         # Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
-        # TODO: Add Card ID str of num tokens ex. 1 green 2 red -> 100002
+        # Ex. ID: 1 green 2 red -> 100002
+        self.card_id = "".join([str(self.token_cost[color])
+                                for color in self.token_cost
+                                if color != Token.YELLOW])
 
     def __str__(self) -> str:
         output = []
-        output.append(f"Card Cost")
+        output.append(f"Card {self.card_id}")
+        output.append("Card Cost")
         output.append(str(self.token_cost))
         output.append("Benefits of Purchasing Card")
         output.append(f"Prestige points: {self.prestige_points}")

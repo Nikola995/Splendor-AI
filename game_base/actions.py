@@ -135,8 +135,7 @@ class ReserveCard(Action):
             player.add_token(single_wildcard)
 
     def __str__(self) -> str:
-        # TODO: Implement a card __str__
-        return "reserved a card."
+        return f"reserved card {self.card.card_id}."
 
 
 @dataclass(slots=True)
@@ -215,5 +214,4 @@ class PurchaseCard(Action):
         self._give_card(player)
 
     def __str__(self) -> str:
-        # TODO: Implement a card __str__
-        return "purchased a card."
+        return f"purchased card {self.card.card_id}."
