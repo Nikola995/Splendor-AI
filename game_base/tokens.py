@@ -51,6 +51,8 @@ class TokenBag:
         """Removes tokens of given colors by the amount given for each."""
         for color in amount:
             self.tokens[color] -= amount[color]
+            if self.tokens[color] < 0:
+                raise ValueError("TokenBag cannot work with negative values.")
 
     def __str__(self) -> str:
         return "\n".join([f"{color.name:<5}: {self.tokens[color]}"

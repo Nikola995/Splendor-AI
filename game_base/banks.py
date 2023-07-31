@@ -55,14 +55,10 @@ class Bank:
         if len(set(colors)) != 3:
             raise IncorrectInputError("The 3 token colors were not unique")
         if Token.YELLOW in colors:
-            raise IncorrectInputError("Yellow token cannot be removed without"
+            raise IncorrectInputError("Yellow token can only be removed when"
                                       " reserving a card")
-        for color in colors:
-            self.token_available[color] -= 1
-            if self.token_available[color] < 0:
-                # Should only happen if you don't do the can_remove_token check
-                raise ValueError(f"Too many {color} tokens "
-                                 "were taken from the bank")
+
+        self.token_available.remove(dict.fromkeys(colors, 1))
 
     def remove_2_same_color_tokens(self, color: Token) -> None:
         """Remove 2 tokens of the same color from the bank.
@@ -82,22 +78,19 @@ class Bank:
         if color == Token.YELLOW:
             raise IncorrectInputError("Yellow token cannot be removed without"
                                       " reserving a card")
-        self.token_available[color] -= 2
-        if self.token_available[color] < 2:
-            # Should only happen if you don't do the can_remove_token check
-            raise ValueError(f"Too many {color} tokens "
-                             "were taken from the bank")
+        amount_to_remove = {color: 2}
+        # Sanity check if you don't check before calling this fn
+        if not self.can_remove_token(amount_to_remove):
+            raise ValueError(f"Can't take 2 {color} tokens when there are"
+                             f"{self.token_available[color]} left in the bank")
+        self.token_available.remove(amount_to_remove)
 
     def remove_wildcard_token(self) -> None:
         """Removes a single wildcard token from the bank.
         Assumes can_remove_token check was made and function call is
         only done while a player reserves a card.
         """
-        self.token_available[Token.YELLOW] -= 1
-        if self.token_available[Token.YELLOW] < 0:
-            # Should only happen if you don't do the can_remove_token check
-            raise ValueError(f"Too many {Token.YELLOW} tokens "
-                             "were taken from the bank")
+        self.token_available.remove({Token.YELLOW: 1})
 
     def add_token(self, amount_to_add: Dict[Token, int]) -> None:
         """Add an amount of tokens for given colors to the bank.
@@ -108,8 +101,7 @@ class Bank:
         amount_to_add : Dict[Token, int]
             A dict of colors and corresponding amount of tokens to add.
         """
-        for color in amount_to_add:
-            self.token_available[color] += amount_to_add[color]
+        self.token_available.add(amount_to_add)
 
     def __str__(self) -> str:
         return ("Available Bank tokens:\n"

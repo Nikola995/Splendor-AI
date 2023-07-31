@@ -36,10 +36,6 @@ class Player:
         amount_to_remove : Dict[Token, int]
             A dict of colors and corresponding amount of tokens to remove.
         """
-        # Sanity check if you don't check before calling this fn
-        if not self.can_remove_token(amount_to_remove):
-            raise ValueError(f"Too many tokens were taken from"
-                             f" the player {self.player_id}")
         self.token_reserved.remove(amount_to_remove)
 
     def can_add_token(self, amount_to_add: Dict[Token, int]) -> bool:
