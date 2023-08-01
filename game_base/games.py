@@ -115,19 +115,6 @@ class Game:
         # Return the winner
         return eligible_players[0]
 
-    def end_turn(self) -> None:
-        """Ends the current turn."""
-        if self.meta_data.curr_player_index < len(self.players) - 1:
-            raise ValueError("Turn isn't over, all of the players haven't "
-                             "made a move")
-        if self.is_final_turn():
-            # End the game if it is the final turn
-            self.meta_data.change_game_state(GameState.FINISHED)
-        else:
-            # Continue the game for another turn
-            self.meta_data.turns_played += 1
-            self.meta_data.curr_player_index = 0
-
     def get_current_player(self) -> Player:
         """Return the current player."""
         return self.players[self.meta_data.curr_player_index]
@@ -143,12 +130,31 @@ class Game:
                 self.nobles.pop(noble)
                 break
 
+    def _end_player_turn(self) -> None:
+        """Updates everything turn-related automatically after player
+        performs an action."""
+        # TODO: Test this
+        # If all the players made their turn
+        if self.meta_data.curr_player_index + 1 == len(self.players):
+            if self.is_final_turn():
+                # End the game if it is the final turn
+                self.meta_data.change_game_state(GameState.FINISHED)
+            else:
+                # Continue the game for another turn
+                self.meta_data.turns_played += 1
+                self.meta_data.curr_player_index = 0
+        else:
+            # Continue the game with the next player to move
+            self.meta_data.curr_player_index += 1
+
     def make_move_for_current_player(self, action: Action, **kwargs) -> None:
         """Performs the given action as the player's move and iterate the
         current player index.
         (Allows **kwargs for action.)
         (Automatically makes the noble check after the action is performed.)
         """
+        if self.meta_data.state != GameState.IN_PROGRESS:
+            raise ValueError("Game isn't currently in progress")
         if not action.can_perform(self.get_current_player(), self.bank):
             raise ValueError(f"Player can't perform {action}")
         action.perform(player=self.get_current_player(), bank=self.bank,
@@ -158,5 +164,4 @@ class Game:
             if self.cards.is_card_in_tables(action.card):
                 self.cards.remove_card_from_tables(action.card)
         self.noble_check_for_current_player()
-        # End the turn for the player
-        self.meta_data.curr_player_index += 1
+        self._end_player_turn()
