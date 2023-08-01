@@ -38,17 +38,21 @@ class Command:
     execute_fn: Callable[[], None]
     description: str
 
-    def execute(self) -> bool:
+    def execute(self, *args: list[str]) -> bool:
         """Executes the command if it can be executed.
 
         If the command can be executed (determined by its 'can_execute_fn'),
         the 'execute_fn' is called to perform the actual execution.
 
+        Args:
+            *args: Any number of arguments to be passed to the
+            command execution function.
+
         Returns:
             bool: True if the command was executed successfully, False otherwise.
         """
-        if self.can_execute_fn():
-            self.execute_fn()
+        if self.can_execute_fn(*args):
+            self.execute_fn(*args)
             return True
         return False
 
@@ -137,7 +141,7 @@ class GameInterfaceConsole(GameInterface):
 
     def invalid_command(self) -> None:
         """Displays an error message for an invalid command."""
-        print("Invalid command. Please try again.")
+        print("Invalid command name and/or parameters. Please try again.")
 
     def run(self) -> None:
         """Runs the console interface, waiting for user input and executing
@@ -147,9 +151,11 @@ class GameInterfaceConsole(GameInterface):
         while True:
             user_input = input("Enter your command "
                                "('help' to show all commands):\n")
-            command = self.commands.get(user_input)
+            # Split the input into the command name & parameters
+            user_cmd, *user_params = user_input.split(" ")
+            command = self.commands.get(user_cmd)
             if command:
-                if command.execute():
+                if command.execute(*user_params):
                     continue
                 else:
                     self.inexecutable_command()
