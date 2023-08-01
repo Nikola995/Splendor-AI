@@ -103,13 +103,15 @@ class GameInterfaceConsole(GameInterface):
                             "Shows the state of the game.",
                             1, ['all', 'meta', 'players', 'nobles', 'cards',
                                 'bank', 'winner']),
-            'add': Command(self.can_add_player, self.add_player,
+            'add': Command(self.can_add_player_cmd, self.add_player_cmd,
                            "Adds a player to the game by the given name.",
                            1, ['Any Name']),
-            'remove': Command(self.can_remove_player, self.remove_player,
-                              "Removes a player from the game by the given name.",
+            'remove': Command(self.can_remove_player_cmd,
+                              self.remove_player_cdm,
+                              "Removes a player from the game"
+                              " by the given name.",
                               1, []),
-            'start': Command(self.can_start_game, self.start_game,
+            'start': Command(self.can_start_game_cmd, self.start_game_cmd,
                              "Starts the game."),
         }
 
@@ -183,30 +185,32 @@ class GameInterfaceConsole(GameInterface):
             case 'winner': self.show_game_winner()
             case _: pass
 
-    def can_add_player(self, player_name: str) -> bool:
+    def can_add_player_cmd(self, player_name: str) -> bool:
         """Checks if a player by the given name
         can be added to the game."""
         return super().can_add_player(Player(player_name))
 
-    def add_player(self, player_name: str) -> None:
+    def add_player_cmd(self, player_name: str) -> None:
         """Adds a player by the given name to the game."""
         self.commands['remove'].valid_parameters.append(player_name)
         return super().add_player(Player(player_name))
 
-    def can_remove_player(self, player_name: str) -> bool:
+    def can_remove_player_cmd(self, player_name: str) -> bool:
         """Checks if a player by the given name
         can be removed from the game."""
         return super().can_remove_player(Player(player_name))
 
-    def remove_player(self, player_name: str) -> None:
+    def remove_player_cmd(self, player_name: str) -> None:
         """Removes a player by the given name from the game."""
         self.commands['remove'].valid_parameters.remove(player_name)
         return super().remove_player(Player(player_name))
 
-    def can_start_game(self) -> bool:
+    def can_start_game_cmd(self) -> bool:
+        """Checks if the game can be started."""
         return self.game.can_initialize()
 
-    def start_game(self) -> bool:
+    def start_game_cmd(self) -> bool:
+        """Starts the game."""
         return self.game.initialize()
 
     def show_help_cmd(self) -> None:
