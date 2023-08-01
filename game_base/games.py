@@ -81,10 +81,10 @@ class Game:
                 return True
         return False
 
-    def declare_winner(self) -> Player:
-        """Declares the winner of the finished game."""
+    def get_winner(self) -> Player:
+        """Gets the winner if the game is finished."""
         if self.meta_data.state != GameState.FINISHED:
-            raise ValueError("Game hasn't finished")
+            raise ValueError("Can't get winner because game isn't finished")
         eligible_players = [player for player in self.players
                             if player.prestige_points >= 15]
         # If there's more than one eligible players,
@@ -109,7 +109,7 @@ class Game:
             self.meta_data.turns_played += 1
             self.meta_data.curr_player_index = 0
 
-    def current_player(self) -> Player:
+    def get_current_player(self) -> Player:
         """Return the current player."""
         return self.players[self.meta_data.curr_player_index]
 
@@ -119,8 +119,8 @@ class Game:
         # TODO: Add the usecase of multiple available nobles in one turn
         # # Currently just returns the first one
         for noble in self.nobles:
-            if self.current_player().is_eligible_for_noble(noble):
-                self.current_player().add_noble(noble)
+            if self.get_current_player().is_eligible_for_noble(noble):
+                self.get_current_player().add_noble(noble)
                 self.nobles.pop(noble)
                 break
 
@@ -130,9 +130,10 @@ class Game:
         (Allows **kwargs for action.)
         (Automatically makes the noble check after the action is performed.)
         """
-        if not action.can_perform(self.current_player(), self.bank):
+        if not action.can_perform(self.get_current_player(), self.bank):
             raise ValueError(f"Player can't perform {action}")
-        action.perform(player=self.current_player(), bank=self.bank, **kwargs)
+        action.perform(player=self.get_current_player(), bank=self.bank,
+                       **kwargs)
         # If action with card wasn't purchasing a reserved card.
         if hasattr(action, 'card'):
             if self.cards.is_card_in_tables(action.card):

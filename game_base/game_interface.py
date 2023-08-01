@@ -74,7 +74,7 @@ class GameInterfaceConsole(GameInterface):
         print(str(self.game.meta_data))
         if self.game.meta_data.state == GameState.IN_PROGRESS:
             print("Current player to move: "
-                  f"{self.game.current_player().player_id}")
+                  f"{self.game.get_current_player().player_id}")
 
     def show_game_nobles(self) -> None:
         print("----------Available Nobles-------------")
@@ -103,7 +103,7 @@ class GameInterfaceConsole(GameInterface):
 
     def show_winner(self) -> None:
         print("----------Winner-----------------------")
-        print(str(self.game.declare_winner()))
+        print(str(self.game.get_winner()))
 
     def show_game_state(self, dense: bool = False) -> None:
         """Prints the state of the game on the console."""
