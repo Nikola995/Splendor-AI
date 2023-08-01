@@ -160,7 +160,7 @@ class GameInterfaceConsole(GameInterface):
             self.show_game_cards_on_tables()
             self.show_game_bank()
 
-    def can_show_game_state_cmd(self, game_attr: str) -> bool:
+    def can_show_game_attr_cmd(self, game_attr: str) -> bool:
         if game_attr == 'winner':
             return self.game.meta_data.state == GameState.FINISHED
         elif game_attr in ['nobles', 'cards', 'bank']:
@@ -170,7 +170,7 @@ class GameInterfaceConsole(GameInterface):
         else:
             return False
 
-    def show_game_state_cmd(self, game_attr: str) -> None:
+    def show_game_attr_cmd(self, game_attr: str) -> None:
         match game_attr:
             case 'all': self.show_game_state()
             case 'meta': self.show_game_meta_data()
