@@ -107,7 +107,7 @@ class GameInterfaceConsole(GameInterface):
                            "Adds a player to the game by the given name.",
                            1, ['Any Name']),
             'remove': Command(self.can_remove_player_cmd,
-                              self.remove_player_cdm,
+                              self.remove_player_cmd,
                               "Removes a player from the game"
                               " by the given name.",
                               1, []),
