@@ -74,6 +74,10 @@ class Game:
                                        "the start of the game")
         self.players.remove(player)
 
+    def can_initialize(self) -> bool:
+        """Checks if the game has at least 2 players."""
+        return len(self.players) < 2
+
     # TODO Add customizable player order pre-initialization - now only FCFS
     def initialize(self) -> None:
         """Initialize a new game for currently added players."""
