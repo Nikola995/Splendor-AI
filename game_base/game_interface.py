@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
+from itertools import combinations
 from typing import Any, Tuple, Callable
 from games import Game, GameState
 from players import Player
@@ -37,6 +38,17 @@ class Command:
     can_execute_fn: Callable[[], bool]
     execute_fn: Callable[[], None]
     description: str
+    # If there are usecases with multiple num_params change to tuple[int]
+    num_parameters: int = 0  # The number of required parameters of the command
+    valid_parameters: list[str] = field(default_factory=list)
+
+    def current_valid_parameters(self) -> set[str]:
+        """Returns all of the valid paramaters for which the command
+        can currently be executed.
+        Unpacks all the parameters from an executable combination in a set."""
+        return {parameters for combo
+                in combinations(self.valid_parameters, self.num_parameters)
+                if self.can_execute_fn(*combo) for parameters in combo}
 
     def execute(self, *args: list[str]) -> bool:
         """Executes the command if it can be executed.
@@ -51,6 +63,9 @@ class Command:
         Returns:
             bool: True if the command was executed successfully, False otherwise.
         """
+        for arg in args:
+            if arg not in self.valid_parameters:
+                return False
         if self.can_execute_fn(*args):
             self.execute_fn(*args)
             return True
@@ -65,12 +80,16 @@ class GameInterfaceConsole(GameInterface):
 
     def __post_init__(self):
         self.commands = {
-            'exit': Command(lambda: True, self.exit,
+            'exit': Command(lambda: True, self.exit_cmd,
                             "Exit the program."),
-            'help': Command(lambda: True, self.show_help,
+            'help': Command(lambda: True, self.show_help_cmd,
                             "Show all available commands and "
-                            "their descriptions.")
-
+                            "their descriptions."),
+            'show': Command(self.can_show_game_attr_cmd,
+                            self.show_game_attr_cmd,
+                            "Shows the state of the game.",
+                            1, ['all', 'meta', 'players', 'nobles', 'cards',
+                                'bank', 'winner'])
         }
 
     def show_game_meta_data(self) -> None:
@@ -105,7 +124,7 @@ class GameInterfaceConsole(GameInterface):
             print("_______________________________________")
             print(str(player))
 
-    def show_winner(self) -> None:
+    def show_game_winner(self) -> None:
         print("----------Winner-----------------------")
         print(str(self.game.get_winner()))
 
@@ -114,23 +133,56 @@ class GameInterfaceConsole(GameInterface):
         print("----------Complete game state----------")
         print("_______________________________________")
         self.show_game_meta_data()
-        if self.game.meta_data.state == GameState.NOT_STARTED:
-            return None
-        self.show_game_nobles()
-        self.show_game_cards_on_tables()
-        self.show_game_bank()
-        self.show_game_players()
         if self.game.meta_data.state == GameState.FINISHED:
-            self.show_winner()
+            self.show_game_winner()
+        self.show_game_players()
+        if self.game.meta_data.state != GameState.NOT_STARTED:
+            self.show_game_nobles()
+            self.show_game_cards_on_tables()
+            self.show_game_bank()
 
-    def show_help(self) -> None:
+    def can_show_game_state_cmd(self, game_attr: str) -> bool:
+        if game_attr == 'winner':
+            return self.game.meta_data.state == GameState.FINISHED
+        elif game_attr in ['nobles', 'cards', 'bank']:
+            return self.game.meta_data.state != GameState.NOT_STARTED
+        elif game_attr in ['all', 'meta', 'players']:
+            return True
+        else:
+            return False
+
+    def show_game_state_cmd(self, game_attr: str) -> None:
+        match game_attr:
+            case 'all': self.show_game_state()
+            case 'meta': self.show_game_meta_data()
+            case 'players': self.show_game_players()
+            case 'nobles': self.show_game_nobles()
+            case 'cards': self.show_game_cards_on_tables()
+            case 'bank': self.show_game_bank()
+            case 'winner': self.show_game_winner()
+            case _: pass
+
+    def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
         print("Available commands:")
-        for command in self.commands:
-            if self.commands[command].can_execute_fn():
+        for command_name in self.commands:
+            command = self.commands[command_name]
+            # Iterate over all executable valid parameters if they exist
+            if command.num_parameters:
+                params = command.current_valid_parameters()
+                # If there is at least one valid combination of params
+                if params:
+                    print(f"{command}: {command.description}. "
+                          f"Takes {command.num_parameters} "
+                          "of the valid parameters as arguments.\n"
+                          f"Current valid parameters: {params}")
+            # If no parameters as input, only executable cmds
+            elif command.can_execute_fn():
                 print(f"{command}: {self.commands[command].description}")
+            else:
+                continue
 
-    def exit(self) -> None:
+    def exit_cmd(self) -> None:
         """Exits the program."""
         print("Exiting the program.")
         quit()
