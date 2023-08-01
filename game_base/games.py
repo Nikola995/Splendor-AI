@@ -49,9 +49,12 @@ class Game:
     # %% Game initialization methods
 
     def can_add_player(self, player: Player) -> bool:
-        """Returns True if number of players in game < 4 and
+        """Returns True if the game hasn't started,
+        the number of players in game < 4 and
         player is not in the game."""
-        return len(self.players) < 4 and player not in self.players
+        return (self.meta_data.state == GameState.NOT_STARTED and
+                len(self.players) < 4 and
+                player not in self.players)
 
     def add_player(self, player: Player) -> None:
         """Adds the given player to the game if the game has not started."""
@@ -63,8 +66,10 @@ class Game:
         self.players.append(player)
 
     def can_remove_player(self, player: Player) -> bool:
-        """Checks if the given player is in the game."""
-        return player in self.players
+        """Checks if the game hasn't started and
+        the given player is in the game."""
+        return (self.meta_data.state == GameState.NOT_STARTED and
+                player in self.players)
 
     def remove_player(self, player: Player) -> None:
         """Removes the given player from the game
