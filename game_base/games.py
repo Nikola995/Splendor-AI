@@ -48,7 +48,13 @@ class Game:
     actions: ActionSet = field(default_factory=StandardActionSet)
     # %% Game initialization methods
 
+    def can_add_player(self, player: Player) -> bool:
+        """Returns True if number of players in game < 4 and
+        player is not in the game."""
+        return len(self.players) < 4 and player not in self.players
+
     def add_player(self, player: Player) -> None:
+        """Adds the given player to the game if the game has not started."""
         if self.meta_data.state != GameState.NOT_STARTED:
             raise GameInitializedError("Players can only be added before "
                                        "the start of the game")
@@ -56,7 +62,13 @@ class Game:
             raise ValueError("A game can't have more than 4 players")
         self.players.append(player)
 
+    def can_remove_player(self, player: Player) -> bool:
+        """Checks if the given player is in the game."""
+        return player in self.players
+
     def remove_player(self, player: Player) -> None:
+        """Removes the given player from the game
+        if the game has not started."""
         if self.meta_data.state != GameState.NOT_STARTED:
             raise GameInitializedError("Players can only be removed before "
                                        "the start of the game")
