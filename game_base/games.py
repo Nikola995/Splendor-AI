@@ -75,12 +75,15 @@ class Game:
         self.players.remove(player)
 
     def can_initialize(self) -> bool:
-        """Checks if the game has at least 2 players."""
-        return len(self.players) < 2
+        """Checks if the game hasn't started and has at least 2 players."""
+        return (self.meta_data.state == GameState.NOT_STARTED and
+                len(self.players) < 2)
 
     # TODO Add customizable player order pre-initialization - now only FCFS
     def initialize(self) -> None:
         """Initialize a new game for currently added players."""
+        if self.meta_data.state != GameState.NOT_STARTED:
+            raise GameInitializedError("Game has already started")
         if len(self.players) < 2:
             raise ValueError("A game can't begin without at least 2 players")
         # Generate the game assets
