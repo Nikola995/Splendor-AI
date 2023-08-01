@@ -21,6 +21,8 @@ class Action(ABC):
     @abstractmethod
     def perform(self, player: Player, bank: Bank, **kwargs) -> bool:
         """Abstract method for performing the action in the game."""
+        # If ultimate perfomance is needed, this can be refactored to not use
+        # **kwargs
         pass
 
 
@@ -51,8 +53,9 @@ class Reserve3UniqueColorTokens(Action):
         return (bank.can_remove_token(dict.fromkeys(self.colors, 1))
                 and player.can_add_token(dict.fromkeys(self.colors, 1)))
 
-    def perform(self, player: Player, bank: Bank) -> None:
-        """Transfer the requested tokens from the bank to the player."""
+    def perform(self, player: Player, bank: Bank, **kwargs) -> None:
+        """Transfer the requested tokens from the bank to the player.
+        (Ignore **kwargs)"""
         bank.remove_3_unique_color_tokens(self.colors)
         player.add_token(dict.fromkeys(self.colors, 1))
 
@@ -89,8 +92,9 @@ class Reserve2SameColorTokens(Action):
         return (bank.can_remove_token({self.color: 2})
                 and player.can_add_token({self.color: 2}))
 
-    def perform(self, player: Player, bank: Bank) -> None:
-        """Transfer the requested tokens from the bank to the player."""
+    def perform(self, player: Player, bank: Bank, **kwargs) -> None:
+        """Transfer the requested tokens from the bank to the player.
+        (Ignore **kwargs)"""
         bank.remove_2_same_color_tokens(self.color)
         player.add_token({self.color: 2})
 
@@ -125,8 +129,9 @@ class ReserveCard(Action):
         """
         return player.can_reserve_card()
 
-    def perform(self, player: Player, bank: Bank) -> None:
-        """Add the card to the player's reserved cards."""
+    def perform(self, player: Player, bank: Bank, **kwargs) -> None:
+        """Add the card to the player's reserved cards.
+        (Ignore **kwargs)"""
         player.add_to_reserved_cards(self.card)
         # Give the player 1 wildcard token, if the transfer is possible
         single_wildcard = {Token.YELLOW: 1}
@@ -175,19 +180,24 @@ class PurchaseCard(Action):
         player.add_to_owned_cards(self.card)
 
     def perform(self, player: Player, bank: Bank,
-                wildcard_collaterals: Dict[Token, int]) -> None:
+                wildcard_collaterals: Dict[Token, int], **kwargs) -> None:
         """Purchase the card for the player.
 
         The process of purchasing a card follows this process:
+
             1. The owned bonuses discount the price of the card
             (for the corresponding color)
             (the card can be purchased with just bonuses)
+
             2. The collateral wildcard tokens discount the price of the card
             (for the corresponding color) & removed from the player's inventory
             (the card can be purchased with just wildcard tokens)
+
             3. The reserved tokens are removed from the player's inventory
             by the remaining amount of the card cost
             (for the corresponding color)
+
+        (Ignore **kwargs, wildcard_collaterals is given explicitly)
         """
         remaining_cost = deepcopy(self.card.token_cost)
         # 1. Reduce the cost by the owned bonuses
