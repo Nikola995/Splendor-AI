@@ -108,7 +108,9 @@ class GameInterfaceConsole(GameInterface):
                            1, ['Any Name']),
             'remove': Command(self.can_remove_player, self.remove_player,
                               "Removes a player from the game by the given name.",
-                              1, [])
+                              1, []),
+            'start': Command(self.can_start_game, self.start_game,
+                             "Starts the game."),
         }
 
     def show_game_meta_data(self) -> None:
@@ -200,6 +202,12 @@ class GameInterfaceConsole(GameInterface):
         """Removes a player by the given name from the game."""
         self.commands['remove'].valid_parameters.remove(player_name)
         return super().remove_player(Player(player_name))
+
+    def can_start_game(self) -> bool:
+        return self.game.can_initialize()
+
+    def start_game(self) -> bool:
+        return self.game.initialize()
 
     def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
