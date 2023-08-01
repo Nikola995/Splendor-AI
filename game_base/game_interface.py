@@ -11,10 +11,24 @@ class GameInterface(ABC):
     """Abstract class for an interface that can interact with a game"""
     game: Game = field(default_factory=Game)
 
+    @abstractmethod
+    def can_add_player(self, player: Player) -> bool:
+        """Method for checking if a player can be added
+        to the game before starting."""
+        return self.game.can_add_player(player)
+
+    @abstractmethod
     def add_player(self, player: Player) -> None:
         """Method for adding a player to the game before starting."""
         self.game.add_player(player)
 
+    @abstractmethod
+    def can_remove_player(self, player: Player) -> bool:
+        """Method for checking if a player can be removed
+        from the game before starting."""
+        return self.game.can_remove_player(player)
+
+    @abstractmethod
     def remove_player(self, player: Player) -> None:
         """Method for removing a player from the game before starting."""
         self.game.remove_player(player)
@@ -63,9 +77,8 @@ class Command:
         Returns:
             bool: True if the command was executed successfully, False otherwise.
         """
-        for arg in args:
-            if arg not in self.valid_parameters:
-                return False
+        if len(args) != self.num_parameters:
+            return False
         if self.can_execute_fn(*args):
             self.execute_fn(*args)
             return True
@@ -89,7 +102,13 @@ class GameInterfaceConsole(GameInterface):
                             self.show_game_attr_cmd,
                             "Shows the state of the game.",
                             1, ['all', 'meta', 'players', 'nobles', 'cards',
-                                'bank', 'winner'])
+                                'bank', 'winner']),
+            'add': Command(self.can_add_player, self.add_player,
+                           "Adds a player to the game by the given name.",
+                           1, ['Any Name']),
+            'remove': Command(self.can_remove_player, self.remove_player,
+                              "Removes a player from the game by the given name.",
+                              1, [])
         }
 
     def show_game_meta_data(self) -> None:
@@ -161,6 +180,26 @@ class GameInterfaceConsole(GameInterface):
             case 'bank': self.show_game_bank()
             case 'winner': self.show_game_winner()
             case _: pass
+
+    def can_add_player(self, player_name: str) -> bool:
+        """Checks if a player by the given name
+        can be added to the game."""
+        return super().can_add_player(Player(player_name))
+
+    def add_player(self, player_name: str) -> None:
+        """Adds a player by the given name to the game."""
+        self.commands['remove'].valid_parameters.append(player_name)
+        return super().add_player(Player(player_name))
+
+    def can_remove_player(self, player_name: str) -> bool:
+        """Checks if a player by the given name
+        can be removed from the game."""
+        return super().can_remove_player(Player(player_name))
+
+    def remove_player(self, player_name: str) -> None:
+        """Removes a player by the given name from the game."""
+        self.commands['remove'].valid_parameters.remove(player_name)
+        return super().remove_player(Player(player_name))
 
     def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
