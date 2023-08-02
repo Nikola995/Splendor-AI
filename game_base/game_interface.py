@@ -113,6 +113,19 @@ class GameInterfaceConsole(GameInterface):
                               1, []),
             'start': Command(self.can_start_game_cmd, self.start_game_cmd,
                              "Starts the game."),
+            # TODO: Implement all of the action cmds
+            'token3': Command(self.can_reserve_3_tokens_cmd,
+                              self.reserve_3_tokens_cmd,
+                              "Reserves 3 unique color tokens from the bank.",
+                              3, ['green', 'white', 'blue', 'black', 'red']),
+            'token2': Command(self.can_reserve_2_tokens_cmd,
+                              self.reserve_2_tokens_cmd,
+                              "Reserves 2 same color tokens from the bank.",
+                              1, ['green', 'white', 'blue', 'black', 'red']),
+            'res': Command(self.can_reserve_card, self.reserve_card,
+                           "Reserves a card from the table.", 1, []),
+            'buy': Command(self.can_purchase_card, self.purchase_card,
+                           "Purchases a card from the table.", 1, []),
         }
 
     def show_game_meta_data(self) -> None:
