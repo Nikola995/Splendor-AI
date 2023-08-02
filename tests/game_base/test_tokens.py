@@ -71,33 +71,88 @@ class TestingTokenBagInit:
 
 class TestingTokenBagAdd:
     def test_token_bag_default_add_single(self) -> None:
-        token_bag = TokenBag(standard_amount=0)
+        token_bag = TokenBag()
         amounts = {Token.GREEN: 2}
         token_bag.add(amounts)
-        assert token_bag.tokens[Token.GREEN] == 2
+        expected = {Token.GREEN: 2,
+                    Token.WHITE: 0,
+                    Token.BLUE: 0,
+                    Token.BLACK: 0,
+                    Token.RED: 0,
+                    Token.YELLOW: 0}
+        assert token_bag.tokens == expected
 
     def test_token_bag_default_add_multiple(self) -> None:
-        token_bag = TokenBag(standard_amount=0)
-        amounts = {Token.GREEN: 2, Token.RED: 3}
+        token_bag = TokenBag()
+        amounts = {Token.GREEN: 2,
+                   Token.RED: 3}
         token_bag.add(amounts)
-        assert token_bag.tokens[Token.GREEN] == 2
-        assert token_bag.tokens[Token.RED] == 3
+        expected = {Token.GREEN: 2,
+                    Token.WHITE: 0,
+                    Token.BLUE: 0,
+                    Token.BLACK: 0,
+                    Token.RED: 3,
+                    Token.YELLOW: 0}
+        assert token_bag.tokens == expected
 
     def test_token_bag_default_add_all(self) -> None:
-        token_bag = TokenBag(standard_amount=0)
+        token_bag = TokenBag()
         amounts = {Token.GREEN: 1,
-                         Token.WHITE: 2,
-                         Token.BLUE: 3,
-                         Token.BLACK: 1,
-                         Token.RED: 2,
-                         Token.YELLOW: 3}
+                   Token.WHITE: 2,
+                   Token.BLUE: 3,
+                   Token.BLACK: 1,
+                   Token.RED: 2,
+                   Token.YELLOW: 3}
         token_bag.add(amounts)
-        assert token_bag.tokens[Token.GREEN] == 1
-        assert token_bag.tokens[Token.WHITE] == 2
-        assert token_bag.tokens[Token.BLUE] == 3
-        assert token_bag.tokens[Token.BLACK] == 1
-        assert token_bag.tokens[Token.RED] == 2
-        assert token_bag.tokens[Token.YELLOW] == 3
+        expected = {Token.GREEN: 1,
+                    Token.WHITE: 2,
+                    Token.BLUE: 3,
+                    Token.BLACK: 1,
+                    Token.RED: 2,
+                    Token.YELLOW: 3}
+        assert token_bag.tokens == expected
+
+    def test_token_bag_bank_4_init_add_single(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: 2}
+        token_bag.add(amounts)
+        expected = {Token.GREEN: 9,
+                    Token.WHITE: 7,
+                    Token.BLUE: 7,
+                    Token.BLACK: 7,
+                    Token.RED: 7,
+                    Token.YELLOW: 5}
+        assert token_bag.tokens == expected
+
+    def test_token_bag_bank_4_init_add_multiple(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: 2,
+                   Token.RED: 3}
+        token_bag.add(amounts)
+        expected = {Token.GREEN: 9,
+                    Token.WHITE: 7,
+                    Token.BLUE: 7,
+                    Token.BLACK: 7,
+                    Token.RED: 10,
+                    Token.YELLOW: 5}
+        assert token_bag.tokens == expected
+
+    def test_token_bag_bank_4_init_add_all(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: 1,
+                   Token.WHITE: 2,
+                   Token.BLUE: 3,
+                   Token.BLACK: 1,
+                   Token.RED: 2,
+                   Token.YELLOW: 3}
+        token_bag.add(amounts)
+        expected = {Token.GREEN: 8,
+                    Token.WHITE: 9,
+                    Token.BLUE: 10,
+                    Token.BLACK: 8,
+                    Token.RED: 9,
+                    Token.YELLOW: 8}
+        assert token_bag.tokens == expected
 
 
 class TestingTokenBagRemove:
