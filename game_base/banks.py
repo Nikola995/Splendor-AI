@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, InitVar
 from typing import Tuple, Dict
-from utils import IncorrectInputError
+from game_base.utils import IncorrectInputError
 from game_base.tokens import TokenBag, Token
 
 

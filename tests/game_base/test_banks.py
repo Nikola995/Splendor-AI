@@ -1,6 +1,7 @@
 import pytest
 from game_base.tokens import Token, TokenBag
 from game_base.banks import Bank
+from game_base.utils import IncorrectInputError
 
 
 class TestingBankInit:
@@ -68,19 +69,41 @@ class TestingBankCanRemoveToken:
 
 class TestingBankRemove3Unique:
     def test_bank_remove_token_3_unique(self) -> None:
-        assert False
+        bank = Bank()
+        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.BLUE)
+        bank.remove_3_unique_color_tokens(tokens_to_remove)
+        expected = {Token.GREEN: 6,
+                    Token.WHITE: 6,
+                    Token.BLUE: 6,
+                    Token.BLACK: 7,
+                    Token.RED: 7,
+                    Token.YELLOW: 5}
+        assert bank.token_available.tokens == expected
 
-    def test_bank_remove_token_3_unique_error_not_3(self) -> None:
-        assert False
+    def test_bank_remove_token_3_unique_error_ne_3(self) -> None:
+        bank = Bank()
+        tokens_to_remove = (Token.GREEN, Token.WHITE)
+        with pytest.raises(IncorrectInputError) as e:
+            bank.remove_3_unique_color_tokens(tokens_to_remove)
 
     def test_bank_remove_token_3_unique_error_not_unique(self) -> None:
-        assert False
+        bank = Bank()
+        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.WHITE)
+        with pytest.raises(IncorrectInputError) as e:
+            bank.remove_3_unique_color_tokens(tokens_to_remove)
 
     def test_bank_remove_token_3_unique_error_wildcard(self) -> None:
-        assert False
+        bank = Bank()
+        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.YELLOW)
+        with pytest.raises(IncorrectInputError) as e:
+            bank.remove_3_unique_color_tokens(tokens_to_remove)
 
     def test_bank_remove_token_3_unique_error_negative(self) -> None:
-        assert False
+        bank = Bank()
+        bank.token_available.tokens[Token.GREEN] = 0
+        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.BLUE)
+        with pytest.raises(ValueError) as e:
+            bank.remove_3_unique_color_tokens(tokens_to_remove)
 
 
 class TestingBankRemove2Same:
