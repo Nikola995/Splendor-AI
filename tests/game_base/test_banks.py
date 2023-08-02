@@ -135,10 +135,21 @@ class TestingBankRemove2Same:
 
 class TestingBankRemoveWildcard:
     def test_bank_remove_wildcard(self) -> None:
-        assert False
+        bank = Bank()
+        bank.remove_wildcard_token()
+        expected = {Token.GREEN: 7,
+                    Token.WHITE: 7,
+                    Token.BLUE: 7,
+                    Token.BLACK: 7,
+                    Token.RED: 7,
+                    Token.YELLOW: 4}
+        assert bank.token_available.tokens == expected
 
     def test_bank_remove_wildcard_error(self) -> None:
-        assert False
+        bank = Bank()
+        bank.token_available.tokens[Token.YELLOW] = 0
+        with pytest.raises(ValueError) as e:
+            bank.remove_wildcard_token()
 
 
 class TestingBankAddToken:
