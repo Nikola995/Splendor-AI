@@ -25,14 +25,45 @@ class TestingBankInit:
 
 
 class TestingBankCanRemoveToken:
-    def test_bank_can_remove_token_3_unique(self) -> None:
-        assert False
+    def test_bank_can_remove_token_3_unique_true(self) -> None:
+        bank = Bank()
+        tokens_to_remove = {Token.GREEN: 1,
+                            Token.WHITE: 1,
+                            Token.BLUE: 1}
+        assert bank.can_remove_token(tokens_to_remove)
 
-    def test_bank_can_remove_token_2_same(self) -> None:
-        assert False
+    def test_bank_can_remove_token_3_unique_false(self) -> None:
+        bank = Bank()
+        bank.token_available.tokens[Token.GREEN] = 0
+        tokens_to_remove = {Token.GREEN: 1,
+                            Token.WHITE: 1,
+                            Token.BLUE: 1}
+        assert not bank.can_remove_token(tokens_to_remove)
+
+    def test_bank_can_remove_token_2_same_true_gt_4(self) -> None:
+        bank = Bank()
+        tokens_to_remove = {Token.GREEN: 2}
+        assert bank.can_remove_token(tokens_to_remove)
+
+    def test_bank_can_remove_token_2_same_true_eq_4(self) -> None:
+        bank = Bank()
+        bank.token_available.tokens[Token.GREEN] = 4
+        tokens_to_remove = {Token.GREEN: 2}
+        assert bank.can_remove_token(tokens_to_remove)
+
+    def test_bank_can_remove_token_2_same_true_lt_4(self) -> None:
+        bank = Bank()
+        bank.token_available.tokens[Token.GREEN] = 3
+        tokens_to_remove = {Token.GREEN: 2}
+        assert not bank.can_remove_token(tokens_to_remove)
 
     def test_bank_can_remove_token_error(self) -> None:
-        assert False
+        bank = Bank()
+        tokens_to_remove = {Token.GREEN: 1,
+                            Token.WHITE: 1,
+                            Token.BLUE: 3}
+        with pytest.raises(ValueError) as e:
+            bank.can_remove_token(tokens_to_remove)
 
 
 class TestingBankRemove3Unique:
