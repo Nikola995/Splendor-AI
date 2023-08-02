@@ -45,13 +45,16 @@ class TokenBag:
     def add(self, amount: dict[Token, int]) -> None:
         """Adds tokens of given colors by the amount given for each."""
         for color in amount:
+            if amount[color] < 0:
+                raise ValueError("TokenBag cannot work with negative values.")
             self.tokens[color] += amount[color]
 
     def remove(self, amount: dict[Token, int]) -> None:
-        """Removes tokens of given colors by the amount given for each."""
+        """Removes tokens of given colors by the amount given for each.
+        Assumes you're not going to 'remove' negative amounts."""
         for color in amount:
             self.tokens[color] -= amount[color]
-            if self.tokens[color] < 0:
+            if self.tokens[color] < 0 or amount[color] < 0:
                 raise ValueError("TokenBag cannot work with negative values.")
 
     def __str__(self) -> str:
