@@ -108,13 +108,29 @@ class TestingBankRemove3Unique:
 
 class TestingBankRemove2Same:
     def test_bank_remove_token_2_same(self) -> None:
-        assert False
+        bank = Bank()
+        color = Token.GREEN
+        bank.remove_2_same_color_tokens(color)
+        expected = {Token.GREEN: 5,
+                    Token.WHITE: 7,
+                    Token.BLUE: 7,
+                    Token.BLACK: 7,
+                    Token.RED: 7,
+                    Token.YELLOW: 5}
+        assert bank.token_available.tokens == expected
 
     def test_bank_remove_token_2_same_error_wildcard(self) -> None:
-        assert False
+        bank = Bank()
+        color = Token.YELLOW
+        with pytest.raises(IncorrectInputError) as e:
+            bank.remove_2_same_color_tokens(color)
 
     def test_bank_remove_token_2_same_error_can_not_remove(self) -> None:
-        assert False
+        bank = Bank()
+        bank.token_available.tokens[Token.GREEN] = 3
+        color = Token.GREEN
+        with pytest.raises(ValueError) as e:
+            bank.remove_2_same_color_tokens(color)
 
 
 class TestingBankRemoveWildcard:
