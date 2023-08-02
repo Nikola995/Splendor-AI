@@ -167,3 +167,57 @@ class TestingTokenBagRemove:
         amounts = {Token.GREEN: 2, Token.RED: 3}
         with pytest.raises(ValueError) as e:
             token_bag.remove(amounts)
+
+    def test_token_bag_default_remove_all(self) -> None:
+        token_bag = TokenBag()
+        amounts = {Token.GREEN: 1,
+                   Token.WHITE: 2,
+                   Token.BLUE: 3,
+                   Token.BLACK: 1,
+                   Token.RED: 2,
+                   Token.YELLOW: 3}
+        with pytest.raises(ValueError) as e:
+            token_bag.remove(amounts)
+
+    def test_token_bag_bank_4_init_remove_single(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: 2}
+        token_bag.remove(amounts)
+        expected = {Token.GREEN: 5,
+                    Token.WHITE: 7,
+                    Token.BLUE: 7,
+                    Token.BLACK: 7,
+                    Token.RED: 7,
+                    Token.YELLOW: 5}
+        assert token_bag.tokens == expected
+
+    def test_token_bag_bank_4_init_remove_multiple(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: 1,
+                   Token.RED: 1,
+                   Token.WHITE: 1}
+        token_bag.remove(amounts)
+        expected = {Token.GREEN: 6,
+                    Token.WHITE: 6,
+                    Token.BLUE: 7,
+                    Token.BLACK: 7,
+                    Token.RED: 6,
+                    Token.YELLOW: 5}
+        assert token_bag.tokens == expected
+
+    def test_token_bag_bank_4_init_remove_all(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: 1,
+                   Token.WHITE: 2,
+                   Token.BLUE: 3,
+                   Token.BLACK: 1,
+                   Token.RED: 2,
+                   Token.YELLOW: 3}
+        token_bag.remove(amounts)
+        expected = {Token.GREEN: 6,
+                    Token.WHITE: 5,
+                    Token.BLUE: 4,
+                    Token.BLACK: 6,
+                    Token.RED: 5,
+                    Token.YELLOW: 2}
+        assert token_bag.tokens == expected
