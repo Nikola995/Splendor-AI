@@ -14,11 +14,9 @@ class Noble:
 
     def __str__(self) -> str:
         return "\n".join([f"Prestige points: {self.prestige_points}",
-                          "Bonuses required:",
-                          f"{str(self.bonus_required)}"])
+                          f"Bonuses required: {self.bonus_required}"])
 
 
-@dataclass
 class NobleGenerator:
     """Generates a List of Nobles for the number of players in a game."""
 
