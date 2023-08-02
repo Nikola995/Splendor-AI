@@ -1,4 +1,4 @@
-from dataclasses import dataclass, InitVar
+from dataclasses import dataclass, field, InitVar
 from typing import Tuple, Dict
 from utils import IncorrectInputError
 from game_base.tokens import TokenBag, Token
@@ -9,7 +9,7 @@ from game_base.tokens import TokenBag, Token
 class Bank:
     """A representation of the unreserved tokens in the game."""
 
-    token_available: TokenBag
+    token_available: TokenBag = field(init=False)
     num_players: InitVar[int] = 4
 
     def __post_init__(self, num_players: int):
