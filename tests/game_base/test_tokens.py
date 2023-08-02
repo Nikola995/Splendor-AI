@@ -366,13 +366,38 @@ class TestingTokenBagAddAndRemove:
 
 class TestingTokenBagStr:
     def test_token_bag_str_default(self) -> None:
-        pass
+        token_bag = TokenBag()
+        assert str(token_bag) == ""
 
     def test_token_bag_str_single(self) -> None:
-        pass
+        token_bag = TokenBag()
+        amounts_to_add = {Token.GREEN: 2}
+        token_bag.add(amounts_to_add)
+        assert str(token_bag) == "GREEN: 2"
 
     def test_token_bag_str_multiple(self) -> None:
-        pass
+        token_bag = TokenBag()
+        amounts_to_add = {Token.GREEN: 2,
+                          Token.BLUE: 4,
+                          Token.RED: 3,
+                          }
+        token_bag.add(amounts_to_add)
+        assert str(token_bag) == ("GREEN: 2\n"
+                                  "BLUE : 4\n"
+                                  "RED  : 3")
 
     def test_token_bag_str_all(self) -> None:
-        pass
+        token_bag = TokenBag()
+        amounts_to_add = {Token.GREEN: 1,
+                          Token.WHITE: 2,
+                          Token.BLUE: 3,
+                          Token.BLACK: 1,
+                          Token.RED: 2,
+                          Token.YELLOW: 3}
+        token_bag.add(amounts_to_add)
+        assert str(token_bag) == ("GREEN: 1\n"
+                                  "WHITE: 2\n"
+                                  "BLUE : 3\n"
+                                  "BLACK: 1\n"
+                                  "RED  : 2\n"
+                                  "YELLOW: 3")
