@@ -27,11 +27,15 @@ class Bank:
         """Check if tokens of given colors can be removed."""
         for color in amount_to_remove:
             match amount_to_remove[color]:
-                case 2: return False if self.token_available[color] < 4 else None
-                case 1: return False if self.token_available[color] < 1 else None
-                case other: raise ValueError("Can only remove 1 or 2 tokens "
-                                             "per color, tried to remove "
-                                             f"{other}")
+                case 2:
+                    if self.token_available.tokens[color] < 4:
+                        return False
+                case 1:
+                    if self.token_available.tokens[color] < 1:
+                        return False
+                case other:
+                    raise ValueError("Can only remove 1 or 2 tokens per color"
+                                     f", tried to remove {other}")
         return True
 
     def remove_3_unique_color_tokens(self,
@@ -82,7 +86,8 @@ class Bank:
         # Sanity check if you don't check before calling this fn
         if not self.can_remove_token(amount_to_remove):
             raise ValueError(f"Can't take 2 {color} tokens when there are"
-                             f"{self.token_available[color]} left in the bank")
+                             f"{self.token_available.tokens[color]} left "
+                             "in the bank")
         self.token_available.remove(amount_to_remove)
 
     def remove_wildcard_token(self) -> None:
