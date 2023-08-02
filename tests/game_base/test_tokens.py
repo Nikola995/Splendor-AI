@@ -154,6 +154,39 @@ class TestingTokenBagAdd:
                     Token.YELLOW: 8}
         assert token_bag.tokens == expected
 
+    def test_token_bag_add_expected_errors_single(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: -1}
+        with pytest.raises(ValueError) as e:
+            token_bag.add(amounts)
+
+    def test_token_bag_add_expected_errors_multiple(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        amounts = {Token.GREEN: 1,
+                   Token.WHITE: 2,
+                   Token.BLUE: -1}
+        with pytest.raises(ValueError) as e:
+            token_bag.add(amounts)
+
+    def test_token_bag_bank_4_init_add_0(self) -> None:
+        token_bag = TokenBag(standard_amount=7, wildcard_amount=5)
+        # Adding 0 shouldn't happen,
+        # but at the same time shouldn't raise an error
+        amounts = {Token.GREEN: 1,
+                   Token.WHITE: 2,
+                   Token.BLUE: 3,
+                   Token.BLACK: 1,
+                   Token.RED: 2,
+                   Token.YELLOW: 0}
+        token_bag.add(amounts)
+        expected = {Token.GREEN: 8,
+                    Token.WHITE: 9,
+                    Token.BLUE: 10,
+                    Token.BLACK: 8,
+                    Token.RED: 9,
+                    Token.YELLOW: 5}
+        assert token_bag.tokens == expected
+
 
 class TestingTokenBagRemove:
     def test_token_bag_default_remove_single(self) -> None:
