@@ -27,15 +27,27 @@ class TestingNoble:
         expected.add(amounts)
         assert noble.bonus_required == expected
 
-    def test_noble_frozen_error(self) -> None:
+    def test_noble_initialization_error_wildcard(self) -> None:
+        amounts = {Token.GREEN: 4,
+                   Token.YELLOW: 4}
+        with pytest.raises(ValueError) as e:
+            noble = Noble(amounts)
+
+    def test_noble_initialization_error_negative_value(self) -> None:
+        amounts = {Token.GREEN: 4,
+                   Token.RED: -1}
+        with pytest.raises(ValueError) as e:
+            noble = Noble(amounts)
+
+    def test_noble_frozen_error_prestige_points(self) -> None:
         amounts = {Token.GREEN: 4,
                    Token.WHITE: 0,
                    Token.BLUE: 0,
                    Token.BLACK: 0,
                    Token.RED: 4}
         noble = Noble(amounts)
-        with pytest.raises(FrozenInstanceError) as e_info:
-            noble.bonus_required.add({Token.GREEN: 1})
+        with pytest.raises(FrozenInstanceError) as e:
+            noble.prestige_points += 1
 
     def test_noble_str(self) -> None:
         amounts = {Token.GREEN: 4,
