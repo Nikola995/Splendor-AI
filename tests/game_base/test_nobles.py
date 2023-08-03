@@ -4,8 +4,6 @@ from dataclasses import FrozenInstanceError
 from game_base.tokens import Token, TokenBag
 from game_base.nobles import Noble, NobleGenerator
 
-random.seed(42)
-
 
 class TestingNoble:
     def test_noble_initialization_default_simple(self) -> None:
@@ -73,4 +71,6 @@ class TestingNobleGenerator:
         assert len(nobles) == 4
 
     def test_noble_generator_types(self) -> None:
-        assert False
+        nobles = NobleGenerator().generate_nobles()
+        for noble in nobles:
+            assert isinstance(noble, Noble)
