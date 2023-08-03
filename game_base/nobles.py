@@ -11,11 +11,13 @@ class Noble:
     input_bonuses: InitVar[dict[Token, int]]
     # Number of prestige points the noble is worth
     prestige_points: int = 3
-    # Number of bonuses per color required to acquire noble
+    # Number of bonuses per color required to acquire noble (constant values!)
     bonus_required: TokenBag = field(default_factory=TokenBag)
 
     def __post_init__(self, input_bonuses: dict[Token, int]) -> None:
         self.bonus_required.add(input_bonuses)
+        if self.bonus_required.tokens[Token.YELLOW]:
+            raise ValueError("A noble can't require wildcard bonuses")
 
     def __str__(self) -> str:
         return "\n".join([f"Prestige points: {self.prestige_points}",
