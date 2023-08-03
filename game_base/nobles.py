@@ -52,4 +52,6 @@ class NobleGenerator:
 
     def generate_nobles(self, num_players: int = 4) -> List[Noble]:
         """Returns n + 1 nobles for n players from a shuffled list."""
-        return shuffle(self.default_nobles_list())[0:num_players + 1]
+        shuffled_nobles = self.default_nobles_list()
+        shuffle(shuffled_nobles)
+        return shuffled_nobles[0:num_players + 1]

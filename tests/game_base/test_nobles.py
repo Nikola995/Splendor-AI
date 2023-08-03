@@ -63,8 +63,14 @@ class TestingNoble:
 
 
 class TestingNobleGenerator:
-    def test_noble_generator_len(self) -> None:
-        assert False
+    def test_noble_generator_len_default(self) -> None:
+        nobles = NobleGenerator().generate_nobles()
+        assert len(nobles) == 5
+
+    def test_noble_generator_len_custom(self) -> None:
+        num_players = 3
+        nobles = NobleGenerator().generate_nobles(num_players)
+        assert len(nobles) == 4
 
     def test_noble_generator_types(self) -> None:
         assert False
