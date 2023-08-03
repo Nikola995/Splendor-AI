@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from typing import List
 from random import shuffle
 from game_base.tokens import Token, TokenBag
@@ -7,14 +7,19 @@ from game_base.tokens import Token, TokenBag
 @dataclass(frozen=True, slots=True)
 class Noble:
     """Representation of the Noble cards."""
-    # Number of bonuses per color required to acquire noble
-    bonus_required: TokenBag
+    # Initialization variable for the bonus amounts
+    input_bonuses: InitVar[dict[Token, int]]
     # Number of prestige points the noble is worth
     prestige_points: int = 3
+    # Number of bonuses per color required to acquire noble
+    bonus_required: TokenBag = field(default_factory=TokenBag)
+
+    def __post_init__(self, input_bonuses: dict[Token, int]) -> None:
+        self.bonus_required.add(input_bonuses)
 
     def __str__(self) -> str:
         return "\n".join([f"Prestige points: {self.prestige_points}",
-                          f"Bonuses required: {self.bonus_required}"])
+                          "Bonuses required:", f"{self.bonus_required}"])
 
 
 class NobleGenerator:
