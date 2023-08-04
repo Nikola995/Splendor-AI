@@ -198,11 +198,14 @@ class CardGenerator:
         if it exists, or generated from the .csv file,
         shuffling the decks if requested.
         """
-        if not path.exists(CARDS_FILE_PATH_PICKLE):
-            cards_data = self.generate_from_csv()
-            self.save_to_pickle(cards_data)
-        else:
+        if path.exists(CARDS_FILE_PATH_PICKLE):
             with open(CARDS_FILE_PATH_PICKLE, 'rb') as f:
                 cards_data = pickle.load(f)
+            if not isinstance(cards_data, CardManagerCollection):
+                raise ValueError("A CardManagerCollection wasn't saved in"
+                                 f"{CARDS_FILE_PATH_PICKLE}")
+        else:
+            cards_data = self.generate_from_csv()
+            self.save_to_pickle(cards_data)
         cards_data.shuffle_decks() if shuffled else None
         return cards_data
