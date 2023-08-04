@@ -122,3 +122,90 @@ class TestingCard:
                              "Benefits of Purchasing Card\n"
                              "Prestige points: 0\n"
                              "Bonus token: GREEN")
+
+
+class TestingCardManager:
+    def test_card_manager_initialization(self) -> None:
+        assert False
+
+    def test_card_manager_initialization_error_level(self) -> None:
+        assert False
+
+    def test_card_manager_sort(self) -> None:
+        assert False
+
+    def test_card_manager_fill_table_all(self) -> None:
+        assert False
+
+    def test_card_manager_fill_table_any(self) -> None:
+        assert False
+
+    def test_card_manager_fill_table_none(self) -> None:
+        assert False
+
+    def test_card_manager_remove_card_table_all(self) -> None:
+        assert False
+
+    def test_card_manager_remove_card_table_any(self) -> None:
+        assert False
+
+    def test_card_manager_remove_card_table_none(self) -> None:
+        assert False
+
+
+class TestingCardManagerColletion:
+    def test_card_manager_collection_initialization(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_manager(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_manager_error(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_deck(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_deck_error(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_table(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_table_error(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_all_decks(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_all_tables(self) -> None:
+        assert False
+
+    def test_card_manager_collection_get_all_cards_on_tables(self) -> None:
+        assert False
+
+    def test_card_manager_collection_is_card_in_tables_True(self) -> None:
+        assert False
+
+    def test_card_manager_collection_is_card_in_tables_False(self) -> None:
+        assert False
+
+    def test_card_manager_collection_shuffle_decks(self) -> None:
+        # Copy of original deck & shuffled deck compare
+        # same elements & not the same order
+        assert False
+
+    def test_card_manager_collection_fill_tables(self) -> None:
+        # Check pre & post fill the len of the tables
+        assert False
+
+
+class TestingCardGenerator:
+    def test_generate_from_csv(self) -> None:
+        # Just check if it runs & type of output is correct
+        assert False
+
+    def test_generate_cards(self) -> None:
+        # Check if the pkl file is made & correct type of output
+        # If CardManagerColletion.shuffle_decks test works, don't test here
+        assert False
