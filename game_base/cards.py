@@ -6,7 +6,7 @@ from os import path
 from game_base.tokens import Token, TokenBag
 
 CARDS_FILE_PATH_CSV = 'splendor_cards_list.csv'
-CARDS_FILE_PATH_PICKLE = 'cards_manager_collection.pickle'
+CARDS_FILE_PATH_PICKLE = 'cards_manager_collection.pkl'
 
 
 @dataclass(order=True, frozen=True, slots=True)
@@ -62,7 +62,7 @@ class Card:
 @dataclass(slots=True)
 class CardManager:
     """Contains a deck (face-down) and table (face-up) of
-    all cards of the same level,"""
+    all cards of the same level"""
     # Value by which this class is ordered
     _sort_index: int = field(init=False, repr=False)
     # All of the not visible cards
@@ -82,7 +82,6 @@ class CardManager:
 
     def fill_table(self):
         """Fill the table with 4 cards from the deck."""
-        # TODO: Make tests for this
         if len(self.table) < 4:
             for _ in range(4 - len(self.table)):
                 self.table.append(self.deck.pop())
@@ -90,7 +89,6 @@ class CardManager:
     def remove_card_from_table(self, card: Card) -> None:
         """Removes a card from the table, and replaces it with
         a card from the deck if possible, else None."""
-        # TODO: Make tests for this
         self.table[self.table.index(card)] = (self.deck.pop() if self.deck
                                               else None)
 
@@ -147,7 +145,6 @@ class CardManagerCollection:
 
     def get_all_cards_on_tables(self) -> list[Card]:
         """Returns a list of all cards on all tables."""
-        # TODO: Test this
         # Flatten the list of tables
         return [card for table in self.get_all_tables()
                 for card in table]
@@ -202,7 +199,7 @@ class CardGenerator:
         return CardManagerCollection(cards)
 
     def save_to_pickle(self, cards_data: CardManagerCollection,
-                       filepath: str = 'cards_lists.pickle') -> None:
+                       filepath: str = CARDS_FILE_PATH_PICKLE) -> None:
         """Save the CardManagerCollection from the original card info
         in a .pickle file."""
         with open(filepath, 'wb') as f:
