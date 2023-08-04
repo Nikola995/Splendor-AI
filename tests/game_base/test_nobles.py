@@ -1,5 +1,4 @@
 import pytest
-import random
 from dataclasses import FrozenInstanceError
 from game_base.tokens import Token, TokenBag
 from game_base.nobles import Noble, NobleGenerator
