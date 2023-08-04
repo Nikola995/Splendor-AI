@@ -95,6 +95,7 @@ class Game:
         self.bank = Bank(num_players=len(self.players))
         self.nobles = NobleGenerator.generate_nobles(len(self.players))
         self.meta_data.change_game_state(GameState.IN_PROGRESS)
+        self.cards.fill_tables()
 
     # %% Active game methods
     def is_final_turn(self) -> bool:
