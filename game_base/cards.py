@@ -29,6 +29,8 @@ class Card:
     card_id: str = field(init=False)
 
     def __post_init__(self):
+        if self.token_cost.tokens[Token.YELLOW]:
+            raise ValueError("A card can't require wildcard tokens")
         # Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
         # Ex. ID: 1 green 2 red -> 100002
@@ -161,11 +163,12 @@ class CardGenerator:
         cards_3 = []
         for index, row in cards_df.iterrows():
             card = Card(level=int(row['Level']), prestige_points=int(row['PV']),
-                        token_cost={Token.GREEN: int(row['(g)reen']),
-                                    Token.WHITE: int(row['(w)hite']),
-                                    Token.BLUE: int(row['bl(u)e']),
-                                    Token.BLACK: int(row['blac(k)']),
-                                    Token.RED: int(row['(r)ed'])},
+                        token_cost=TokenBag().add(
+                            {Token.GREEN: int(row['(g)reen']),
+                             Token.WHITE: int(row['(w)hite']),
+                             Token.BLUE: int(row['bl(u)e']),
+                             Token.BLACK: int(row['blac(k)']),
+                             Token.RED: int(row['(r)ed'])}),
                         bonus_color=Token[row['Gem color'].upper()])
             match card.level:
                 case 1: cards_1.append(card)
