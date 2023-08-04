@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from random import shuffle
 import pandas as pd
 import pickle
@@ -31,6 +31,8 @@ class Card:
     def __post_init__(self):
         if self.token_cost.tokens[Token.YELLOW]:
             raise ValueError("A card can't require wildcard tokens")
+        if self.level not in [1, 2, 3]:
+            raise ValueError('Card level is not 1, 2 or 3')
         # Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
         # Ex. ID: 1 green 2 red -> 100002
@@ -56,7 +58,7 @@ class CardManager:
     # All of the not visible cards
     deck: list[Card]
     # Difficulty of purchasing cards
-    card_level: int
+    card_level: int = field(init=False)
     # All of the visible cards
     table: list[Card] = field(default_factory=list)
 
@@ -81,7 +83,23 @@ class CardManager:
 @dataclass(slots=True)
 class CardManagerCollection:
     """Contains the card managers for all card levels."""
-    managers: list[CardManager]
+    managers: list[CardManager] = field(init=False)
+    cards: InitVar[list[Card]]
+
+    def __post_init__(self, cards: list[Card]) -> None:
+        # Separate the cards by level
+        cards_1 = []
+        cards_2 = []
+        cards_3 = []
+        for card in cards:
+            match card.level:
+                case 1: cards_1.append(card)
+                case 2: cards_2.append(card)
+                case 3: cards_3.append(card)
+                case _: continue
+        self.managers = [CardManager(cards_1),
+                         CardManager(cards_2),
+                         CardManager(cards_3)]
 
     def get_manager(self, card_level: int) -> CardManager:
         """Returns the card manager for the given card level."""
@@ -149,35 +167,24 @@ class CardGenerator:
         """Generates the CardManagerCollection from the original card info
         in the .csv file."""
         cards_df = pd.read_csv(CARDS_FILE_PATH_CSV, header=1)
-        cards_df['Level'] = cards_df['Level'].fillna(method='ffill')
-        cards_df['Gem color'] = cards_df['Gem color'].fillna(method='ffill')
-        cards_df['PV'] = cards_df['PV'].fillna(0)
-        cards_df['(w)hite'] = cards_df['(w)hite'].fillna(0)
-        cards_df['bl(u)e'] = cards_df['bl(u)e'].fillna(0)
-        cards_df['(g)reen'] = cards_df['(g)reen'].fillna(0)
-        cards_df['(r)ed'] = cards_df['(r)ed'].fillna(0)
-        cards_df['blac(k)'] = cards_df['blac(k)'].fillna(0)
+        columns_to_ffill = ['Level', 'Gem color']
+        cards_df[columns_to_ffill] = (cards_df[columns_to_ffill]
+                                      .fillna(method='ffill'))
+        columns_to_fill_0 = ['PV', '(w)hite', 'bl(u)e', '(g)reen',
+                             '(r)ed', 'blac(k)']
+        cards_df[columns_to_fill_0] = (cards_df[columns_to_fill_0]
+                                       .fillna(0))
         # Create cards from their info
-        cards_1 = []
-        cards_2 = []
-        cards_3 = []
-        for index, row in cards_df.iterrows():
-            card = Card(level=int(row['Level']), prestige_points=int(row['PV']),
-                        token_cost=TokenBag().add(
-                            {Token.GREEN: int(row['(g)reen']),
-                             Token.WHITE: int(row['(w)hite']),
-                             Token.BLUE: int(row['bl(u)e']),
-                             Token.BLACK: int(row['blac(k)']),
-                             Token.RED: int(row['(r)ed'])}),
-                        bonus_color=Token[row['Gem color'].upper()])
-            match card.level:
-                case 1: cards_1.append(card)
-                case 2: cards_2.append(card)
-                case 3: cards_3.append(card)
-                case other: raise Exception('Card level is not 1, 2 or 3')
-        return CardManagerCollection([CardManager(cards_1),
-                                      CardManager(cards_2),
-                                      CardManager(cards_3)])
+        cards = [Card(level=int(row['Level']), prestige_points=int(row['PV']),
+                      token_cost=TokenBag().add(
+                          {Token.GREEN: int(row['(g)reen']),
+                           Token.WHITE: int(row['(w)hite']),
+                           Token.BLUE: int(row['bl(u)e']),
+                           Token.BLACK: int(row['blac(k)']),
+                           Token.RED: int(row['(r)ed'])}),
+                      bonus_color=Token[row['Gem color'].upper()])
+                 for row in cards_df.to_dict('records')]
+        return CardManagerCollection(cards)
 
     def save_to_pickle(self, cards_data: CardManagerCollection,
                        filepath: str = 'cards_lists.pickle') -> None:
