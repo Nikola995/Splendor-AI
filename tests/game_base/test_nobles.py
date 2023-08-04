@@ -36,6 +36,12 @@ class TestingNoble:
         with pytest.raises(ValueError) as e:
             noble = Noble(amounts)
 
+    def test_noble_initialization_error_no_cost(self) -> None:
+        amounts = {Token.GREEN: 0,
+                   Token.RED: 0}
+        with pytest.raises(ValueError) as e:
+            noble = Noble(amounts)
+
     def test_noble_frozen_error_prestige_points(self) -> None:
         amounts = {Token.GREEN: 4,
                    Token.WHITE: 0,
