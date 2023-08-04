@@ -63,6 +63,8 @@ class Card:
 class CardManager:
     """Contains a deck (face-down) and table (face-up) of
     all cards of the same level,"""
+    # Value by which this class is ordered
+    _sort_index: int = field(init=False, repr=False)
     # All of the not visible cards
     deck: list[Card]
     # Difficulty of purchasing cards
@@ -75,6 +77,8 @@ class CardManager:
         for card in self.deck:
             if card.level != self.card_level:
                 raise ValueError("Not all cards have the same level.")
+        # Card Managers are ordered by their level
+        object.__setattr__(self, '_sort_index', self.level)
 
     def fill_table(self):
         """Fill the table with 4 cards from the deck."""
