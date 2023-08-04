@@ -42,20 +42,22 @@ class TokenBag:
         if wildcard_amount is not None:
             self.tokens[Token.YELLOW] = wildcard_amount
 
-    def add(self, amount: dict[Token, int]) -> None:
+    def add(self, amount: dict[Token, int]) -> 'TokenBag':
         """Adds tokens of given colors by the amount given for each."""
         for color in amount:
             if amount[color] < 0:
                 raise ValueError("TokenBag cannot work with negative values.")
             self.tokens[color] += amount[color]
+        return self
 
-    def remove(self, amount: dict[Token, int]) -> None:
+    def remove(self, amount: dict[Token, int]) -> 'TokenBag':
         """Removes tokens of given colors by the amount given for each.
         Assumes you're not going to 'remove' negative amounts."""
         for color in amount:
             self.tokens[color] -= amount[color]
             if self.tokens[color] < 0 or amount[color] < 0:
                 raise ValueError("TokenBag cannot work with negative values.")
+        return self
 
     def __str__(self) -> str:
         return "\n".join([f"{color.name:<5}: {self.tokens[color]}"
