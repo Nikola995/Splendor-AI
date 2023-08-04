@@ -15,6 +15,8 @@ class Noble:
     bonus_required: TokenBag = field(default_factory=TokenBag)
 
     def __post_init__(self, input_bonuses: dict[Token, int]) -> None:
+        if all(cost == 0 for cost in input_bonuses.values()):
+            raise ValueError("A noble can't require nothing.")
         self.bonus_required.add(input_bonuses)
         if self.bonus_required.tokens[Token.YELLOW]:
             raise ValueError("A noble can't require wildcard bonuses")

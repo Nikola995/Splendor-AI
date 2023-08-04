@@ -31,6 +31,8 @@ class Card:
     def __post_init__(self):
         if self.token_cost.tokens[Token.YELLOW]:
             raise ValueError("A card can't require wildcard tokens")
+        if all(cost == 0 for cost in self.token_cost.tokens.values()):
+            raise ValueError("A card can't cost nothing.")
         if self.level not in [1, 2, 3]:
             raise ValueError('Card level is not 1, 2 or 3')
         # Cards are ordered by their level
