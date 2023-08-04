@@ -25,22 +25,30 @@ class Card:
     prestige_points: int
     # Number of tokens required to purchase the card per color
     token_cost: TokenBag
-    # Card ID
-    card_id: str = field(init=False)
 
     def __post_init__(self):
         if self.token_cost.tokens[Token.YELLOW]:
             raise ValueError("A card can't require wildcard tokens")
+        if self.bonus_color == Token.YELLOW:
+            raise ValueError("A card can't have wildcard as a bonus color")
         if all(cost == 0 for cost in self.token_cost.tokens.values()):
             raise ValueError("A card can't cost nothing.")
         if self.level not in [1, 2, 3]:
             raise ValueError('Card level is not 1, 2 or 3')
         # Cards are ordered by their level
         object.__setattr__(self, '_sort_index', self.level)
-        # Ex. ID: 1 green 2 red -> 100002
-        self.card_id = "".join([str(self.token_cost[color])
-                                for color in self.token_cost
-                                if color != Token.YELLOW])
+
+    @property
+    def id(self) -> str:
+        """A string identifier of the card represented by the
+        token cost amounts.
+        (Assumed to be unique for all cards.)
+
+        Example ID: {green: 1, red: 2} -> 100002
+        """
+        return "".join([str(self.token_cost.tokens[color])
+                        for color in self.token_cost.tokens
+                        if color != Token.YELLOW])
 
     def __str__(self) -> str:
         output = []
