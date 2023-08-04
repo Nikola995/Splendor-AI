@@ -72,6 +72,9 @@ class CardManager:
 
     def __post_init__(self):
         self.card_level = self.deck[0].level
+        for card in self.deck:
+            if card.level != self.card_level:
+                raise ValueError("Not all cards have the same level.")
 
     def fill_table(self):
         """Fill the table with 4 cards from the deck."""
