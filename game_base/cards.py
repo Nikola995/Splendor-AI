@@ -51,14 +51,12 @@ class Card:
                         if color != Token.YELLOW])
 
     def __str__(self) -> str:
-        output = []
-        output.append(f"Card {self.card_id}")
-        output.append("Card Cost")
-        output.append(str(self.token_cost))
-        output.append("Benefits of Purchasing Card")
-        output.append(f"Prestige points: {self.prestige_points}")
-        output.append(f"Bonus token: {self.bonus_color.name}")
-        return '\n'.join(output)
+        return '\n'.join([f"Card {self.id}",
+                          "Card Cost",
+                          f"{self.token_cost}",
+                          "Benefits of Purchasing Card",
+                          f"Prestige points: {self.prestige_points}",
+                          f"Bonus token: {self.bonus_color.name}"])
 
 
 @dataclass(slots=True)
