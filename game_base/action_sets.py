@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from itertools import combinations
 from actions import (Action, ReserveCard, PurchaseCard,
@@ -44,14 +44,12 @@ def generate_standard_token_actions() -> list[Action]:
     return generate_3_unique_token_actions() + generate_2_same_token_actions()
 
 
-STANDARD_TOKEN_ACTIONS = generate_standard_token_actions()
-
-
 @dataclass(slots=True)
 class StandardActionSet(ActionSet):
     """All standard game actions."""
     # List of possible actions with tokens (immutable during entire game)
-    token_actions: list[Action] = STANDARD_TOKEN_ACTIONS
+    token_actions: list[Action] = field(
+        default_factory=generate_standard_token_actions)
 
     def possible_card_actions(self, player: Player,
                               cards: list[Card]) -> list[Action]:
