@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Tuple, Dict
 from abc import ABC, abstractmethod
 from players import Player
 from banks import Bank
@@ -36,10 +35,10 @@ class Reserve3UniqueColorTokens(Action):
         The player that will receive the requested tokens.
     bank : Bank
         The bank that will give the requested tokens.
-    colors: Tuple[Token, Token, Token]
+    colors: tuple[Token, Token, Token]
         Tuple containing 3 unique token colors
     """
-    colors: Tuple[Token, Token, Token]
+    colors: tuple[Token, Token, Token]
 
     def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the requested tokens can be reserved.
@@ -156,7 +155,7 @@ class PurchaseCard(Action):
         The bank that will give the requested wildcard token.
     card : Card
         The card that will be reserved by the player.
-    wildcard_collaterals: Dict[Token, int]
+    wildcard_collaterals: dict[Token, int]
         The number of Tokens that are replaced by wildcard tokens in the
         player's reserved_tokens
     """
@@ -180,7 +179,7 @@ class PurchaseCard(Action):
         player.add_to_owned_cards(self.card)
 
     def perform(self, player: Player, bank: Bank,
-                wildcard_collaterals: Dict[Token, int], **kwargs) -> None:
+                wildcard_collaterals: dict[Token, int], **kwargs) -> None:
         """Purchase the card for the player.
 
         The process of purchasing a card follows this process:

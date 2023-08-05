@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Dict
 from cards import Card
 from nobles import Noble
 from game_base.tokens import Token, TokenBag
@@ -21,29 +20,29 @@ class Player:
     # Metric for winning the game. >= 15 is eligible to win the game
     prestige_points: int = 0
 
-    def can_remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
+    def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
         return all([self.token_reserved[color] - amount_to_remove[color] >= 0
                     for color in amount_to_remove])
 
-    def remove_token(self, amount_to_remove: Dict[Token, int]) -> None:
+    def remove_token(self, amount_to_remove: dict[Token, int]) -> None:
         """Remove tokens of given colors by the amount given for each.
         Assumes can_remove_token check was made.
         Function call is only done while a player purchases a card.
 
         Parameters
         ----------
-        amount_to_remove : Dict[Token, int]
+        amount_to_remove : dict[Token, int]
             A dict of colors and corresponding amount of tokens to remove.
         """
         self.token_reserved.remove(amount_to_remove)
 
-    def can_add_token(self, amount_to_add: Dict[Token, int]) -> bool:
+    def can_add_token(self, amount_to_add: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be added."""
         return (sum(self.token_reserved.values()) +
                 sum(amount_to_add.values()) <= 10)
 
-    def add_token(self, amount_to_add: Dict[Token, int]) -> None:
+    def add_token(self, amount_to_add: dict[Token, int]) -> None:
         """Add tokens of given colors by the amount given for each.
         Assumes can_remove_token check was made.
         Function call is only done when a player reserves a card or
@@ -51,7 +50,7 @@ class Player:
 
         Parameters
         ----------
-        amount_to_add : Dict[Token, int]
+        amount_to_add : dict[Token, int]
             A dict of colors and corresponding amount of tokens to add.
         """
         # Sanity check if you don't check before calling this fn

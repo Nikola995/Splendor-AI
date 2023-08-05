@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field, InitVar
-from typing import List
 from random import shuffle
 from game_base.tokens import Token, TokenBag
 
@@ -27,9 +26,9 @@ class Noble:
 
 
 class NobleGenerator:
-    """Generates a List of Nobles for the number of players in a game."""
+    """Generates a list of Nobles for the number of players in a game."""
 
-    def default_nobles_list(self) -> List[Noble]:
+    def default_nobles_list(self) -> list[Noble]:
         """Returns a list of all the default nobles."""
         return [Noble({Token.GREEN: 4, Token.WHITE: 0, Token.BLUE: 0,
                        Token.BLACK: 0, Token.RED: 4}),
@@ -52,7 +51,7 @@ class NobleGenerator:
                 Noble({Token.GREEN: 3, Token.WHITE: 0, Token.BLUE: 0,
                        Token.BLACK: 3, Token.RED: 3})]
 
-    def generate_nobles(self, num_players: int = 4) -> List[Noble]:
+    def generate_nobles(self, num_players: int = 4) -> list[Noble]:
         """Returns n + 1 nobles for n players from a shuffled list."""
         shuffled_nobles = self.default_nobles_list()
         shuffle(shuffled_nobles)

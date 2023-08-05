@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from itertools import combinations
-from typing import Any, Tuple, Callable
+from typing import Any, Callable
 from games import Game, GameState
 from players import Player
 

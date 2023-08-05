@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field, InitVar
-from typing import Tuple, Dict
 from game_base.utils import IncorrectInputError
 from game_base.tokens import TokenBag, Token
 
@@ -23,7 +22,7 @@ class Bank:
             case other: raise ValueError("Cannot initialize a bank for "
                                          f"{num_players}, only 2, 3 or 4")
 
-    def can_remove_token(self, amount_to_remove: Dict[Token, int]) -> bool:
+    def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
         for color in amount_to_remove:
             match amount_to_remove[color]:
@@ -39,13 +38,13 @@ class Bank:
         return True
 
     def remove_3_unique_color_tokens(self,
-                                     colors: Tuple[Token, Token, Token]) -> None:
+                                     colors: tuple[Token, Token, Token]) -> None:
         """Remove 3 tokens of unique colors from the bank.
         Assumes can_remove_token check was made.
 
         Parameters
         ----------
-        color_list : Tuple[Token, Token, Token]
+        color_list : tuple[Token, Token, Token]
             Tuple containing 3 unique token colors
 
         Raises
@@ -97,13 +96,13 @@ class Bank:
         """
         self.token_available.remove({Token.YELLOW: 1})
 
-    def add_token(self, amount_to_add: Dict[Token, int]) -> None:
+    def add_token(self, amount_to_add: dict[Token, int]) -> None:
         """Add an amount of tokens for given colors to the bank.
         Function call is only done while a player purchases a card.
 
         Parameters
         ----------
-        amount_to_add : Dict[Token, int]
+        amount_to_add : dict[Token, int]
             A dict of colors and corresponding amount of tokens to add.
         """
         self.token_available.add(amount_to_add)
