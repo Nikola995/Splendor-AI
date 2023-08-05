@@ -133,7 +133,7 @@ class CLI(GameInterface):
         print(str(self.game.meta_data))
         if self.game.meta_data.state == GameState.IN_PROGRESS:
             print("Current player to move: "
-                  f"{self.game.get_current_player().player_id}")
+                  f"{self.game.get_current_player().id}")
 
     def show_game_nobles(self) -> None:
         print("----------Available Nobles-------------")

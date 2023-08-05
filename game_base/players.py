@@ -10,7 +10,7 @@ class Player:
 
     # TODO make it a user account with elo (in the future)
     # For now just use a string name
-    player_id: str
+    id: str
     token_reserved: TokenBag = field(default_factory=TokenBag)
     cards_reserved: list[Card] = field(default_factory=list)
     cards_owned: list[Card] = field(default_factory=list)
@@ -56,7 +56,7 @@ class Player:
         # Sanity check if you don't check before calling this fn
         if not self.can_add_token():
             raise ValueError("Too many tokens were given to"
-                             f" the player {self.player_id}")
+                             f" the player {self.id}")
         self.token_reserved.add(amount_to_add)
 
     def can_reserve_card(self) -> bool:
@@ -68,7 +68,7 @@ class Player:
         Assumes can_reserve_card check was made."""
         # Sanity check if you don't check before calling this fn
         if not self.can_reserve_card():
-            raise ValueError(f"Player {self.player_id} has too many"
+            raise ValueError(f"Player {self.id} has too many"
                              "reserved cards")
         # The wildcard token given when reserving a card should be handled
         # in the Action, this method just reserves the card for the player
@@ -121,7 +121,7 @@ class Player:
             Card to add to owned cards
         """
         self.cards_owned.append(card)
-        self.bonus_owned[card.bonus_color] += 1
+        self.bonus_owned.add({card.bonus_color: 1})
         self.prestige_points += card.prestige_points
 
     def is_eligible_for_noble(self, noble: Noble) -> bool:
@@ -149,14 +149,14 @@ class Player:
         self.prestige_points += noble.prestige_points
 
     def __str__(self) -> str:
-        output = []
-        output.append(f"Player ID: {self.player_id}")
-        output.append(f"Prestige points: {self.prestige_points}")
-        output.append(f"Number of nobles: {len(self.nobles_owned)}")
-        output.append(f"Number of reserved cards: {len(self.cards_reserved)}")
-        output.append(f"Number of purchased cards: {len(self.cards_owned)}")
-        output.append(f"--Bonuses from purchased cards--")
-        output.append(str(self.bonus_owned))
-        output.append(f"--Reserved tokens--")
-        output.append(str(self.token_reserved))
-        return '\n'.join(output)
+        return '\n'.join([f"Player ID: {self.id}",
+                          f"Prestige points: {self.prestige_points}",
+                          f"Number of nobles: {len(self.nobles_owned)}",
+                          "Number of reserved cards: "
+                          f"{len(self.cards_reserved)}",
+                          "Number of purchased cards: "
+                          f"{len(self.cards_owned)}",
+                          f"--Bonuses from purchased cards--",
+                          str(self.bonus_owned),
+                          f"--Reserved tokens--",
+                          str(self.token_reserved)])
