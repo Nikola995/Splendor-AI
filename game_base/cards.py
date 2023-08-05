@@ -56,7 +56,8 @@ class Card:
                           f"{self.token_cost}",
                           "Benefits of Purchasing Card",
                           f"Prestige points: {self.prestige_points}",
-                          f"Bonus token: {self.bonus_color.name}"])
+                          "Bonus token: "
+                          f"{str(self.bonus_color).capitalize()}"])
 
 
 @dataclass(slots=True)

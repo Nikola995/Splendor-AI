@@ -14,6 +14,9 @@ class GameState(Enum):
     IN_PROGRESS = auto()
     FINISHED = auto()
 
+    def __str__(self) -> str:
+        return f"{self.name.replace('_', ' ').lower()}"
+
 
 @dataclass(slots=True)
 class GameMetaData:
@@ -25,11 +28,12 @@ class GameMetaData:
     def change_game_state(self, new_state: GameState) -> None:
         """Changes the current state of the game."""
         if new_state == GameState.NOT_STARTED:
-            raise ValueError("Game can't be changed to NOT_STARTED")
+            raise ValueError("The game state is initialized to NOT_STARTED & "
+                             "can't be changed to it")
         self.state = new_state
 
     def __str__(self) -> str:
-        output = [f"Game is {self.state.name}",
+        output = [f"Game is {self.state}",
                   f"Turns played: {self.turns_played}"]
         return "\n".join(output)
 

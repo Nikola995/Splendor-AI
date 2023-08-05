@@ -11,6 +11,9 @@ class Token(Enum):
     RED = auto()
     YELLOW = auto()
 
+    def __str__(self) -> str:
+        return f"{self.name.lower()}"
+
 
 @dataclass(slots=True)
 class TokenBag:
@@ -60,5 +63,5 @@ class TokenBag:
         return self
 
     def __str__(self) -> str:
-        return "\n".join([f"{color.name:<5}: {self.tokens[color]}"
+        return "\n".join([f"{str(color).capitalize():<5}: {self.tokens[color]}"
                           for color in self.tokens if self.tokens[color] > 0])

@@ -59,9 +59,8 @@ class Reserve3UniqueColorTokens(Action):
         player.add_token(dict.fromkeys(self.colors, 1))
 
     def __str__(self) -> str:
-        return (f"reserved 1 {self.colors[0].name.lower()}, "
-                f"{self.colors[1].name.lower()} and "
-                f"{self.colors[2].name.lower()} tokens.")
+        return (f"reserved 1 {self.colors[0]}, {self.colors[1]} and "
+                f"{self.colors[2]} tokens.")
 
 
 @dataclass(slots=True)
@@ -98,7 +97,7 @@ class Reserve2SameColorTokens(Action):
         player.add_token({self.color: 2})
 
     def __str__(self) -> str:
-        return (f"reserved 2 {self.color.name.lower()} tokens.")
+        return (f"reserved 2 {self.color} tokens.")
 
 
 @dataclass(slots=True)
@@ -140,7 +139,7 @@ class ReserveCard(Action):
             player.add_token(single_wildcard)
 
     def __str__(self) -> str:
-        return f"reserved card {self.card.card_id}."
+        return f"reserved card {self.card.id}."
 
 
 @dataclass(slots=True)
@@ -224,4 +223,4 @@ class PurchaseCard(Action):
         self._give_card(player)
 
     def __str__(self) -> str:
-        return f"purchased card {self.card.card_id}."
+        return f"purchased card {self.card.id}."

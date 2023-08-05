@@ -79,7 +79,7 @@ class Bank:
         """
         # TODO: Remove the sanity checks if never raised and need speed-up.
         if color == Token.YELLOW:
-            raise IncorrectInputError("Yellow token cannot be removed without"
+            raise IncorrectInputError(f"Yellow token cannot be removed without"
                                       " reserving a card")
         amount_to_remove = {color: 2}
         # Sanity check if you don't check before calling this fn
