@@ -61,8 +61,8 @@ class TestingNoble:
         noble = Noble(amounts)
         assert str(noble) == ("Prestige points: 3\n"
                               "Bonuses required:\n"
-                              "GREEN: 4\n"
-                              "RED  : 4")
+                              "Green: 4\n"
+                              "Red  : 4")
 
 
 class TestingNobleGenerator:

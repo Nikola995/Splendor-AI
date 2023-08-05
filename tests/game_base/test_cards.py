@@ -116,12 +116,12 @@ class TestingCard:
                     token_cost=TokenBag().add(amounts))
         assert str(card) == ("Card 00111\n"
                              "Card Cost\n"
-                             "BLUE : 1\n"
-                             "BLACK: 1\n"
-                             "RED  : 1\n"
+                             "Blue : 1\n"
+                             "Black: 1\n"
+                             "Red  : 1\n"
                              "Benefits of Purchasing Card\n"
                              "Prestige points: 0\n"
-                             "Bonus token: GREEN")
+                             "Bonus token: Green")
 
 
 class TestingCardManager:

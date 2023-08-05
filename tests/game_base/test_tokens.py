@@ -373,7 +373,7 @@ class TestingTokenBagStr:
         token_bag = TokenBag()
         amounts_to_add = {Token.GREEN: 2}
         token_bag.add(amounts_to_add)
-        assert str(token_bag) == "GREEN: 2"
+        assert str(token_bag) == "Green: 2"
 
     def test_token_bag_str_multiple(self) -> None:
         token_bag = TokenBag()
@@ -382,9 +382,9 @@ class TestingTokenBagStr:
                           Token.RED: 3,
                           }
         token_bag.add(amounts_to_add)
-        assert str(token_bag) == ("GREEN: 2\n"
-                                  "BLUE : 4\n"
-                                  "RED  : 3")
+        assert str(token_bag) == ("Green: 2\n"
+                                  "Blue : 4\n"
+                                  "Red  : 3")
 
     def test_token_bag_str_all(self) -> None:
         token_bag = TokenBag()
@@ -395,9 +395,9 @@ class TestingTokenBagStr:
                           Token.RED: 2,
                           Token.YELLOW: 3}
         token_bag.add(amounts_to_add)
-        assert str(token_bag) == ("GREEN: 1\n"
-                                  "WHITE: 2\n"
-                                  "BLUE : 3\n"
-                                  "BLACK: 1\n"
-                                  "RED  : 2\n"
-                                  "YELLOW: 3")
+        assert str(token_bag) == ("Green: 1\n"
+                                  "White: 2\n"
+                                  "Blue : 3\n"
+                                  "Black: 1\n"
+                                  "Red  : 2\n"
+                                  "Yellow: 3")

@@ -198,40 +198,40 @@ class TestingBankAddToken:
 
 
 class TestingBankStr:
-    def test_bank_str_default(self) -> None:
+    def test_bank_str_default_all(self) -> None:
         bank = Bank()
         assert str(bank) == ("Available Bank tokens:\n"
-                             "GREEN: 7\n"
-                             "WHITE: 7\n"
-                             "BLUE : 7\n"
-                             "BLACK: 7\n"
-                             "RED  : 7\n"
-                             "YELLOW: 5")
+                             "Green: 7\n"
+                             "White: 7\n"
+                             "Blue : 7\n"
+                             "Black: 7\n"
+                             "Red  : 7\n"
+                             "Yellow: 5")
 
-    def test_bank_str_empty(self) -> None:
+    def test_bank_str_default_none(self) -> None:
         bank = Bank()
         for color in bank.token_available.tokens:
             bank.token_available.tokens[color] = 0
         assert str(bank) == ("Available Bank tokens:\n")
 
-    def test_bank_str_not_all(self) -> None:
+    def test_bank_str_any(self) -> None:
         bank = Bank()
         bank.token_available.tokens[Token.GREEN] = 0
         assert str(bank) == ("Available Bank tokens:\n"
-                             "WHITE: 7\n"
-                             "BLUE : 7\n"
-                             "BLACK: 7\n"
-                             "RED  : 7\n"
-                             "YELLOW: 5")
+                             "White: 7\n"
+                             "Blue : 7\n"
+                             "Black: 7\n"
+                             "Red  : 7\n"
+                             "Yellow: 5")
 
     def test_bank_str_post_remove(self) -> None:
         bank = Bank()
         tokens_to_remove = (Token.GREEN, Token.WHITE, Token.BLUE)
         bank.remove_3_unique_color_tokens(tokens_to_remove)
         assert str(bank) == ("Available Bank tokens:\n"
-                             "GREEN: 6\n"
-                             "WHITE: 6\n"
-                             "BLUE : 6\n"
-                             "BLACK: 7\n"
-                             "RED  : 7\n"
-                             "YELLOW: 5")
+                             "Green: 6\n"
+                             "White: 6\n"
+                             "Blue : 6\n"
+                             "Black: 7\n"
+                             "Red  : 7\n"
+                             "Yellow: 5")
