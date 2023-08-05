@@ -60,7 +60,7 @@ class Card:
                           f"{str(self.bonus_color).capitalize()}"])
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, order=True)
 class CardManager:
     """Contains a deck (face-down) and table (face-up) of
     all cards of the same level"""
@@ -79,13 +79,17 @@ class CardManager:
             if card.level != self.card_level:
                 raise ValueError("Not all cards have the same level.")
         # Card Managers are ordered by their level
-        object.__setattr__(self, '_sort_index', self.level)
+        object.__setattr__(self, '_sort_index', self.card_level)
 
     def fill_table(self):
         """Fill the table with 4 cards from the deck."""
         if len(self.table) < 4:
             for _ in range(4 - len(self.table)):
-                self.table.append(self.deck.pop())
+                self.table.append(self.deck.pop() if self.deck else None)
+    
+    def num_cards_on_table(self):
+        """Gets the number of cards on the table that has 4 slots."""
+        return len([card for card in self.table if card is not None])
 
     def remove_card_from_table(self, card: Card) -> None:
         """Removes a card from the table, and replaces it with
