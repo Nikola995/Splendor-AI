@@ -125,23 +125,62 @@ class TestingCard:
 
 
 class TestingCardManager:
+    def card_list_for_testing(self, level: int = 1,
+                              num_cards: int = 5) -> list[Card]:
+        return [Card(level=level, prestige_points=0, bonus_color=Token.GREEN,
+                     token_cost=TokenBag().add({Token.BLUE: i}))
+                for i in range(1, num_cards + 1)]
+
     def test_card_manager_initialization(self) -> None:
-        assert False
+        card_list = self.card_list_for_testing()
+        card_manager = CardManager(card_list)
+        assert card_manager.deck == card_list
+        assert card_manager.card_level == 1
+        assert len(card_manager.table) == card_manager.table_size
+        assert card_manager.num_cards_on_table() == 0
 
     def test_card_manager_initialization_error_level(self) -> None:
-        assert False
+        card_list = self.card_list_for_testing()
+        card_list.append(Card(level=2, prestige_points=0,
+                              bonus_color=Token.GREEN,
+                              token_cost=TokenBag().add({Token.BLACK: 1})))
+        with pytest.raises(ValueError) as e:
+            card_manager = CardManager(card_list)
 
     def test_card_manager_sort(self) -> None:
-        assert False
+        card_manager_1 = CardManager(self.card_list_for_testing(level=1))
+        card_manager_2 = CardManager(self.card_list_for_testing(level=2))
+        card_manager_3 = CardManager(self.card_list_for_testing(level=3))
+        assert (sorted([card_manager_3, card_manager_2, card_manager_1]) ==
+                [card_manager_1, card_manager_2, card_manager_3])
 
     def test_card_manager_fill_table_all(self) -> None:
-        assert False
+        num_cards = 5
+        card_list = self.card_list_for_testing(num_cards=num_cards)
+        card_manager = CardManager(card_list)
+        card_manager.fill_table()
+        assert len(card_manager.deck) == num_cards - card_manager.table_size
+        assert len(card_manager.table) == card_manager.table_size
+        assert card_manager.num_cards_on_table() == card_manager.table_size
 
     def test_card_manager_fill_table_any(self) -> None:
-        assert False
+        num_cards = 3
+        card_list = self.card_list_for_testing(num_cards=num_cards)
+        card_manager = CardManager(card_list)
+        card_manager.fill_table()
+        assert len(card_manager.deck) == max(num_cards -
+                                             card_manager.table_size, 0)
+        assert len(card_manager.table) == card_manager.table_size
+        assert card_manager.num_cards_on_table() == num_cards
 
     def test_card_manager_fill_table_none(self) -> None:
-        assert False
+        card_list = self.card_list_for_testing(num_cards=1)
+        card_manager = CardManager(card_list)
+        card_manager.deck.remove(card_list[0])
+        card_manager.fill_table()
+        assert len(card_manager.deck) == 0
+        assert len(card_manager.table) == card_manager.table_size
+        assert card_manager.num_cards_on_table() == 0
 
     def test_card_manager_remove_card_table_all(self) -> None:
         assert False

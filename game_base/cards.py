@@ -68,28 +68,30 @@ class CardManager:
     _sort_index: int = field(init=False, repr=False)
     # All of the not visible cards
     deck: list[Card]
+    # All of the visible cards
+    table_size: int = 4
+    table: list[Card] = field(init=False)
     # Difficulty of purchasing cards
     card_level: int = field(init=False)
-    # All of the visible cards
-    table: list[Card] = field(default_factory=list)
 
     def __post_init__(self):
         self.card_level = self.deck[0].level
         for card in self.deck:
             if card.level != self.card_level:
                 raise ValueError("Not all cards have the same level.")
+        self.table = [None] * self.table_size
         # Card Managers are ordered by their level
         object.__setattr__(self, '_sort_index', self.card_level)
 
-    def fill_table(self):
-        """Fill the table with 4 cards from the deck."""
-        if len(self.table) < 4:
-            for _ in range(4 - len(self.table)):
-                self.table.append(self.deck.pop() if self.deck else None)
-    
     def num_cards_on_table(self):
         """Gets the number of cards on the table that has 4 slots."""
         return len([card for card in self.table if card is not None])
+
+    def fill_table(self):
+        """Fill the remaining slots in the table with cards from the deck."""
+        if self.num_cards_on_table() < self.table_size:
+            for slot_idx in range(self.table_size):
+                self.table[slot_idx] = (self.deck.pop() if self.deck else None)
 
     def remove_card_from_table(self, card: Card) -> None:
         """Removes a card from the table, and replaces it with
