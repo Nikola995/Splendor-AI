@@ -183,13 +183,32 @@ class TestingCardManager:
         assert card_manager.num_cards_on_table() == 0
 
     def test_card_manager_remove_card_table_all(self) -> None:
-        assert False
+        num_cards = 5
+        card_list = self.card_list_for_testing(num_cards=num_cards)
+        card_manager = CardManager(card_list)
+        card_manager.fill_table()
+        card_idx = 1
+        card_to_remove = card_manager.table[card_idx]
+        card_manager.remove_card_from_table(card_to_remove)
+        assert len(card_manager.deck) == (num_cards -
+                                          (card_manager.table_size + 1))
+        assert len(card_manager.table) == card_manager.table_size
+        assert card_manager.num_cards_on_table() == card_manager.table_size
+        assert card_manager.table[card_idx] is not None
 
     def test_card_manager_remove_card_table_any(self) -> None:
-        assert False
-
-    def test_card_manager_remove_card_table_none(self) -> None:
-        assert False
+        num_cards = 3
+        card_list = self.card_list_for_testing(num_cards=num_cards)
+        card_manager = CardManager(card_list)
+        card_manager.fill_table()
+        card_idx = 1
+        card_to_remove = card_manager.table[card_idx]
+        card_manager.remove_card_from_table(card_to_remove)
+        assert len(card_manager.deck) == max((num_cards -
+                                             (card_manager.table_size + 1)), 0)
+        assert len(card_manager.table) == card_manager.table_size
+        assert card_manager.num_cards_on_table() == num_cards - 1
+        assert card_manager.table[card_idx] is None
 
 
 class TestingCardManagerColletion:
