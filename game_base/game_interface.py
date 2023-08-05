@@ -86,8 +86,8 @@ class Command:
 
 
 @dataclass(slots=True)
-class GameInterfaceConsole(GameInterface):
-    """An interface for playing a game using the console."""
+class CLI(GameInterface):
+    """A control line interface for playing a game."""
     # All of the possible commands with their descriptions & executions
     commands: dict[str, Command] = field(default_factory=dict)
 
