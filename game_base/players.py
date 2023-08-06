@@ -12,7 +12,7 @@ class Player:
     # For now just use a string name
     id: str
     token_reserved: TokenBag = field(default_factory=TokenBag)
-    cards_reserved: list[Card] = field(default_factory=list)
+    cards_reserved: list[Card] = field(default_factory=lambda: [None] * 3)
     cards_owned: list[Card] = field(default_factory=list)
     # Bonuses from Owned Cards, Wildcard in TokenBag is unused
     bonus_owned: TokenBag = field(default_factory=TokenBag)
@@ -59,20 +59,27 @@ class Player:
                              f" the player {self.id}")
         self.token_reserved.add(amount_to_add)
 
+    def num_reserved_cards(self) -> int:
+        """Returns the number of reserved card slots that are not empty."""
+        return len([card for card in self.cards_reserved if card is not None])
+        
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""
-        return len(self.cards_reserved) < 3
+        return self.num_reserved_cards() < 3
 
     def add_to_reserved_cards(self, card: Card) -> None:
-        """Add card to dict of reserved cards.
+        """Add card to the first open slot in reserved cards.
         Assumes can_reserve_card check was made."""
         # Sanity check if you don't check before calling this fn
         if not self.can_reserve_card():
-            raise ValueError(f"Player {self.id} has too many"
-                             "reserved cards")
+            raise ValueError(f"Player {self.id} has no open slots to reserve "
+                             "another card.")
         # The wildcard token given when reserving a card should be handled
         # in the Action, this method just reserves the card for the player
-        self.cards_reserved.append(card)
+        for i in range(len(self.cards_reserved)):
+            if self.cards_reserved[i] is None:
+                self.cards_reserved[i] = card
+                break
 
     # TODO: Write tests for this
     def can_purchase_card(self, card: Card) -> bool:
