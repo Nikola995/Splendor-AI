@@ -371,10 +371,21 @@ class TestingCardManagerColletion:
 
 class TestingCardGenerator:
     def test_generate_from_csv(self) -> None:
-        # Just check if it runs & type of output is correct
-        assert False
+        # Just check if it runs & the output type is correct
+        card_collection = CardGenerator.generate_from_csv()
+        assert isinstance(card_collection, CardManagerCollection)
 
     def test_generate_cards(self) -> None:
-        # Check if the pkl file is made & correct type of output
-        # If CardManagerColletion.shuffle_decks test works, don't test here
-        assert False
+        # Just check if it runs & the output type is correct
+        card_collection = CardGenerator.generate_cards()
+        assert isinstance(card_collection, CardManagerCollection)
+
+    def test_generate_cards_shuffle(self) -> None:
+        # Compare shuffled & unshuffled card collections
+        card_collection_shuffled = CardGenerator.generate_cards()
+        card_collection = CardGenerator.generate_cards(shuffled=False)
+        for i in range(1, 4):
+            assert (card_collection.get_deck(i) !=
+                    card_collection_shuffled.get_deck(i))
+            assert all(card in card_collection_shuffled.get_deck(i)
+                       for card in card_collection.get_deck(i))
