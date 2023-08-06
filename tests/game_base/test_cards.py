@@ -125,7 +125,8 @@ class TestingCard:
 
 
 class TestingCardManager:
-    def card_list_for_testing(self, level: int = 1,
+    @staticmethod
+    def card_list_for_testing(level: int = 1,
                               num_cards: int = 5) -> list[Card]:
         return [Card(level=level, prestige_points=0, bonus_color=Token.GREEN,
                      token_cost=TokenBag().add({Token.BLUE: i}))
@@ -212,50 +213,160 @@ class TestingCardManager:
 
 
 class TestingCardManagerColletion:
+    @staticmethod
+    def card_collection_for_testing() -> tuple[list[Card],
+                                               list[Card],
+                                               list[Card],
+                                               CardManagerCollection]:
+        cards_1 = TestingCardManager.card_list_for_testing(level=1)
+        cards_2 = TestingCardManager.card_list_for_testing(level=2)
+        cards_3 = TestingCardManager.card_list_for_testing(level=3)
+        return (cards_1, cards_2, cards_3,
+                CardManagerCollection(cards_1 + cards_2 + cards_3))
+
     def test_card_manager_collection_initialization(self) -> None:
-        assert False
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        assert card_collection.managers == [CardManager(cards_1),
+                                            CardManager(cards_2),
+                                            CardManager(cards_3)]
 
     def test_card_manager_collection_get_manager(self) -> None:
-        assert False
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        assert card_collection.get_manager(1) == CardManager(cards_1)
+        assert card_collection.get_manager(2) == CardManager(cards_2)
+        assert card_collection.get_manager(3) == CardManager(cards_3)
 
     def test_card_manager_collection_get_manager_error(self) -> None:
-        assert False
+        _, _, _, card_collection = self.card_collection_for_testing()
+        with pytest.raises(ValueError) as e:
+            card_collection.get_manager(4)
 
     def test_card_manager_collection_get_deck(self) -> None:
-        assert False
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        assert card_collection.get_deck(1) == cards_1
+        assert card_collection.get_deck(2) == cards_2
+        assert card_collection.get_deck(3) == cards_3
 
     def test_card_manager_collection_get_deck_error(self) -> None:
-        assert False
+        _, _, _, card_collection = self.card_collection_for_testing()
+        with pytest.raises(ValueError) as e:
+            card_collection.get_deck(4)
 
     def test_card_manager_collection_get_table(self) -> None:
-        assert False
+        _, _, _, card_collection = self.card_collection_for_testing()
+        for i in range(1, 4):
+            assert (card_collection.get_table(i) ==
+                    [None] * card_collection.get_manager(i).table_size)
+        assert card_collection.get_table(1) is not card_collection.get_table(2)
+        assert card_collection.get_table(1) is not card_collection.get_table(3)
+        assert card_collection.get_table(2) is not card_collection.get_table(3)
 
     def test_card_manager_collection_get_table_error(self) -> None:
-        assert False
+        _, _, _, card_collection = self.card_collection_for_testing()
+        with pytest.raises(ValueError) as e:
+            card_collection.get_table(4)
 
     def test_card_manager_collection_get_all_decks(self) -> None:
-        assert False
-
-    def test_card_manager_collection_get_all_tables(self) -> None:
-        assert False
-
-    def test_card_manager_collection_get_all_cards_on_tables(self) -> None:
-        assert False
-
-    def test_card_manager_collection_is_card_in_tables_True(self) -> None:
-        assert False
-
-    def test_card_manager_collection_is_card_in_tables_False(self) -> None:
-        assert False
-
-    def test_card_manager_collection_shuffle_decks(self) -> None:
-        # Copy of original deck & shuffled deck compare
-        # same elements & not the same order
-        assert False
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        assert card_collection.get_all_decks() == [cards_1, cards_2, cards_3]
 
     def test_card_manager_collection_fill_tables(self) -> None:
-        # Check pre & post fill the len of the tables
-        assert False
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        # Pre-fill asserts
+        for i in range(1, 4):
+            assert (card_collection.get_table(i) ==
+                    [None] * card_collection.get_manager(i).table_size)
+        assert card_collection.get_table(1) is not card_collection.get_table(2)
+        assert card_collection.get_table(1) is not card_collection.get_table(3)
+        assert card_collection.get_table(2) is not card_collection.get_table(3)
+        card_collection.fill_tables()
+        # Post-fill asserts
+        # Do the same asserts for each table as in
+        # TestingCardManager.test_card_manager_fill_table_all
+        assert (len(card_collection.get_deck(1)) ==
+                len(cards_1) - card_collection.get_manager(1).table_size)
+        assert (len(card_collection.get_deck(2)) ==
+                len(cards_2) - card_collection.get_manager(2).table_size)
+        assert (len(card_collection.get_deck(3)) ==
+                len(cards_3) - card_collection.get_manager(3).table_size)
+        for i in range(1, 4):
+            assert (len(card_collection.get_table(i)) ==
+                    card_collection.get_manager(i).table_size)
+            assert (card_collection.get_manager(i).num_cards_on_table() ==
+                    card_collection.get_manager(i).table_size)
+        # Assert the cards on the table are taken from the deck
+        table_cards_1 = cards_1[-card_collection.get_manager(1).table_size:]
+        table_cards_1.reverse()
+        table_cards_2 = cards_2[-card_collection.get_manager(2).table_size:]
+        table_cards_2.reverse()
+        table_cards_3 = cards_3[-card_collection.get_manager(3).table_size:]
+        table_cards_3.reverse()
+        assert (card_collection.get_table(1) == table_cards_1)
+        assert (card_collection.get_table(2) == table_cards_2)
+        assert (card_collection.get_table(3) == table_cards_3)
+
+    def test_card_manager_collection_get_all_tables(self) -> None:
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        card_collection.fill_tables()
+        table_cards_1 = cards_1[-card_collection.get_manager(1).table_size:]
+        table_cards_1.reverse()
+        table_cards_2 = cards_2[-card_collection.get_manager(2).table_size:]
+        table_cards_2.reverse()
+        table_cards_3 = cards_3[-card_collection.get_manager(3).table_size:]
+        table_cards_3.reverse()
+        assert (card_collection.get_all_tables() ==
+                [table_cards_1, table_cards_2, table_cards_3])
+
+    def test_card_manager_collection_get_all_cards_on_tables(self) -> None:
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        card_collection.fill_tables()
+        table_cards_1 = cards_1[-card_collection.get_manager(1).table_size:]
+        table_cards_1.reverse()
+        table_cards_2 = cards_2[-card_collection.get_manager(2).table_size:]
+        table_cards_2.reverse()
+        table_cards_3 = cards_3[-card_collection.get_manager(3).table_size:]
+        table_cards_3.reverse()
+        assert (card_collection.get_all_cards_on_tables() ==
+                table_cards_1 + table_cards_2 + table_cards_3)
+
+    def test_card_manager_collection_is_card_in_tables_True(self) -> None:
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        card_collection.fill_tables()
+        table_cards_1 = cards_1[-card_collection.get_manager(1).table_size:]
+        table_cards_2 = cards_2[-card_collection.get_manager(2).table_size:]
+        table_cards_3 = cards_3[-card_collection.get_manager(3).table_size:]
+        for card in table_cards_1 + table_cards_2 + table_cards_3:
+            assert card_collection.is_card_in_tables(card) == True
+
+    def test_card_manager_collection_is_card_in_tables_False(self) -> None:
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        card_collection.fill_tables()
+        deck_cards_1 = cards_1[:-card_collection.get_manager(1).table_size]
+        deck_cards_2 = cards_2[:-card_collection.get_manager(2).table_size]
+        deck_cards_3 = cards_3[:-card_collection.get_manager(3).table_size]
+        for card in deck_cards_1 + deck_cards_2 + deck_cards_3:
+            assert card_collection.is_card_in_tables(card) == False
+
+    def test_card_manager_collection_shuffle_decks(self) -> None:
+        # For each deck assert the same elements & not the same order
+        (cards_1, cards_2, cards_3,
+         card_collection) = self.card_collection_for_testing()
+        card_collection.shuffle_decks()
+        assert all(card in card_collection.get_deck(1) for card in cards_1)
+        assert all(card in card_collection.get_deck(2) for card in cards_2)
+        assert all(card in card_collection.get_deck(3) for card in cards_3)
+        assert cards_1 != card_collection.get_deck(1)
+        assert cards_2 != card_collection.get_deck(2)
+        assert cards_3 != card_collection.get_deck(3)
 
 
 class TestingCardGenerator:
