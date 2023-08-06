@@ -3,7 +3,6 @@ from game_base.utils import IncorrectInputError
 from game_base.tokens import TokenBag, Token
 
 
-# TODO Make it a singleton (refactor) (maybe?)
 @dataclass(slots=True)
 class Bank:
     """A representation of the unreserved tokens in the game."""
@@ -12,6 +11,7 @@ class Bank:
     num_players: InitVar[int] = 4
 
     def __post_init__(self, num_players: int):
+        # TODO: store the initial amounts to have can_add_token check
         match num_players:
             case 4: self.token_available = TokenBag(standard_amount=7,
                                                     wildcard_amount=5)
@@ -19,7 +19,7 @@ class Bank:
                                                     wildcard_amount=5)
             case 2: self.token_available = TokenBag(standard_amount=4,
                                                     wildcard_amount=5)
-            case other: raise ValueError("Cannot initialize a bank for "
+            case _: raise ValueError("Cannot initialize a bank for "
                                          f"{num_players}, only 2, 3 or 4")
 
     def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
@@ -32,11 +32,12 @@ class Bank:
                 case 1:
                     if self.token_available.tokens[color] < 1:
                         return False
-                case other:
-                    raise ValueError("Can only remove 1 or 2 tokens per color"
-                                     f", tried to remove {other}")
+                case other_amount:
+                    raise NotImplementedError("There are no ways to remove "
+                                              f"{other_amount} tokens.")
         return True
 
+    # TODO: revert to a single remove_token method
     def remove_3_unique_color_tokens(self,
                                      colors: tuple[Token, Token, Token]) -> None:
         """Remove 3 tokens of unique colors from the bank.
@@ -52,7 +53,7 @@ class Bank:
         IncorrectInputError
             Raised if 3 unique colors are not given or wildcard is given
         """
-        # TODO: Remove the sanity checks if never raised and need speed-up.
+        # Sanity checks
         if len(colors) != 3:
             raise IncorrectInputError("The number of token colors was not 3")
         if len(set(colors)) != 3:
@@ -77,7 +78,7 @@ class Bank:
         IncorrectInputError
             Raised if wildcard color is given
         """
-        # TODO: Remove the sanity checks if never raised and need speed-up.
+        # Sanity check
         if color == Token.YELLOW:
             raise IncorrectInputError(f"Yellow token cannot be removed without"
                                       " reserving a card")
@@ -96,6 +97,8 @@ class Bank:
         """
         self.token_available.remove({Token.YELLOW: 1})
 
+    # TODO: create can_add_token method
+    # TODO: add can_add_token check inside add_token
     def add_token(self, amount_to_add: dict[Token, int]) -> None:
         """Add an amount of tokens for given colors to the bank.
         Function call is only done while a player purchases a card.
