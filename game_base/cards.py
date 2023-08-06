@@ -1,3 +1,4 @@
+from pathlib import Path
 from dataclasses import dataclass, field, InitVar
 from random import shuffle
 import pandas as pd
@@ -5,8 +6,11 @@ import pickle
 from os import path
 from game_base.tokens import Token, TokenBag
 
-CARDS_FILE_PATH_CSV = 'splendor_cards_list.csv'
-CARDS_FILE_PATH_PICKLE = 'cards_manager_collection.pkl'
+# Set the files path to be relative to this file
+CARDS_FILE_PATH_CSV: Path = (Path(__file__).parent /
+                             'splendor_cards_list.csv').resolve()
+CARDS_FILE_PATH_PKL: Path = (Path(__file__).parent /
+                             'cards_manager_collection.pkl').resolve()
 
 
 @dataclass(order=True, frozen=True, slots=True)
@@ -207,7 +211,7 @@ class CardGenerator:
 
     @staticmethod
     def save_to_pickle(cards_data: CardManagerCollection,
-                       filepath: str = CARDS_FILE_PATH_PICKLE) -> None:
+                       filepath: Path = CARDS_FILE_PATH_PKL) -> None:
         """Save the CardManagerCollection from the original card info
         in a .pickle file."""
         with open(filepath, 'wb') as f:
@@ -219,12 +223,12 @@ class CardGenerator:
         if it exists, or generated from the .csv file,
         shuffling the decks if requested.
         """
-        if path.exists(CARDS_FILE_PATH_PICKLE):
-            with open(CARDS_FILE_PATH_PICKLE, 'rb') as f:
+        if path.exists(CARDS_FILE_PATH_PKL):
+            with open(CARDS_FILE_PATH_PKL, 'rb') as f:
                 cards_data = pickle.load(f)
             if not isinstance(cards_data, CardManagerCollection):
                 raise ValueError("A CardManagerCollection wasn't saved in"
-                                 f"{CARDS_FILE_PATH_PICKLE}")
+                                 f"{CARDS_FILE_PATH_PKL}")
         else:
             cards_data = CardGenerator.generate_from_csv()
             CardGenerator.save_to_pickle(cards_data)
