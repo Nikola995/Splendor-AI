@@ -59,13 +59,14 @@ class Player:
                              f" the player {self.id}")
         self.token_reserved.add(amount_to_add)
 
+    @property
     def num_reserved_cards(self) -> int:
-        """Returns the number of reserved card slots that are not empty."""
+        """The number of reserved card slot filled by a card."""
         return len([card for card in self.cards_reserved if card is not None])
         
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""
-        return self.num_reserved_cards() < 3
+        return self.num_reserved_cards < 3
 
     def add_to_reserved_cards(self, card: Card) -> None:
         """Add card to the first open slot in reserved cards.
