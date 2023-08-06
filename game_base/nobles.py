@@ -27,8 +27,8 @@ class Noble:
 
 class NobleGenerator:
     """Generates a list of Nobles for the number of players in a game."""
-
-    def default_nobles_list(self) -> list[Noble]:
+    @staticmethod
+    def default_nobles_list() -> list[Noble]:
         """Returns a list of all the default nobles."""
         return [Noble({Token.GREEN: 4, Token.WHITE: 0, Token.BLUE: 0,
                        Token.BLACK: 0, Token.RED: 4}),
@@ -51,8 +51,9 @@ class NobleGenerator:
                 Noble({Token.GREEN: 3, Token.WHITE: 0, Token.BLUE: 0,
                        Token.BLACK: 3, Token.RED: 3})]
 
-    def generate_nobles(self, num_players: int = 4) -> list[Noble]:
+    @staticmethod
+    def generate_nobles(num_players: int = 4) -> list[Noble]:
         """Returns n + 1 nobles for n players from a shuffled list."""
-        shuffled_nobles = self.default_nobles_list()
+        shuffled_nobles = NobleGenerator.default_nobles_list()
         shuffle(shuffled_nobles)
         return shuffled_nobles[0:num_players + 1]
