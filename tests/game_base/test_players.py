@@ -170,6 +170,30 @@ class TestingPlayer:
         with pytest.raises(ValueError) as e:
             player.add_noble(noble)
 
+    def test_player_sort(self) -> None:
+        player_1 = Player('test_player_1')
+        player_2 = Player('test_player_2')
+        player_3 = Player('test_player_3')
+        player_4 = Player('test_player_4')
+        cards = TestingCardManager.card_list_for_testing(num_cards=10)
+        player_1.prestige_points = 16
+        player_2.prestige_points = 16
+        player_3.prestige_points = 15
+        player_4.prestige_points = 15
+        player_1.cards_owned = cards[0:3]
+        assert len(player_1.cards_owned) == 3
+        player_2.cards_owned = cards[3:7]
+        assert len(player_2.cards_owned) == 4
+        player_3.cards_owned = cards[7:8]
+        assert len(player_3.cards_owned) == 1
+        player_4.cards_owned = cards[8:10]
+        assert len(player_4.cards_owned) == 2
+        # Do the same sort as used in Game class
+        player_list = sorted([player_2, player_4, player_3, player_1],
+                             reverse=True)
+        expected = [player_1, player_2, player_3, player_4]
+        assert player_list == expected
+
 
 class TestingPlayerCanPurchaseCard:
     def test_player_can_purchase_card_True_just_bonus(self) -> None:
