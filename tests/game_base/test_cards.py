@@ -94,18 +94,36 @@ class TestingCard:
             card.bonus_color = Token.GREEN
 
     def test_card_sort(self) -> None:
-        # The amounts don't matter for sorting
-        amounts = {Token.BLUE: 1,
-                   Token.BLACK: 1,
-                   Token.RED: 1}
-        card_1 = Card(level=1, prestige_points=0, bonus_color=Token.GREEN,
-                      token_cost=TokenBag().add(amounts))
-        card_2 = Card(level=2, prestige_points=0, bonus_color=Token.GREEN,
-                      token_cost=TokenBag().add(amounts))
-        card_3 = Card(level=3, prestige_points=0, bonus_color=Token.GREEN,
-                      token_cost=TokenBag().add(amounts))
-        card_list = sorted([card_3, card_2, card_1])
-        expected = [card_1, card_2, card_3]
+        card_1_0_1 = Card(level=1, prestige_points=0, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 1}))
+        card_1_0_2 = Card(level=1, prestige_points=0, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 2}))
+        card_1_1_1 = Card(level=1, prestige_points=1, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 1}))
+        card_1_1_2 = Card(level=1, prestige_points=1, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 2}))
+        card_2_0_1 = Card(level=2, prestige_points=0, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 1}))
+        card_2_0_2 = Card(level=2, prestige_points=0, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 2}))
+        card_2_1_1 = Card(level=2, prestige_points=1, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 1}))
+        card_2_1_2 = Card(level=2, prestige_points=1, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 2}))
+        card_3_0_1 = Card(level=3, prestige_points=0, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 1}))
+        card_3_0_2 = Card(level=3, prestige_points=0, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 2}))
+        card_3_1_1 = Card(level=3, prestige_points=1, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 1}))
+        card_3_1_2 = Card(level=3, prestige_points=1, bonus_color=Token.GREEN,
+                          token_cost=TokenBag().add({Token.BLUE: 2}))
+        card_list = sorted([card_3_0_1, card_3_0_2, card_3_1_1, card_3_1_2,
+                            card_2_0_1, card_2_0_2, card_2_1_1, card_2_1_2,
+                            card_1_0_1, card_1_0_2, card_1_1_1, card_1_1_2])
+        expected = [card_1_0_1, card_1_0_2, card_1_1_1, card_1_1_2,
+                    card_2_0_1, card_2_0_2, card_2_1_1, card_2_1_2,
+                    card_3_0_1, card_3_0_2, card_3_1_1, card_3_1_2]
         assert card_list == expected
 
     def test_card_str(self) -> None:

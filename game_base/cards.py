@@ -19,16 +19,15 @@ class Card:
     Cards are purchasable items by players that give them color bonuses
     and possible prestige points
     '''
-    # Value by which this class is ordered
-    _sort_index: int = field(init=False, repr=False)
+    # The order of the attributes is important for sorting
     # Difficulty of purchasing development card
     level: int
-    # Color of the bonus gem given by owning the card
-    bonus_color: Token
     # Number of prestige points given by owning the card
     prestige_points: int
     # Number of tokens required to purchase the card per color
     token_cost: TokenBag
+    # Color of the bonus gem given by owning the card
+    bonus_color: Token
 
     def __post_init__(self):
         if self.token_cost.tokens[Token.YELLOW]:
@@ -39,8 +38,6 @@ class Card:
             raise ValueError("A card can't cost nothing.")
         if self.level not in [1, 2, 3]:
             raise ValueError('Card level is not 1, 2 or 3')
-        # Cards are ordered by their level
-        object.__setattr__(self, '_sort_index', self.level)
 
     @property
     def id(self) -> str:
@@ -68,15 +65,13 @@ class Card:
 class CardManager:
     """Contains a deck (face-down) and table (face-up) of
     all cards of the same level"""
-    # Value by which this class is ordered
-    _sort_index: int = field(init=False, repr=False)
+    # Cards Purchasing Difficulty (also used for sorting)
+    card_level: int = field(init=False)
     # All of the not visible cards
     deck: list[Card]
     # All of the visible cards
     table_size: int = 4
     table: list[Card] = field(init=False)
-    # Difficulty of purchasing cards
-    card_level: int = field(init=False)
 
     def __post_init__(self):
         self.card_level = self.deck[0].level
@@ -84,8 +79,6 @@ class CardManager:
             if card.level != self.card_level:
                 raise ValueError("Not all cards have the same level.")
         self.table = [None] * self.table_size
-        # Card Managers are ordered by their level
-        object.__setattr__(self, '_sort_index', self.card_level)
 
     def num_cards_on_table(self):
         """Gets the number of cards on the table that has 4 slots."""
