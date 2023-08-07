@@ -82,7 +82,6 @@ class Player:
                 self.cards_reserved[i] = card
                 break
 
-    # TODO: Write tests for this
     def can_purchase_card(self, card: Card) -> bool:
         """Check if the player can purchase the given card.
 
@@ -96,21 +95,22 @@ class Player:
             The card that the player wants to purchase.
         """
         collateral_wildcards = 0
-        for color in card.token_cost:
-            player_buying_power = (self.bonus_owned[color] +
-                                   self.token_reserved[color])
+        color_costs = card.token_cost.tokens
+        for color in color_costs:
+            player_buying_power = (self.bonus_owned.tokens[color] +
+                                   self.token_reserved.tokens[color])
             # If the card can be purchased without wildcards
-            if card.token_cost[color] <= player_buying_power:
+            if color_costs[color] <= player_buying_power:
                 continue
             # If the card can be purchased with wildcards
             # that weren't reserved for previous costs
             # in the card requirements
-            elif card.token_cost[color] <= (player_buying_power +
-                                            self.token_reserved[Token.YELLOW]
-                                            - collateral_wildcards):
+            elif color_costs[color] <= (player_buying_power +
+                                        self.token_reserved.tokens[Token.YELLOW]
+                                        - collateral_wildcards):
                 # Add the remainder of the cost to the number of
                 # collateral wildcards for the purchase
-                collateral_wildcards += (card.token_cost[color] -
+                collateral_wildcards += (color_costs[color] -
                                          player_buying_power)
                 continue
             # Else the card can't be purchased
