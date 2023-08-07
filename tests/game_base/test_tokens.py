@@ -364,6 +364,81 @@ class TestingTokenBagAddAndRemove:
         assert token_bag.tokens == expected
 
 
+class TestingTokenBagComparisonOperators:
+    def test_token_bag_eq_True(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=5)
+        token_bag_2 = TokenBag(standard_amount=5, wildcard_amount=5)
+        assert token_bag_1 == token_bag_2
+
+    def test_token_bag_eq_False(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=5)
+        token_bag_2 = TokenBag(standard_amount=5, wildcard_amount=4)
+        assert not (token_bag_1 == token_bag_2)
+
+    def test_token_bag_lt_True(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=5, wildcard_amount=4)
+        token_bag_2 = TokenBag(standard_amount=6, wildcard_amount=5)
+        assert token_bag_1 < token_bag_2
+
+    def test_token_bag_lt_False_any(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=5, wildcard_amount=4)
+        token_bag_2 = TokenBag(standard_amount=6, wildcard_amount=4)
+        assert not (token_bag_1 < token_bag_2)
+
+    def test_token_bag_le_True(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=5, wildcard_amount=4)
+        token_bag_2 = TokenBag(standard_amount=6, wildcard_amount=4)
+        assert token_bag_1 <= token_bag_2
+
+    def test_token_bag_le_True_eq(self) -> None:
+        token_bag_1 = TokenBag()
+        token_bag_2 = TokenBag()
+        assert token_bag_1 <= token_bag_2
+        token_bag_2.add({Token.BLACK: 1})
+        assert token_bag_1 <= token_bag_2
+
+    def test_token_bag_le_False_any(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=5, wildcard_amount=4)
+        token_bag_2 = TokenBag(standard_amount=6, wildcard_amount=3)
+        assert not (token_bag_1 <= token_bag_2)
+
+    def test_token_bag_le_False_diff_color(self) -> None:
+        token_bag_1 = TokenBag()
+        token_bag_2 = TokenBag()
+        token_bag_1.add({Token.GREEN: 1})
+        token_bag_2.add({Token.BLUE: 1})
+        assert not (token_bag_1 <= token_bag_2)
+
+    def test_token_bag_gt_True(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=6, wildcard_amount=5)
+        token_bag_2 = TokenBag(standard_amount=5, wildcard_amount=4)
+        assert token_bag_1 > token_bag_2
+
+    def test_token_bag_gt_False_any(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=6, wildcard_amount=4)
+        token_bag_2 = TokenBag(standard_amount=5, wildcard_amount=4)
+        assert not (token_bag_1 > token_bag_2)
+
+    def test_token_bag_le_True_eq(self) -> None:
+        token_bag_1 = TokenBag()
+        token_bag_2 = TokenBag()
+        assert token_bag_1 >= token_bag_2
+        token_bag_1.add({Token.BLACK: 1})
+        assert token_bag_1 >= token_bag_2
+
+    def test_token_bag_le_False_any(self) -> None:
+        token_bag_1 = TokenBag(standard_amount=6, wildcard_amount=3)
+        token_bag_2 = TokenBag(standard_amount=5, wildcard_amount=4)
+        assert not (token_bag_1 >= token_bag_2)
+
+    def test_token_bag_le_False_diff_color(self) -> None:
+        token_bag_1 = TokenBag()
+        token_bag_2 = TokenBag()
+        token_bag_1.add({Token.GREEN: 1})
+        token_bag_2.add({Token.BLUE: 1})
+        assert not (token_bag_1 >= token_bag_2)
+
+
 class TestingTokenBagStr:
     def test_token_bag_str_default(self) -> None:
         token_bag = TokenBag()
