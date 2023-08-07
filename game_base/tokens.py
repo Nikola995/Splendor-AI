@@ -62,6 +62,39 @@ class TokenBag:
                 raise ValueError("TokenBag cannot work with negative values.")
         return self
 
+    def __eq__(self, other):
+        if isinstance(other, TokenBag):
+            return self.tokens == other.tokens
+        return False
+
+    def __lt__(self, other):
+        if isinstance(other, TokenBag):
+            return all([self.tokens[color] < other.tokens[color]
+                        for color in self.tokens])
+        raise TypeError(
+            f"Comparison not supported between 'TokenBag' and {type(other)}")
+
+    def __le__(self, other):
+        if isinstance(other, TokenBag):
+            return all([self.tokens[color] <= other.tokens[color]
+                        for color in self.tokens])
+        raise TypeError(
+            f"Comparison not supported between 'TokenBag' and {type(other)}")
+
+    def __gt__(self, other):
+        if isinstance(other, TokenBag):
+            return all([self.tokens[color] > other.tokens[color]
+                        for color in self.tokens])
+        raise TypeError(
+            f"Comparison not supported between 'TokenBag' and {type(other)}")
+
+    def __ge__(self, other):
+        if isinstance(other, TokenBag):
+            return all([self.tokens[color] >= other.tokens[color]
+                        for color in self.tokens])
+        raise TypeError(
+            f"Comparison not supported between 'TokenBag' and {type(other)}")
+
     def __str__(self) -> str:
         return "\n".join([f"{str(color).capitalize():<5}: {self.tokens[color]}"
                           for color in self.tokens if self.tokens[color] > 0])
