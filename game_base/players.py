@@ -22,8 +22,8 @@ class Player:
 
     def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
-        return all([self.token_reserved[color] - amount_to_remove[color] >= 0
-                    for color in amount_to_remove])
+        return all([(self.token_reserved.tokens[color] - amount_to_remove[color]
+                     >= 0) for color in amount_to_remove])
 
     def remove_token(self, amount_to_remove: dict[Token, int]) -> None:
         """Remove tokens of given colors by the amount given for each.
@@ -39,7 +39,7 @@ class Player:
 
     def can_add_token(self, amount_to_add: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be added."""
-        return (sum(self.token_reserved.values()) +
+        return (sum(self.token_reserved.tokens.values()) +
                 sum(amount_to_add.values()) <= 10)
 
     def add_token(self, amount_to_add: dict[Token, int]) -> None:
@@ -54,7 +54,7 @@ class Player:
             A dict of colors and corresponding amount of tokens to add.
         """
         # Sanity check if you don't check before calling this fn
-        if not self.can_add_token():
+        if not self.can_add_token(amount_to_add):
             raise ValueError("Too many tokens were given to"
                              f" the player {self.id}")
         self.token_reserved.add(amount_to_add)
@@ -140,8 +140,9 @@ class Player:
         noble : Noble
             The noble whose bonuses we check against
         """
-        return all([self.bonus_owned[color] >= noble.bonus_required[color]
-                    for color in noble.bonus_required])
+        return all([(self.bonus_owned.tokens[color] >=
+                     noble.bonus_required.tokens[color])
+                    for color in noble.bonus_required.tokens])
 
     def add_noble(self, noble: Noble) -> None:
         """Add noble to list of owned nobles.
@@ -153,7 +154,7 @@ class Player:
         noble : Noble
             Noble to add to owned nobles
         """
-        if not self.is_eligible_for_noble():
+        if not self.is_eligible_for_noble(noble):
             raise ValueError(f"Player {self.id} is not eligible for "
                              f"Noble {noble}")
         self.nobles_owned.append(noble)
