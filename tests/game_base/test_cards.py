@@ -127,8 +127,10 @@ class TestingCard:
 class TestingCardManager:
     @staticmethod
     def card_list_for_testing(level: int = 1,
-                              num_cards: int = 5) -> list[Card]:
-        return [Card(level=level, prestige_points=0, bonus_color=Token.GREEN,
+                              num_cards: int = 5,
+                              prestige: bool = False) -> list[Card]:
+        return [Card(level=level, bonus_color=Token.GREEN,
+                     prestige_points=i if prestige else 0,
                      token_cost=TokenBag().add({Token.BLUE: i}))
                 for i in range(1, num_cards + 1)]
 
