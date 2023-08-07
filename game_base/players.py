@@ -128,6 +128,7 @@ class Player:
         card : Card
             Card to add to owned cards
         """
+        # TODO: Check if card in cards_reserved and remove
         self.cards_owned.append(card)
         self.bonus_owned.add({card.bonus_color: 1})
         self.prestige_points += card.prestige_points
@@ -163,12 +164,14 @@ class Player:
     def __str__(self) -> str:
         return '\n'.join([f"Player ID: {self.id}",
                           f"Prestige points: {self.prestige_points}",
-                          f"Number of nobles: {len(self.nobles_owned)}",
-                          "Number of reserved cards: "
-                          f"{len(self.cards_reserved)}",
                           "Number of purchased cards: "
                           f"{len(self.cards_owned)}",
-                          f"--Bonuses from purchased cards--",
+                          f"Number of nobles: {len(self.nobles_owned)}",
+                          "Number of reserved cards: "
+                          f"{self.num_reserved_cards}",
+                          "--Reserved cards--",
+                          *[str(card) for card in self.cards_reserved],
+                          "--Bonuses from purchased cards--",
                           str(self.bonus_owned),
-                          f"--Reserved tokens--",
-                          str(self.token_reserved)])
+                          "--Reserved tokens--",
+                          str(self.token_reserved),])

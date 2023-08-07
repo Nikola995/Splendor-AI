@@ -345,5 +345,150 @@ class TestingPlayerCanPurchaseCard:
 
 
 class TestingPlayerStr:
-    def test_player_str(self) -> None:
-        raise NotImplementedError()
+    def test_player_str_default(self) -> None:
+        player = Player('test_player')
+        assert str(player) == ("Player ID: test_player\n"
+                               "Prestige points: 0\n"
+                               "Number of purchased cards: 0\n"
+                               "Number of nobles: 0\n"
+                               "Number of reserved cards: 0\n"
+                               "--Reserved cards--\n"
+                               "None\n"
+                               "None\n"
+                               "None\n"
+                               "--Bonuses from purchased cards--\n"
+                               "\n"
+                               "--Reserved tokens--\n"
+                               )
+
+    def test_player_str_tokens_reserved(self) -> None:
+        player = Player('test_player')
+        player.add_token({Token.BLACK: 1, Token.BLUE: 1, Token.RED: 1})
+        assert str(player) == ("Player ID: test_player\n"
+                               "Prestige points: 0\n"
+                               "Number of purchased cards: 0\n"
+                               "Number of nobles: 0\n"
+                               "Number of reserved cards: 0\n"
+                               "--Reserved cards--\n"
+                               "None\n"
+                               "None\n"
+                               "None\n"
+                               "--Bonuses from purchased cards--\n"
+                               "\n"
+                               "--Reserved tokens--\n"
+                               "Blue : 1\n"
+                               "Black: 1\n"
+                               "Red  : 1"
+                               )
+
+    def test_player_str_cards_reserved(self) -> None:
+        player = Player('test_player')
+        amounts = {Token.BLUE: 1}
+        card = Card(level=1, prestige_points=0, bonus_color=Token.RED,
+                    token_cost=TokenBag().add(amounts))
+        player.add_to_reserved_cards(card)
+        assert str(player) == ("Player ID: test_player\n"
+                               "Prestige points: 0\n"
+                               "Number of purchased cards: 0\n"
+                               "Number of nobles: 0\n"
+                               "Number of reserved cards: 1\n"
+                               "--Reserved cards--\n"
+                               "Card 00100\n"
+                               "Card Cost\n"
+                               "Blue : 1\n"
+                               "Benefits of Purchasing Card\n"
+                               "Prestige points: 0\n"
+                               "Bonus token: Red\n"
+                               "None\n"
+                               "None\n"
+                               "--Bonuses from purchased cards--\n"
+                               "\n"
+                               "--Reserved tokens--\n"
+                               )
+
+    def test_player_str_cards_purchased(self) -> None:
+        player = Player('test_player')
+        amounts = {Token.BLUE: 1}
+        card = Card(level=1, prestige_points=2, bonus_color=Token.RED,
+                    token_cost=TokenBag().add(amounts))
+        player.add_to_owned_cards(card)
+        assert str(player) == ("Player ID: test_player\n"
+                               "Prestige points: 2\n"
+                               "Number of purchased cards: 1\n"
+                               "Number of nobles: 0\n"
+                               "Number of reserved cards: 0\n"
+                               "--Reserved cards--\n"
+                               "None\n"
+                               "None\n"
+                               "None\n"
+                               "--Bonuses from purchased cards--\n"
+                               "Red  : 1\n"
+                               "--Reserved tokens--\n"
+                               )
+
+    def test_player_str_nobles_owned(self) -> None:
+        player = Player('test_player')
+        bonus_color = Token.RED
+        num_cards = 3
+        for _ in range(num_cards):
+            amounts = {Token.BLUE: 1}
+            card = Card(level=1, prestige_points=1, bonus_color=bonus_color,
+                        token_cost=TokenBag().add(amounts))
+            player.add_to_owned_cards(card)
+        noble = Noble({bonus_color: num_cards})
+        player.add_noble(noble)
+        assert str(player) == ("Player ID: test_player\n"
+                               "Prestige points: 6\n"
+                               "Number of purchased cards: 3\n"
+                               "Number of nobles: 1\n"
+                               "Number of reserved cards: 0\n"
+                               "--Reserved cards--\n"
+                               "None\n"
+                               "None\n"
+                               "None\n"
+                               "--Bonuses from purchased cards--\n"
+                               "Red  : 3\n"
+                               "--Reserved tokens--\n"
+                               )
+
+    def test_player_str_all(self) -> None:
+        player = Player('test_player')
+        # Reserve tokens
+        player.add_token({Token.BLACK: 1, Token.BLUE: 1, Token.RED: 1})
+        # Reserve card
+        amounts = {Token.BLUE: 1}
+        card = Card(level=1, prestige_points=0, bonus_color=Token.RED,
+                    token_cost=TokenBag().add(amounts))
+        player.add_to_reserved_cards(card)
+        # Purchase cards
+        bonus_color = Token.RED
+        num_cards = 3
+        for _ in range(num_cards):
+            amounts = {Token.BLUE: 1}
+            card = Card(level=1, prestige_points=1, bonus_color=bonus_color,
+                        token_cost=TokenBag().add(amounts))
+            player.add_to_owned_cards(card)
+        # Add Noble
+        noble = Noble({bonus_color: num_cards})
+        player.add_noble(noble)
+        assert str(player) == ("Player ID: test_player\n"
+                               "Prestige points: 6\n"
+                               "Number of purchased cards: 3\n"
+                               "Number of nobles: 1\n"
+                               "Number of reserved cards: 1\n"
+                               "--Reserved cards--\n"
+                               "Card 00100\n"
+                               "Card Cost\n"
+                               "Blue : 1\n"
+                               "Benefits of Purchasing Card\n"
+                               "Prestige points: 0\n"
+                               "Bonus token: Red\n"
+                               "None\n"
+                               "None\n"
+                               "--Bonuses from purchased cards--\n"
+                               "Red  : 3\n"
+                               "--Reserved tokens--\n"
+                               "Blue : 1\n"
+                               "Black: 1\n"
+                               "Red  : 1"
+                               )
