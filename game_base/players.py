@@ -63,7 +63,7 @@ class Player:
     def num_reserved_cards(self) -> int:
         """The number of reserved card slot filled by a card."""
         return len([card for card in self.cards_reserved if card is not None])
-        
+
     def can_reserve_card(self) -> bool:
         """Check if player has less than 3 reserved cards."""
         return self.num_reserved_cards < 3
@@ -153,6 +153,9 @@ class Player:
         noble : Noble
             Noble to add to owned nobles
         """
+        if not self.is_eligible_for_noble():
+            raise ValueError(f"Player {self.id} is not eligible for "
+                             f"Noble {noble}")
         self.nobles_owned.append(noble)
         self.prestige_points += noble.prestige_points
 
