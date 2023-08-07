@@ -111,19 +111,17 @@ class Game:
         return False
 
     def get_winner(self) -> Player:
-        """Gets the winner if the game is finished."""
+        """Gets the winner if the game is finished.
+
+        If there's more than one eligible player to win,
+        sort by most prestige points, then least owned cards.
+        (Sorting keys are implemented in the Player class)"""
         if self.meta_data.state != GameState.FINISHED:
             raise ValueError("Can't get winner because game isn't finished")
         eligible_players = [player for player in self.players
                             if player.prestige_points >= 15]
-        # If there's more than one eligible players,
-        # sort by most prestige points, then least owned cards
-        if len(eligible_players) > 1:
-            eligible_players = sorted(eligible_players,
-                                      key=lambda x: (-x.prestige_points,
-                                                     len(x.cards_owned)))
         # Return the winner
-        return eligible_players[0]
+        return sorted(eligible_players, reverse=True)[0]
 
     def get_current_player(self) -> Player:
         """Return the current player."""

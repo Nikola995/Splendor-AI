@@ -4,7 +4,7 @@ from nobles import Noble
 from game_base.tokens import Token, TokenBag
 
 
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class Player:
     """A representation of a player entity within the game."""
 
@@ -160,6 +160,25 @@ class Player:
                              f"Noble {noble}")
         self.nobles_owned.append(noble)
         self.prestige_points += noble.prestige_points
+
+    def __lt__(self, other):
+        """Used for sorting in Game to get the winner.
+        If there's more than one eligible player to win,
+        sort by most prestige points, then least owned cards."""
+        if isinstance(other, Player):
+            return ((self.prestige_points, -len(self.cards_owned)) <
+                    (other.prestige_points, -len(other.cards_owned)))
+        raise TypeError(
+            f"Comparison not supported between 'Player' and {type(other)}")
+
+    def __eq__(self, other):
+        """Used for sorting in Game to get the winner.
+        If there's more than one eligible player to win,
+        sort by most prestige points, then least owned cards."""
+        if isinstance(other, Player):
+            return ((self.prestige_points, -len(self.cards_owned)) ==
+                    (other.prestige_points, -len(other.cards_owned)))
+        return False
 
     def __str__(self) -> str:
         return '\n'.join([f"Player ID: {self.id}",
