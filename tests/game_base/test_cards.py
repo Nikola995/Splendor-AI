@@ -364,7 +364,7 @@ class TestingCardManagerColletion:
         table_cards_2 = cards_2[-card_collection.get_manager(2).table_size:]
         table_cards_3 = cards_3[-card_collection.get_manager(3).table_size:]
         for card in table_cards_1 + table_cards_2 + table_cards_3:
-            assert card_collection.is_card_in_tables(card) == True
+            assert card_collection.is_card_in_tables(card)
 
     def test_card_manager_collection_is_card_in_tables_False(self) -> None:
         (cards_1, cards_2, cards_3,
@@ -374,7 +374,7 @@ class TestingCardManagerColletion:
         deck_cards_2 = cards_2[:-card_collection.get_manager(2).table_size]
         deck_cards_3 = cards_3[:-card_collection.get_manager(3).table_size]
         for card in deck_cards_1 + deck_cards_2 + deck_cards_3:
-            assert card_collection.is_card_in_tables(card) == False
+            assert not card_collection.is_card_in_tables(card)
 
     def test_card_manager_collection_shuffle_decks(self) -> None:
         # For each deck assert the same elements & not the same order

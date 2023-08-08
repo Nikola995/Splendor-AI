@@ -20,12 +20,12 @@ class TestingPlayer:
     def test_player_can_remove_token_True(self) -> None:
         player = Player('test_player')
         player.token_reserved.add({Token.GREEN: 3})
-        assert player.can_remove_token({Token.GREEN: 2}) == True
+        assert player.can_remove_token({Token.GREEN: 2})
 
     def test_player_can_remove_token_False(self) -> None:
         player = Player('test_player')
         player.token_reserved.add({Token.GREEN: 3})
-        assert player.can_remove_token({Token.RED: 2}) == False
+        assert not player.can_remove_token({Token.RED: 2})
 
     def test_player_remove_token(self) -> None:
         player = Player('test_player')
@@ -46,7 +46,7 @@ class TestingPlayer:
         player.token_reserved.add({Token.GREEN: 3,
                                    Token.WHITE: 3,
                                    Token.BLACK: 2})
-        assert player.can_add_token({Token.BLUE: 2}) == True
+        assert player.can_add_token({Token.BLUE: 2})
 
     def test_player_can_add_token_False(self) -> None:
         player = Player('test_player')
@@ -54,7 +54,7 @@ class TestingPlayer:
                                    Token.WHITE: 3,
                                    Token.BLACK: 2,
                                    Token.RED: 1})
-        assert player.can_add_token({Token.BLUE: 2}) == False
+        assert not player.can_add_token({Token.BLUE: 2})
 
     def test_player_add_token(self) -> None:
         player = Player('test_player')
@@ -82,7 +82,7 @@ class TestingPlayer:
         cards = TestingCardManager.card_list_for_testing()
         player = Player('test_player')
         assert player.num_reserved_cards == 0
-        assert player.can_reserve_card() == True
+        assert player.can_reserve_card()
 
     def test_player_add_to_reserved_cards(self) -> None:
         cards = TestingCardManager.card_list_for_testing()
@@ -96,7 +96,7 @@ class TestingPlayer:
         cards = TestingCardManager.card_list_for_testing()
         player = Player('test_player')
         for i in range(3):
-            assert player.can_reserve_card() == True
+            assert player.can_reserve_card()
             assert player.num_reserved_cards == i
             player.add_to_reserved_cards(cards[i])
             assert player.num_reserved_cards == i + 1
@@ -107,7 +107,7 @@ class TestingPlayer:
         player = Player('test_player')
         for i in range(3):
             player.add_to_reserved_cards(cards[i])
-        assert player.can_reserve_card() == False
+        assert not player.can_reserve_card()
 
     def test_player_add_to_reserved_cards_error(self) -> None:
         cards = TestingCardManager.card_list_for_testing()
@@ -137,7 +137,7 @@ class TestingPlayer:
         player.add_to_owned_cards(cards[1])
         player.add_to_owned_cards(cards[2])
         noble = Noble({Token.GREEN: 3})
-        assert player.is_eligible_for_noble(noble) == True
+        assert player.is_eligible_for_noble(noble)
 
     def test_player_is_eligible_for_noble_False(self) -> None:
         cards = TestingCardManager.card_list_for_testing(prestige=True)
@@ -145,7 +145,7 @@ class TestingPlayer:
         player.add_to_owned_cards(cards[0])
         player.add_to_owned_cards(cards[1])
         noble = Noble({Token.GREEN: 3})
-        assert player.is_eligible_for_noble(noble) == False
+        assert not player.is_eligible_for_noble(noble)
 
     def test_player_add_noble(self) -> None:
         cards = TestingCardManager.card_list_for_testing(prestige=True)
@@ -156,8 +156,8 @@ class TestingPlayer:
         noble = Noble({Token.GREEN: 3})
         assert player.prestige_points == 6
         assert len(player.nobles_owned) == 0
-        assert player.is_eligible_for_noble(noble) == True
-        player.add_noble(noble) == True
+        assert player.is_eligible_for_noble(noble)
+        player.add_noble(noble)
         assert player.prestige_points == 9
         assert len(player.nobles_owned) == 1
 
@@ -208,7 +208,7 @@ class TestingPlayerCanPurchaseCard:
         expected_cost = TokenBag().add({bonus_color: num_bonuses})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == True
+        assert player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_True_no_wildcards(self) -> None:
         player = Player('test_player')
@@ -225,7 +225,7 @@ class TestingPlayerCanPurchaseCard:
                                         token_color: num_tokens})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == True
+        assert player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_True_wildcards(self) -> None:
         player = Player('test_player')
@@ -245,7 +245,7 @@ class TestingPlayerCanPurchaseCard:
                                         token_color: num_tokens})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == True
+        assert player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_True_just_bonus_multi(self) -> None:
         player = Player('test_player')
@@ -260,7 +260,7 @@ class TestingPlayerCanPurchaseCard:
         expected_cost = TokenBag().add(bonuses)
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == True
+        assert player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_True_no_wildcards_multi(self) -> None:
         player = Player('test_player')
@@ -278,7 +278,7 @@ class TestingPlayerCanPurchaseCard:
         expected_cost = TokenBag().add(bonuses).add(tokens)
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == True
+        assert player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_True_wildcards_multi(self) -> None:
         player = Player('test_player')
@@ -302,7 +302,7 @@ class TestingPlayerCanPurchaseCard:
         expected_cost = expected_cost.add(wildcard_cost)
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == True
+        assert player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_False_just_bonus(self) -> None:
         player = Player('test_player')
@@ -319,7 +319,7 @@ class TestingPlayerCanPurchaseCard:
         expected_cost = expected_cost.add({extra_cost_color: 1})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == False
+        assert not player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_False_no_wildcards(self) -> None:
         player = Player('test_player')
@@ -339,7 +339,7 @@ class TestingPlayerCanPurchaseCard:
         expected_cost = expected_cost.add({extra_cost_color: 1})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == False
+        assert not player.can_purchase_card(card_to_buy)
 
     def test_player_can_purchase_card_False_wildcards(self) -> None:
         player = Player('test_player')
@@ -365,7 +365,7 @@ class TestingPlayerCanPurchaseCard:
         expected_cost = expected_cost.add(extra_cost)
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy) == False
+        assert not player.can_purchase_card(card_to_buy)
 
 
 class TestingPlayerStr:
