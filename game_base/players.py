@@ -69,7 +69,7 @@ class Player:
         return self.num_reserved_cards < 3
 
     def add_to_reserved_cards(self, card: Card) -> None:
-        """Add card to the first open slot in reserved cards.
+        """Adds card to the first open slot in reserved cards.
         Assumes can_reserve_card check was made."""
         # Sanity check if you don't check before calling this fn
         if not self.can_reserve_card():
@@ -81,6 +81,18 @@ class Player:
             if self.cards_reserved[i] is None:
                 self.cards_reserved[i] = card
                 break
+
+    def remove_from_reserved_cards(self, card: Card) -> None:
+        """Removes card from its slot in reserved cards.
+
+        Raises:
+            ValueError: If the card is not in the Player's reserved cards
+        """
+        # Sanity check
+        if card not in self.cards_reserved:
+            raise ValueError(f"Card {card} was not found in the reserved "
+                             f"cards of Player {self.id}")
+        self.cards_reserved[self.cards_reserved.index(card)] = None
 
     def can_purchase_card(self, card: Card) -> bool:
         """Check if the player can purchase the given card.
@@ -121,14 +133,16 @@ class Player:
     def add_to_owned_cards(self, card: Card) -> None:
         """Add card to list of owned cards.
 
-        Automatically adds bonus and prestige points from card
+        Automatically removes card from reserved cards if found there.
+        Automatically adds bonus and prestige points from card.
 
         Parameters
         ----------
         card : Card
             Card to add to owned cards
         """
-        # TODO: Check if card in cards_reserved and remove
+        if card in self.cards_reserved:
+            self.remove_from_reserved_cards(card)
         self.cards_owned.append(card)
         self.bonus_owned.add({card.bonus_color: 1})
         self.prestige_points += card.prestige_points
