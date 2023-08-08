@@ -20,7 +20,7 @@ class Bank:
             case 2: self.token_available = TokenBag(standard_amount=4,
                                                     wildcard_amount=5)
             case _: raise ValueError("Cannot initialize a bank for "
-                                         f"{num_players}, only 2, 3 or 4")
+                                     f"{num_players}, only 2, 3 or 4")
 
     def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
@@ -37,65 +37,19 @@ class Bank:
                                               f"{other_amount} tokens.")
         return True
 
-    # TODO: revert to a single remove_token method
-    def remove_3_unique_color_tokens(self,
-                                     colors: tuple[Token, Token, Token]) -> None:
-        """Remove 3 tokens of unique colors from the bank.
-        Assumes can_remove_token check was made.
+    def remove_token(self, amount_to_remove: dict[Token, int]) -> None:
+        """Remove an amount of tokens for each given colors from the bank.
 
         Parameters
         ----------
-        color_list : tuple[Token, Token, Token]
-            Tuple containing 3 unique token colors
-
-        Raises
-        ------
-        IncorrectInputError
-            Raised if 3 unique colors are not given or wildcard is given
-        """
-        # Sanity checks
-        if len(colors) != 3:
-            raise IncorrectInputError("The number of token colors was not 3")
-        if len(set(colors)) != 3:
-            raise IncorrectInputError("The 3 token colors were not unique")
-        if Token.YELLOW in colors:
-            raise IncorrectInputError("Yellow token can only be removed when"
-                                      " reserving a card")
-
-        self.token_available.remove(dict.fromkeys(colors, 1))
-
-    def remove_2_same_color_tokens(self, color: Token) -> None:
-        """Remove 2 tokens of the same color from the bank.
-        Assumes can_remove_token check was made.
-
-        Parameters
-        ----------
-        color : Token
-            Color for the 2 tokens
-
-        Raises
-        ------
-        IncorrectInputError
-            Raised if wildcard color is given
+        amount_to_remove : dict[Token, int]
+            A dict of colors and corresponding amount of tokens to remove.
         """
         # Sanity check
-        if color == Token.YELLOW:
-            raise IncorrectInputError(f"Yellow token cannot be removed without"
-                                      " reserving a card")
-        amount_to_remove = {color: 2}
-        # Sanity check if you don't check before calling this fn
         if not self.can_remove_token(amount_to_remove):
-            raise ValueError(f"Can't take 2 {color} tokens when there are"
-                             f"{self.token_available.tokens[color]} left "
-                             "in the bank")
+            raise ValueError("The amounts given can't be removed from "
+                             "the bank")
         self.token_available.remove(amount_to_remove)
-
-    def remove_wildcard_token(self) -> None:
-        """Removes a single wildcard token from the bank.
-        Assumes can_remove_token check was made and function call is
-        only done while a player reserves a card.
-        """
-        self.token_available.remove({Token.YELLOW: 1})
 
     # TODO: create can_add_token method
     # TODO: add can_add_token check inside add_token
