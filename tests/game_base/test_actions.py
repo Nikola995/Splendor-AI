@@ -117,8 +117,77 @@ class TestingReserve3UniqueColorTokens:
 
 
 class TestingReserveCard:
-    def test_reserve_card(self) -> None:
-        raise NotImplementedError
+    def test_reserve_card_can_perform_True(self) -> None:
+        cards = TestingCardManager.card_list_for_testing(num_cards=3)
+        player = Player('player_1')
+        bank = Bank()
+        for card in cards:
+            action = ReserveCard(card)
+            assert action.can_perform(player, bank)
+            action.perform(player, bank)
+
+    def test_reserve_card_can_perform_False(self) -> None:
+        cards = TestingCardManager.card_list_for_testing(num_cards=4)
+        player = Player('player_1')
+        bank = Bank()
+        for card in cards[:3]:
+            action = ReserveCard(card)
+            assert action.can_perform(player, bank)
+            action.perform(player, bank)
+        action = ReserveCard(cards[-1])
+        assert not action.can_perform(player, bank)
+
+    def test_reserve_card_perform(self) -> None:
+        cards = TestingCardManager.card_list_for_testing(num_cards=3)
+        player = Player('player_1')
+        bank = Bank()
+        for card_idx, card in enumerate(cards):
+            action = ReserveCard(card)
+            action.perform(player, bank)
+            assert player.num_reserved_cards == card_idx + 1
+            assert player.token_reserved.tokens[Token.YELLOW] == card_idx + 1
+            assert (bank.token_available.tokens[Token.YELLOW] ==
+                    bank.initial_wildcard_token_amount - (card_idx + 1))
+
+    def test_reserve_card_perform_no_wildcard_bank(self) -> None:
+        cards = TestingCardManager.card_list_for_testing(num_cards=3)
+        player = Player('player_1')
+        bank = Bank()
+        bank.initial_wildcard_token_amount = 2
+        bank.token_available.tokens[Token.YELLOW] = 2
+        for card_idx, card in enumerate(cards[:2]):
+            action = ReserveCard(card)
+            action.perform(player, bank)
+            assert player.num_reserved_cards == card_idx + 1
+            assert player.token_reserved.tokens[Token.YELLOW] == card_idx + 1
+            assert (bank.token_available.tokens[Token.YELLOW] ==
+                    bank.initial_wildcard_token_amount - (card_idx + 1))
+        action = ReserveCard(cards[-1])
+        action.perform(player, bank)
+        assert player.num_reserved_cards == 3
+        assert (player.token_reserved.tokens[Token.YELLOW] ==
+                bank.initial_wildcard_token_amount)
+        assert bank.token_available.tokens[Token.YELLOW] == 0
+
+    def test_reserve_card_perform_no_wildcard_player(self) -> None:
+        cards = TestingCardManager.card_list_for_testing(num_cards=3)
+        player = Player('player_1')
+        bank = Bank()
+        for color in [Token.BLUE, Token.BLACK, Token.RED, Token.WHITE]:
+            player.token_reserved.tokens[color] = 2
+        for card_idx, card in enumerate(cards[:2]):
+            action = ReserveCard(card)
+            action.perform(player, bank)
+            assert player.num_reserved_cards == card_idx + 1
+            assert player.token_reserved.tokens[Token.YELLOW] == card_idx + 1
+            assert (bank.token_available.tokens[Token.YELLOW] ==
+                    bank.initial_wildcard_token_amount - (card_idx + 1))
+        action = ReserveCard(cards[-1])
+        action.perform(player, bank)
+        assert player.num_reserved_cards == 3
+        assert player.token_reserved.tokens[Token.YELLOW] == 2
+        assert (bank.token_available.tokens[Token.YELLOW] ==
+                bank.initial_wildcard_token_amount - 2)
 
 
 class TestingPurchaseCard:
