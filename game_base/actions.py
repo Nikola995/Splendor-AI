@@ -40,6 +40,18 @@ class Reserve3UniqueColorTokens(Action):
     """
     colors: tuple[Token, Token, Token]
 
+    def __post_init__(self) -> None:
+        # Sanity checks
+        if len(self.colors) != 3:
+            raise ValueError("Reserve3UniqueColorTokens action requires 3 "
+                             "token colors")
+        if len(set(self.colors)) != 3:
+            raise ValueError("Reserve3UniqueColorTokens action requires 3 "
+                             "unique token colors")
+        if Token.YELLOW in self.colors:
+            raise ValueError("Reserve3UniqueColorTokens action cannot contain "
+                             "a wildcard token")
+
     def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the requested tokens can be reserved.
 
@@ -49,14 +61,16 @@ class Reserve3UniqueColorTokens(Action):
             - The player won't have more than 10 tokens in total after
             the action is performed.
         """
-        return (bank.can_remove_token(dict.fromkeys(self.colors, 1))
-                and player.can_add_token(dict.fromkeys(self.colors, 1)))
+        amounts = dict.fromkeys(self.colors, 1)
+        return (bank.can_remove_token(amounts) and
+                player.can_add_token(amounts))
 
     def perform(self, player: Player, bank: Bank, **kwargs) -> None:
         """Transfer the requested tokens from the bank to the player.
         (Ignore **kwargs)"""
-        bank.remove_3_unique_color_tokens(self.colors)
-        player.add_token(dict.fromkeys(self.colors, 1))
+        amounts = dict.fromkeys(self.colors, 1)
+        bank.remove_token(amounts)
+        player.add_token(amounts)
 
     def __str__(self) -> str:
         return (f"reserved 1 {self.colors[0]}, {self.colors[1]} and "
@@ -78,6 +92,12 @@ class Reserve2SameColorTokens(Action):
     """
     color: Token
 
+    def __post_init__(self) -> None:
+        # Sanity checks
+        if self.color == Token.YELLOW:
+            raise ValueError("Reserve2SameColorTokens action cannot work with "
+                             "a wildcard token")
+
     def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the requested tokens can be reserved.
 
@@ -87,14 +107,16 @@ class Reserve2SameColorTokens(Action):
             - The player won't have more than 10 tokens in total after
             the action is performed.
         """
-        return (bank.can_remove_token({self.color: 2})
-                and player.can_add_token({self.color: 2}))
+        amounts = {self.color: 2}
+        return (bank.can_remove_token(amounts) and
+                player.can_add_token(amounts))
 
     def perform(self, player: Player, bank: Bank, **kwargs) -> None:
         """Transfer the requested tokens from the bank to the player.
         (Ignore **kwargs)"""
-        bank.remove_2_same_color_tokens(self.color)
-        player.add_token({self.color: 2})
+        amounts = {self.color: 2}
+        bank.remove_token(amounts)
+        player.add_token(amounts)
 
     def __str__(self) -> str:
         return (f"reserved 2 {self.color} tokens.")
@@ -135,7 +157,7 @@ class ReserveCard(Action):
         single_wildcard = {Token.YELLOW: 1}
         if (bank.can_remove_token(single_wildcard) and
                 player.can_add_token(single_wildcard)):
-            bank.remove_wildcard_token()
+            bank.remove_token(single_wildcard)
             player.add_token(single_wildcard)
 
     def __str__(self) -> str:
