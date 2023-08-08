@@ -18,10 +18,8 @@ class Action(ABC):
         pass
 
     @abstractmethod
-    def perform(self, player: Player, bank: Bank, **kwargs) -> bool:
+    def perform(self, player: Player, bank: Bank) -> bool:
         """Abstract method for performing the action in the game."""
-        # If ultimate perfomance is needed, this can be refactored to not use
-        # **kwargs
         pass
 
 
@@ -65,9 +63,8 @@ class Reserve3UniqueColorTokens(Action):
         return (bank.can_remove_token(amounts) and
                 player.can_add_token(amounts))
 
-    def perform(self, player: Player, bank: Bank, **kwargs) -> None:
-        """Transfer the requested tokens from the bank to the player.
-        (Ignore **kwargs)"""
+    def perform(self, player: Player, bank: Bank) -> None:
+        """Transfer the requested tokens from the bank to the player."""
         amounts = dict.fromkeys(self.colors, 1)
         bank.remove_token(amounts)
         player.add_token(amounts)
@@ -111,9 +108,8 @@ class Reserve2SameColorTokens(Action):
         return (bank.can_remove_token(amounts) and
                 player.can_add_token(amounts))
 
-    def perform(self, player: Player, bank: Bank, **kwargs) -> None:
-        """Transfer the requested tokens from the bank to the player.
-        (Ignore **kwargs)"""
+    def perform(self, player: Player, bank: Bank) -> None:
+        """Transfer the requested tokens from the bank to the player."""
         amounts = {self.color: 2}
         bank.remove_token(amounts)
         player.add_token(amounts)
@@ -149,9 +145,8 @@ class ReserveCard(Action):
         """
         return player.can_reserve_card()
 
-    def perform(self, player: Player, bank: Bank, **kwargs) -> None:
-        """Add the card to the player's reserved cards.
-        (Ignore **kwargs)"""
+    def perform(self, player: Player, bank: Bank) -> None:
+        """Add the card to the player's reserved cards."""
         player.add_to_reserved_cards(self.card)
         # Give the player 1 wildcard token, if the transfer is possible
         single_wildcard = {Token.YELLOW: 1}
@@ -175,12 +170,18 @@ class PurchaseCard(Action):
     bank : Bank
         The bank that will give the requested wildcard token.
     card : Card
-        The card that will be reserved by the player.
+        The card that will be purchased by the player.
     wildcard_collaterals: dict[Token, int]
-        The number of Tokens that are replaced by wildcard tokens in the
-        player's reserved_tokens
+        The number of Tokens that are replaced by wildcard tokens from the
+        player's reserved tokens as collaterals to purchase the card.
     """
     card: Card
+    wildcard_collaterals: dict[Token, int]
+
+    def __post_init__(self) -> None:
+        if Token.YELLOW in self.wildcard_collaterals:
+            raise ValueError("Wildcard tokens can only be used as collateral "
+                             "for regular color tokens")
 
     def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the player can purchase the given card.
@@ -199,8 +200,7 @@ class PurchaseCard(Action):
             player.cards_reserved.pop(self.card)
         player.add_to_owned_cards(self.card)
 
-    def perform(self, player: Player, bank: Bank,
-                wildcard_collaterals: dict[Token, int], **kwargs) -> None:
+    def perform(self, player: Player, bank: Bank) -> None:
         """Purchase the card for the player.
 
         The process of purchasing a card follows this process:
@@ -216,8 +216,6 @@ class PurchaseCard(Action):
             3. The reserved tokens are removed from the player's inventory
             by the remaining amount of the card cost
             (for the corresponding color)
-
-        (Ignore **kwargs, wildcard_collaterals is given explicitly)
         """
         remaining_cost = deepcopy(self.card.token_cost)
         # 1. Reduce the cost by the owned bonuses
@@ -231,10 +229,11 @@ class PurchaseCard(Action):
         # 2. Reduce the cost by collateral wildcard tokens
         for color in remaining_cost:
             remaining_cost[color] = max((remaining_cost[color] -
-                                         wildcard_collaterals[color]), 0)
+                                         self.wildcard_collaterals[color]), 0)
         # Transfer the collateral wildcard tokens from the player to the bank
-        player.remove_token({Token.YELLOW: sum(wildcard_collaterals.values())})
-        bank.add_token({Token.YELLOW: sum(wildcard_collaterals.values())})
+        player.remove_token(
+            {Token.YELLOW: sum(self.wildcard_collaterals.values())})
+        bank.add_token({Token.YELLOW: sum(self.wildcard_collaterals.values())})
         # Transfer the card if the total remaining cost == 0
         if sum(remaining_cost.values()) == 0:
             self._give_card(player)

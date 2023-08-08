@@ -155,18 +155,16 @@ class Game:
             # Continue the game with the next player to move
             self.meta_data.curr_player_index += 1
 
-    def make_move_for_current_player(self, action: Action, **kwargs) -> None:
+    def make_move_for_current_player(self, action: Action) -> None:
         """Performs the given action as the player's move and iterate the
         current player index.
-        (Allows **kwargs for action.)
         (Automatically makes the noble check after the action is performed.)
         """
         if self.meta_data.state != GameState.IN_PROGRESS:
             raise ValueError("Game isn't currently in progress")
         if not action.can_perform(self.get_current_player(), self.bank):
             raise ValueError(f"Player can't perform {action}")
-        action.perform(player=self.get_current_player(), bank=self.bank,
-                       **kwargs)
+        action.perform(player=self.get_current_player(), bank=self.bank)
         # If action with card wasn't purchasing a reserved card.
         if hasattr(action, 'card'):
             if self.cards.is_card_in_tables(action.card):
