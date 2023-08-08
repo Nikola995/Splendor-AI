@@ -63,80 +63,16 @@ class TestingBankCanRemoveToken:
         tokens_to_remove = {Token.GREEN: 1,
                             Token.WHITE: 1,
                             Token.BLUE: 3}
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(NotImplementedError) as e:
             bank.can_remove_token(tokens_to_remove)
 
 
-class TestingBankRemove3Unique:
-    def test_bank_remove_token_3_unique(self) -> None:
-        bank = Bank()
-        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.BLUE)
-        bank.remove_3_unique_color_tokens(tokens_to_remove)
-        expected = {Token.GREEN: 6,
-                    Token.WHITE: 6,
-                    Token.BLUE: 6,
-                    Token.BLACK: 7,
-                    Token.RED: 7,
-                    Token.YELLOW: 5}
-        assert bank.token_available.tokens == expected
-
-    def test_bank_remove_token_3_unique_error_ne_3(self) -> None:
-        bank = Bank()
-        tokens_to_remove = (Token.GREEN, Token.WHITE)
-        with pytest.raises(IncorrectInputError) as e:
-            bank.remove_3_unique_color_tokens(tokens_to_remove)
-
-    def test_bank_remove_token_3_unique_error_not_unique(self) -> None:
-        bank = Bank()
-        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.WHITE)
-        with pytest.raises(IncorrectInputError) as e:
-            bank.remove_3_unique_color_tokens(tokens_to_remove)
-
-    def test_bank_remove_token_3_unique_error_wildcard(self) -> None:
-        bank = Bank()
-        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.YELLOW)
-        with pytest.raises(IncorrectInputError) as e:
-            bank.remove_3_unique_color_tokens(tokens_to_remove)
-
-    def test_bank_remove_token_3_unique_error_negative(self) -> None:
-        bank = Bank()
-        bank.token_available.tokens[Token.GREEN] = 0
-        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.BLUE)
-        with pytest.raises(ValueError) as e:
-            bank.remove_3_unique_color_tokens(tokens_to_remove)
-
-
-class TestingBankRemove2Same:
-    def test_bank_remove_token_2_same(self) -> None:
-        bank = Bank()
-        color = Token.GREEN
-        bank.remove_2_same_color_tokens(color)
-        expected = {Token.GREEN: 5,
-                    Token.WHITE: 7,
-                    Token.BLUE: 7,
-                    Token.BLACK: 7,
-                    Token.RED: 7,
-                    Token.YELLOW: 5}
-        assert bank.token_available.tokens == expected
-
-    def test_bank_remove_token_2_same_error_wildcard(self) -> None:
+class TestingBankRemoveToken:
+    def test_bank_remove_token_1_single(self) -> None:
         bank = Bank()
         color = Token.YELLOW
-        with pytest.raises(IncorrectInputError) as e:
-            bank.remove_2_same_color_tokens(color)
-
-    def test_bank_remove_token_2_same_error_can_not_remove(self) -> None:
-        bank = Bank()
-        bank.token_available.tokens[Token.GREEN] = 3
-        color = Token.GREEN
-        with pytest.raises(ValueError) as e:
-            bank.remove_2_same_color_tokens(color)
-
-
-class TestingBankRemoveWildcard:
-    def test_bank_remove_wildcard(self) -> None:
-        bank = Bank()
-        bank.remove_wildcard_token()
+        tokens_to_remove = {color: 1}
+        bank.remove_token(tokens_to_remove)
         expected = {Token.GREEN: 7,
                     Token.WHITE: 7,
                     Token.BLUE: 7,
@@ -145,11 +81,55 @@ class TestingBankRemoveWildcard:
                     Token.YELLOW: 4}
         assert bank.token_available.tokens == expected
 
-    def test_bank_remove_wildcard_error(self) -> None:
+    def test_bank_remove_token_1_single_error(self) -> None:
         bank = Bank()
         bank.token_available.tokens[Token.YELLOW] = 0
+        color = Token.YELLOW
+        tokens_to_remove = {color: 1}
         with pytest.raises(ValueError) as e:
-            bank.remove_wildcard_token()
+            bank.remove_token(tokens_to_remove)
+
+    def test_bank_remove_token_1_multiple(self) -> None:
+        bank = Bank()
+        colors = (Token.GREEN, Token.WHITE, Token.BLUE)
+        tokens_to_remove = dict.fromkeys(colors, 1)
+        bank.remove_token(tokens_to_remove)
+        expected = {Token.GREEN: 6,
+                    Token.WHITE: 6,
+                    Token.BLUE: 6,
+                    Token.BLACK: 7,
+                    Token.RED: 7,
+                    Token.YELLOW: 5}
+        assert bank.token_available.tokens == expected
+
+    def test_bank_remove_token_1_multiple_error(self) -> None:
+        bank = Bank()
+        bank.token_available.tokens[Token.GREEN] = 0
+        colors = (Token.GREEN, Token.WHITE, Token.BLUE)
+        tokens_to_remove = dict.fromkeys(colors, 1)
+        with pytest.raises(ValueError) as e:
+            bank.remove_token(tokens_to_remove)
+
+    def test_bank_remove_token_2(self) -> None:
+        bank = Bank()
+        color = Token.GREEN
+        tokens_to_remove = {color: 2}
+        bank.remove_token(tokens_to_remove)
+        expected = {Token.GREEN: 5,
+                    Token.WHITE: 7,
+                    Token.BLUE: 7,
+                    Token.BLACK: 7,
+                    Token.RED: 7,
+                    Token.YELLOW: 5}
+        assert bank.token_available.tokens == expected
+
+    def test_bank_remove_token_2_error(self) -> None:
+        bank = Bank()
+        bank.token_available.tokens[Token.GREEN] = 3
+        color = Token.GREEN
+        tokens_to_remove = {color: 2}
+        with pytest.raises(ValueError) as e:
+            bank.remove_token(tokens_to_remove)
 
 
 class TestingBankAddToken:
@@ -226,8 +206,9 @@ class TestingBankStr:
 
     def test_bank_str_post_remove(self) -> None:
         bank = Bank()
-        tokens_to_remove = (Token.GREEN, Token.WHITE, Token.BLUE)
-        bank.remove_3_unique_color_tokens(tokens_to_remove)
+        colors = (Token.GREEN, Token.WHITE, Token.BLUE)
+        tokens_to_remove = dict.fromkeys(colors, 1)
+        bank.remove_token(tokens_to_remove)
         assert str(bank) == ("Available Bank tokens:\n"
                              "Green: 6\n"
                              "White: 6\n"
