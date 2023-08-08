@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field, InitVar
-from game_base.utils import IncorrectInputError
 from game_base.tokens import TokenBag, Token
 
 
@@ -8,19 +7,20 @@ class Bank:
     """A representation of the unreserved tokens in the game."""
 
     token_available: TokenBag = field(init=False)
+    initial_regular_token_amount: int = field(init=False)
+    initial_wildcard_token_amount: int = field(init=False)
     num_players: InitVar[int] = 4
 
     def __post_init__(self, num_players: int):
-        # TODO: store the initial amounts to have can_add_token check
         match num_players:
-            case 4: self.token_available = TokenBag(standard_amount=7,
-                                                    wildcard_amount=5)
-            case 3: self.token_available = TokenBag(standard_amount=5,
-                                                    wildcard_amount=5)
-            case 2: self.token_available = TokenBag(standard_amount=4,
-                                                    wildcard_amount=5)
+            case 4: self.initial_regular_token_amount = 7
+            case 3: self.initial_regular_token_amount = 5
+            case 2: self.initial_regular_token_amount = 4
             case _: raise ValueError("Cannot initialize a bank for "
                                      f"{num_players}, only 2, 3 or 4")
+        self.initial_wildcard_token_amount = 5
+        self.token_available = TokenBag(self.initial_regular_token_amount,
+                                        self.initial_wildcard_token_amount)
 
     def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
