@@ -73,13 +73,28 @@ class TestingReserve3UniqueColorTokens:
             action = Reserve3UniqueColorTokens(colors)
 
     def test_reserve_3_unique_tokens_can_perform_True(self) -> None:
-        raise NotImplementedError()
+        player_1 = Player('player_1')
+        bank = Bank()
+        colors = (Token.GREEN, Token.WHITE, Token.BLUE)
+        action_1 = Reserve3UniqueColorTokens(colors)
+        assert action_1.can_perform(player_1, bank)
 
     def test_reserve_3_unique_tokens_can_perform_False_bank(self) -> None:
-        raise NotImplementedError()
+        player_1 = Player('player_1')
+        bank = Bank()
+        colors = (Token.GREEN, Token.WHITE, Token.BLUE)
+        action_1 = Reserve3UniqueColorTokens(colors)
+        bank.token_available.tokens[colors[0]] = 0
+        assert not action_1.can_perform(player_1, bank)
 
     def test_reserve_3_unique_tokens_can_perform_False_player(self) -> None:
-        raise NotImplementedError()
+        player_1 = Player('player_1')
+        bank = Bank()
+        colors = (Token.GREEN, Token.WHITE, Token.BLUE)
+        action_1 = Reserve3UniqueColorTokens(colors)
+        for color in [Token.BLUE, Token.BLACK, Token.RED, Token.WHITE]:
+            player_1.token_reserved.tokens[color] = 2
+        assert not action_1.can_perform(player_1, bank)
 
     def test_reserve_3_unique_tokens(self) -> None:
         player_1 = Player('player_1')
