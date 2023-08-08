@@ -179,9 +179,13 @@ class PurchaseCard(Action):
     wildcard_collaterals: dict[Token, int]
 
     def __post_init__(self) -> None:
+        # Sanity checks
         if Token.YELLOW in self.wildcard_collaterals:
             raise ValueError("Wildcard tokens can only be used as collateral "
                              "for regular color tokens")
+        for amount in self.wildcard_collaterals.values():
+            if amount < 0:
+                raise ValueError("Can't give a negative amount as collateral")
 
     def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the player can purchase the given card.
@@ -224,7 +228,7 @@ class PurchaseCard(Action):
                                          player.bonus_owned[color]), 0)
         # Transfer the card if the total remaining cost == 0
         if sum(remaining_cost.values()) == 0:
-            self._give_card(player)
+            player.add_to_owned_cards(self.card)
             return None
         # 2. Reduce the cost by collateral wildcard tokens
         for color in remaining_cost:
@@ -236,12 +240,16 @@ class PurchaseCard(Action):
         bank.add_token({Token.YELLOW: sum(self.wildcard_collaterals.values())})
         # Transfer the card if the total remaining cost == 0
         if sum(remaining_cost.values()) == 0:
-            self._give_card(player)
+            player.add_to_owned_cards(self.card)
             return None
         # 3. Purchase the remaining cost with the player's reserved tokens
         player.remove_token(remaining_cost)
         bank.add_token(remaining_cost)
-        self._give_card(player)
+        player.add_to_owned_cards(self.card)
 
     def __str__(self) -> str:
-        return f"purchased card {self.card.id}."
+        return " ".join([f"purchased card {self.card.id} with wildcard tokens as",
+                        "collateral for",
+                         " & ".join([f"{amount} {color}" for color, amount in
+                                    self.wildcard_collaterals.items()]),
+                         "tokens"])
