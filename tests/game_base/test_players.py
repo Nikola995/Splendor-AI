@@ -109,6 +109,25 @@ class TestingPlayer:
             player.add_to_reserved_cards(cards[i])
         assert not player.can_reserve_card()
 
+    def test_player_remove_from_reserved_cards(self) -> None:
+        cards = TestingCardManager.card_list_for_testing()
+        player = Player('test_player')
+        for i in range(3):
+            player.add_to_reserved_cards(cards[i])
+        player.remove_from_reserved_cards(cards[1])
+        assert player.num_reserved_cards == 2
+        assert isinstance(player.cards_reserved[0], Card)
+        assert player.cards_reserved[1] is None
+        assert isinstance(player.cards_reserved[2], Card)
+
+    def test_player_remove_from_reserved_cards_error(self) -> None:
+        cards = TestingCardManager.card_list_for_testing()
+        player = Player('test_player')
+        for i in range(3):
+            player.add_to_reserved_cards(cards[i])
+        with pytest.raises(ValueError) as e:
+            player.remove_from_reserved_cards(cards[3])
+
     def test_player_add_to_reserved_cards_error(self) -> None:
         cards = TestingCardManager.card_list_for_testing()
         player = Player('test_player')
@@ -124,6 +143,25 @@ class TestingPlayer:
         bonus_expected = TokenBag()
         for i in range(3):
             player.add_to_owned_cards(cards[i])
+            prestige_expected += i + 1
+            bonus_expected.add({Token.GREEN: 1})
+            assert len(player.cards_owned) == i + 1
+            assert player.bonus_owned == bonus_expected
+            assert player.prestige_points == prestige_expected
+
+    def test_player_add_to_owned_cards_reserved(self) -> None:
+        cards = TestingCardManager.card_list_for_testing(prestige=True)
+        player = Player('test_player')
+        prestige_expected = 0
+        bonus_expected = TokenBag()
+        num_test_cards = 3
+        for i in range(num_test_cards):
+            player.add_to_reserved_cards(cards[i])
+            assert player.num_reserved_cards == i + 1
+        for i in range(num_test_cards):
+            player.add_to_owned_cards(cards[i])
+            assert player.num_reserved_cards == num_test_cards - (i + 1)
+            assert player.cards_reserved[i] is None
             prestige_expected += i + 1
             bonus_expected.add({Token.GREEN: 1})
             assert len(player.cards_owned) == i + 1
