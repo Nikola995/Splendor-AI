@@ -16,13 +16,28 @@ class TestingReserve2SameColorTokens:
             action = Reserve2SameColorTokens(color)
 
     def test_reserve_2_same_tokens_can_perform_True(self) -> None:
-        raise NotImplementedError()
+        player_1 = Player('player_1')
+        bank = Bank()
+        color_1 = Token.GREEN
+        action_1 = Reserve2SameColorTokens(color_1)
+        assert action_1.can_perform(player_1, bank)
 
     def test_reserve_2_same_tokens_can_perform_False_bank(self) -> None:
-        raise NotImplementedError()
+        player_1 = Player('player_1')
+        bank = Bank()
+        color_1 = Token.GREEN
+        action_1 = Reserve2SameColorTokens(color_1)
+        bank.token_available.tokens[color_1] = 3
+        assert not action_1.can_perform(player_1, bank)
 
     def test_reserve_2_same_tokens_can_perform_False_player(self) -> None:
-        raise NotImplementedError()
+        player_1 = Player('player_1')
+        bank = Bank()
+        color_1 = Token.GREEN
+        action_1 = Reserve2SameColorTokens(color_1)
+        for color in [Token.BLUE, Token.BLACK, Token.RED]:
+            player_1.token_reserved.tokens[color] = 3
+        assert not action_1.can_perform(player_1, bank)
 
     def test_reserve_2_same_tokens(self) -> None:
         player_1 = Player('player_1')
