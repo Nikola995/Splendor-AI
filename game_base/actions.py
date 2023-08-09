@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from players import Player
 from banks import Bank
@@ -176,7 +176,7 @@ class PurchaseCard(Action):
         player's reserved tokens as collaterals to purchase the card.
     """
     card: Card
-    wildcard_collaterals: dict[Token, int]
+    wildcard_collaterals: dict[Token, int] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         # Sanity checks
@@ -221,11 +221,11 @@ class PurchaseCard(Action):
             by the remaining amount of the card cost
             (for the corresponding color)
         """
-        remaining_cost = deepcopy(self.card.token_cost)
+        remaining_cost = deepcopy(self.card.token_cost.tokens)
         # 1. Reduce the cost by the owned bonuses
         for color in remaining_cost:
             remaining_cost[color] = max((remaining_cost[color] -
-                                         player.bonus_owned[color]), 0)
+                                         player.bonus_owned.tokens[color]), 0)
         # Transfer the card if the total remaining cost == 0
         if sum(remaining_cost.values()) == 0:
             player.add_to_owned_cards(self.card)
@@ -233,7 +233,9 @@ class PurchaseCard(Action):
         # 2. Reduce the cost by collateral wildcard tokens
         for color in remaining_cost:
             remaining_cost[color] = max((remaining_cost[color] -
-                                         self.wildcard_collaterals[color]), 0)
+                                         self.wildcard_collaterals.get(color,
+                                                                       0)),
+                                        0)
         # Transfer the collateral wildcard tokens from the player to the bank
         player.remove_token(
             {Token.YELLOW: sum(self.wildcard_collaterals.values())})
