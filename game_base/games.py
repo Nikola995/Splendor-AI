@@ -42,34 +42,53 @@ class GameMetaData:
 class Game:
     """A representation of the whole process of playing the game."""
     # Game information
-    meta_data: GameMetaData = field(default_factory=GameMetaData)
+    meta_data: GameMetaData = field(init=False)
+    _MIN_PLAYERS = 2
+    _MAX_PLAYERS = 4
+    _WINNER_PRESTIGE_POINTS_THRESHOLD = 15
     # %% Game Assets
     players: list[Player] = field(default_factory=list)
-    bank: Bank = field(default_factory=None)
+    bank: Bank = field(init=False)
+    nobles: list[Noble] = field(init=False)
     cards: CardManagerCollection = field(default_factory=lambda:
                                          (CardGenerator.generate_cards(shuffled=True)))
-    nobles: list[Noble] = field(default_factory=list)
-    actions: ActionSet = field(default_factory=StandardActionSet)
+    possible_actions: ActionSet = field(default_factory=StandardActionSet)
+    # %% Game properties
+
+    @property
+    def num_players(self) -> int:
+        """The number of players currently in the game."""
+        return self.num_players
+
+    @property
+    def current_player_idx(self) -> int:
+        """Return the current player index."""
+        return self.meta_data.curr_player_index
+
+    @property
+    def current_player(self) -> Player:
+        """Return the current player."""
+        return self.players[self.current_player_idx]
+
+    def __post_init__(self) -> None:
+        if self.num_players > self._MAX_PLAYERS:
+            raise ValueError("Game can't be initialized with "
+                             f"{self.num_players} players")
+        self.meta_data = GameMetaData()
     # %% Game initialization methods
 
     def can_add_player(self, player: Player) -> bool:
         """Returns True if the game hasn't started,
-        the number of players in game < 4 and
+        the number of players in game < max. number of players (4) and
         player is not in the game."""
         return (self.meta_data.state == GameState.NOT_STARTED and
-                len(self.players) < 4 and
+                self.num_players < self._MAX_PLAYERS and
                 player not in self.players)
 
     def add_player(self, player: Player) -> None:
         """Adds the given player to the game if the game has not started."""
-        if self.meta_data.state != GameState.NOT_STARTED:
-            raise GameInitializedError("Players can only be added before "
-                                       "the start of the game")
-        if len(self.players) == 4:
-            raise ValueError("A game can't have more than 4 players")
-        if player in self.players:
-            raise ValueError(f"Player {player.id} has already been added to "
-                             "the game")
+        if not self.can_add_player(player):
+            raise ValueError(f"Player {player.id} can't be added to the game.")
         self.players.append(player)
 
     def can_remove_player(self, player: Player) -> bool:
@@ -81,26 +100,29 @@ class Game:
     def remove_player(self, player: Player) -> None:
         """Removes the given player from the game
         if the game has not started."""
-        if self.meta_data.state != GameState.NOT_STARTED:
-            raise GameInitializedError("Players can only be removed before "
-                                       "the start of the game")
+        if not self.can_remove_player(player):
+            raise ValueError(f"Player {player.id} can't be removed from the "
+                             "game.")
         self.players.remove(player)
+
+    def change_player_order(self, new_order: list[int]) -> bool:
+        """Changes the order of the players and returns whether the re-ordering
+        was successful."""
+        # TODO Implement this method
+        raise NotImplementedError()
 
     def can_initialize(self) -> bool:
         """Checks if the game hasn't started and has at least 2 players."""
         return (self.meta_data.state == GameState.NOT_STARTED and
-                len(self.players) < 2)
+                self.num_players < self._MIN_PLAYERS)
 
-    # TODO Add customizable player order pre-initialization - now only FCFS
     def initialize(self) -> None:
         """Initialize a new game for currently added players."""
-        if self.meta_data.state != GameState.NOT_STARTED:
-            raise GameInitializedError("Game has already started")
-        if len(self.players) < 2:
-            raise ValueError("A game can't begin without at least 2 players")
+        if not self.can_initialize():
+            raise ValueError("Game can't be initialized")
         # Generate the game assets
-        self.bank = Bank(num_players=len(self.players))
-        self.nobles = NobleGenerator.generate_nobles(len(self.players))
+        self.bank = Bank(self.num_players)
+        self.nobles = NobleGenerator.generate_nobles(self.num_players)
         self.meta_data.change_game_state(GameState.IN_PROGRESS)
         self.cards.fill_tables()
 
@@ -108,10 +130,9 @@ class Game:
     def is_final_turn(self) -> bool:
         """Check if at least one of the players reached 15 prestige points.
         Called at the end of each turn."""
-        for player in self.players:
-            if player.prestige_points >= 15:
-                return True
-        return False
+        return any([player.prestige_points >=
+                    self._WINNER_PRESTIGE_POINTS_THRESHOLD
+                    for player in self.players])
 
     def get_winner(self) -> Player:
         """Gets the winner if the game is finished.
@@ -126,18 +147,14 @@ class Game:
         # Return the winner
         return sorted(eligible_players, reverse=True)[0]
 
-    def get_current_player(self) -> Player:
-        """Return the current player."""
-        return self.players[self.meta_data.curr_player_index]
-
     def noble_check_for_current_player(self) -> None:
         """Automatically add a noble for the current player after their move.
         (Assumes the player is eligible.)"""
         # TODO: Add the usecase of multiple available nobles in one turn
         # # Currently just returns the first one
         for noble in self.nobles:
-            if self.get_current_player().is_eligible_for_noble(noble):
-                self.get_current_player().add_noble(noble)
+            if self.current_player.is_eligible_for_noble(noble):
+                self.current_player.add_noble(noble)
                 self.nobles.pop(noble)
                 break
 
@@ -146,35 +163,33 @@ class Game:
         performs an action."""
         # TODO: Test this
         # If all the players made their turn
-        if self.meta_data.curr_player_index + 1 == len(self.players):
+        if self.current_player_idx + 1 == self.num_players:
             if self.is_final_turn():
                 # End the game if it is the final turn
                 self.meta_data.change_game_state(GameState.FINISHED)
             else:
                 # Continue the game for another turn
                 self.meta_data.turns_played += 1
-                self.meta_data.curr_player_index = 0
+                self.current_player_idx = 0
         else:
             # Continue the game with the next player to move
-            self.meta_data.curr_player_index += 1
+            self.current_player_idx += 1
 
     def can_make_move_for_current_player(self, action: Action) -> bool:
         """Checks if the given action can be performed for the current
         player's move.
         """
         return (self.meta_data.state != GameState.IN_PROGRESS and
-                action.can_perform(self.get_current_player(), self.bank))
+                action.can_perform(self.current_player, self.bank))
 
     def make_move_for_current_player(self, action: Action) -> None:
         """Performs the given action as the player's move and iterate the
         current player index.
         (Automatically makes the noble check after the action is performed.)
         """
-        if self.meta_data.state != GameState.IN_PROGRESS:
-            raise ValueError("Game isn't currently in progress")
-        if not action.can_perform(self.get_current_player(), self.bank):
-            raise ValueError(f"Player can't perform {action}")
-        action.perform(player=self.get_current_player(), bank=self.bank)
+        if not self.can_make_move_for_current_player(action):
+            raise ValueError(f"Player {self.current_player.id} can't {action}")
+        action.perform(player=self.current_player, bank=self.bank)
         # If action with card wasn't purchasing a reserved card.
         if hasattr(action, 'card'):
             if self.cards.is_card_in_tables(action.card):

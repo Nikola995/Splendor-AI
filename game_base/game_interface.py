@@ -133,7 +133,7 @@ class CLI(GameInterface):
         print(str(self.game.meta_data))
         if self.game.meta_data.state == GameState.IN_PROGRESS:
             print("Current player to move: "
-                  f"{self.game.get_current_player().id}")
+                  f"{self.game.current_player.id}")
 
     def show_game_nobles(self) -> None:
         print("----------Available Nobles-------------")
@@ -284,7 +284,7 @@ class CLI(GameInterface):
         #     raise ValueError("Game can't run if finished")
         # while (self.meta_data.state != GameState.FINISHED):
         #     for idx, player in enumerate(self.game.players):
-        #         self.meta_data.curr_player_index = idx
+        #         self.current_player_idx = idx
         #         self.player_turn()
 
 
