@@ -67,6 +67,9 @@ class Game:
                                        "the start of the game")
         if len(self.players) == 4:
             raise ValueError("A game can't have more than 4 players")
+        if player in self.players:
+            raise ValueError(f"Player {player.id} has already been added to "
+                             "the game")
         self.players.append(player)
 
     def can_remove_player(self, player: Player) -> bool:
