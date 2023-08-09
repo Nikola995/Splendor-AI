@@ -1,7 +1,6 @@
 import pytest
 from game_base.tokens import Token, TokenBag
 from game_base.banks import Bank
-from game_base.utils import IncorrectInputError
 
 
 class TestingBankInit:

@@ -6,7 +6,6 @@ from nobles import Noble, NobleGenerator
 from cards import CardGenerator, CardManagerCollection
 from actions import Action
 from action_sets import ActionSet, StandardActionSet
-from utils import (GameInitializedError)
 
 
 class GameState(Enum):
