@@ -155,6 +155,14 @@ class Game:
             # Continue the game with the next player to move
             self.meta_data.curr_player_index += 1
 
+    def can_make_move_for_current_player(self, action: Action) -> bool:
+        """Checks if the given action can be performed for the current
+        player's move.
+        """
+        if self.meta_data.state != GameState.IN_PROGRESS:
+            raise ValueError("Game isn't currently in progress")
+        return action.can_perform(self.get_current_player(), self.bank)
+
     def make_move_for_current_player(self, action: Action) -> None:
         """Performs the given action as the player's move and iterate the
         current player index.
