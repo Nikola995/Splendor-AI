@@ -210,6 +210,7 @@ class TestingPurchaseCard:
                 player.add_to_owned_cards(card)
         # Perform action
         action = PurchaseCard(card_to_buy)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -230,6 +231,7 @@ class TestingPurchaseCard:
         player.add_token(wildcard_amounts)
         # Perform action
         action = PurchaseCard(card_to_buy, costs)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -251,6 +253,7 @@ class TestingPurchaseCard:
         player.add_token(costs)
         # Perform action
         action = PurchaseCard(card_to_buy)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -283,6 +286,7 @@ class TestingPurchaseCard:
         player.add_token(wildcard_amounts)
         # Perform action
         action = PurchaseCard(card_to_buy, wildcard_collaterals)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -313,6 +317,7 @@ class TestingPurchaseCard:
         player.add_token(token_collaterals)
         # Perform action
         action = PurchaseCard(card_to_buy)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -340,6 +345,7 @@ class TestingPurchaseCard:
         player.add_token(costs)
         # Perform action with wildcard collaterals
         action = PurchaseCard(card_to_buy, wildcard_collaterals)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -372,6 +378,7 @@ class TestingPurchaseCard:
         player.add_token(costs)
         # Perform action without wildcard collaterals
         action = PurchaseCard(card_to_buy)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -418,6 +425,7 @@ class TestingPurchaseCard:
         player.add_token(token_amounts)
         # Perform action
         action = PurchaseCard(card_to_buy, wildcard_collaterals)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy in player.cards_owned
         assert player.bonus_owned.tokens[bonus_color] == 1
@@ -469,6 +477,7 @@ class TestingPurchaseCard:
         assert player.num_reserved_cards == 1
         # Perform action
         action = PurchaseCard(card_to_buy, wildcard_collaterals)
+        assert action.can_perform(player, bank)
         action.perform(player, bank)
         assert card_to_buy not in player.cards_reserved
         assert player.num_reserved_cards == 0
