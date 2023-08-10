@@ -57,7 +57,7 @@ class Game:
     @property
     def num_players(self) -> int:
         """The number of players currently in the game."""
-        return self.num_players
+        return len(self.players)
 
     @property
     def current_player_idx(self) -> int:
