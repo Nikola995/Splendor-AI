@@ -191,6 +191,55 @@ class TestingReserveCard:
 
 
 class TestingPurchaseCard:
+    def test_purchase_card_can_perform_False(self) -> None:
+        # Check all possible scenarios when a player can't purchase a card
+        bonus_color = Token.BLACK
+        costs = {Token.GREEN: 2,
+                 Token.WHITE: 4,
+                 Token.BLUE: 2}
+        card_prestige_points = 3
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=bonus_color, token_cost=TokenBag().add(costs))
+        player = Player('test_player')
+        bank = Bank()
+        # Player has nothing
+        action_no_wildcard = PurchaseCard(card_to_buy)
+        assert not action_no_wildcard.can_perform(player, bank)
+        # Add the bonuses
+        bonuses = {Token.GREEN: 1,
+                   Token.WHITE: 2,
+                   Token.BLUE: 1}
+        for color in bonuses:
+            for _ in range(bonuses[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        # Player has just bonuses from owned cards
+        assert not action_no_wildcard.can_perform(player, bank)
+        # Add the wildcard amounts
+        wildcard_amounts = {Token.YELLOW: 2}
+        bank.remove_token(wildcard_amounts)
+        player.add_token(wildcard_amounts)
+        # Add the wildcard collaterals
+        wildcard_collaterals = {Token.WHITE: 1}
+        action = PurchaseCard(card_to_buy, wildcard_collaterals)
+        # Player has bonuses from owned cards & wildcard collaterals
+        assert not action.can_perform(player, bank)
+        # Add the token amounts
+        token_amounts = {Token.GREEN: 1,
+                         Token.RED: 2,
+                         Token.BLUE: 1}
+        bank.remove_token(token_amounts)
+        player.add_token(token_amounts)
+        # Player has complete purchasing power
+        assert not action.can_perform(player, bank)
+        # Check that the complete purchasing power is not enough
+        assert (costs[Token.WHITE] >
+                bonuses.get(Token.WHITE, 0) +
+                wildcard_collaterals.get(Token.WHITE, 0) +
+                token_amounts.get(Token.WHITE, 0))
+
     def test_purchase_card_just_bonuses(self) -> None:
         bonus_color = Token.BLACK
         costs = {Token.GREEN: 2,
