@@ -74,6 +74,8 @@ class Game:
             raise ValueError("Game can't be initialized with "
                              f"{self.num_players} players")
         self.meta_data = GameMetaData()
+        self.bank = None
+        self.nobles = None
     # %% Game initialization methods
 
     def can_add_player(self, player: Player) -> bool:

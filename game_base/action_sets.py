@@ -13,7 +13,6 @@ from game_base.tokens import Token
 @dataclass
 class ActionSet(ABC):
     """Abstract class for working with game actions"""
-    actions: list[Action]
 
     @abstractmethod
     def possible_actions(self, player: Player, **kwargs) -> list[Action]:
