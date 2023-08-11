@@ -111,7 +111,7 @@ class Player:
             player's reserved tokens as collaterals to purchase the card.
         """
         if (sum(wildcard_collaterals.values()) >
-            self.token_reserved.tokens[Token.YELLOW]):
+                self.token_reserved.tokens[Token.YELLOW]):
             return False
         color_costs = card.token_cost.tokens
         for color in color_costs:
@@ -182,8 +182,8 @@ class Player:
         If there's more than one eligible player to win,
         sort by most prestige points, then least owned cards."""
         if isinstance(other, Player):
-            return ((self.prestige_points, -len(self.cards_owned)) ==
-                    (other.prestige_points, -len(other.cards_owned)))
+            return ((self.id, self.prestige_points, -len(self.cards_owned)) ==
+                    (other.id, other.prestige_points, -len(other.cards_owned)))
         return False
 
     def __str__(self) -> str:
