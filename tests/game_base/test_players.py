@@ -283,7 +283,8 @@ class TestingPlayerCanPurchaseCard:
                                         token_color: num_tokens})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy)
+        wildcard_collaterals = {bonus_color: num_wildcards}
+        assert player.can_purchase_card(card_to_buy, wildcard_collaterals)
 
     def test_player_can_purchase_card_True_just_bonus_multi(self) -> None:
         player = Player('test_player')
@@ -336,11 +337,11 @@ class TestingPlayerCanPurchaseCard:
         # Add the wildcard collaterals
         expected_cost = expected_cost.remove(
             {Token.YELLOW: tokens[Token.YELLOW]})
-        wildcard_cost = {Token.GREEN: 1, Token.RED: 1, Token.WHITE: 1}
-        expected_cost = expected_cost.add(wildcard_cost)
+        wildcard_collaterals = {Token.GREEN: 1, Token.RED: 1, Token.WHITE: 1}
+        expected_cost = expected_cost.add(wildcard_collaterals)
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy)
+        assert player.can_purchase_card(card_to_buy, wildcard_collaterals)
 
     def test_player_can_purchase_card_False_just_bonus(self) -> None:
         player = Player('test_player')

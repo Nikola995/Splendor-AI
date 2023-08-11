@@ -94,7 +94,8 @@ class Player:
                              f"cards of Player {self.id}")
         self.cards_reserved[self.cards_reserved.index(card)] = None
 
-    def can_purchase_card(self, card: Card) -> bool:
+    def can_purchase_card(self, card: Card,
+                          wildcard_collaterals: dict[Token, int] = {}) -> bool:
         """Check if the player can purchase the given card.
 
         Returns True if the sum of each color of owned bonuses,
@@ -105,28 +106,19 @@ class Player:
         ----------
         card : Card
             The card that the player wants to purchase.
+        wildcard_collaterals: dict[Token, int]
+            The number of Tokens that are replaced by wildcard tokens from the
+            player's reserved tokens as collaterals to purchase the card.
         """
-        collateral_wildcards = 0
+        if (sum(wildcard_collaterals.values()) >
+            self.token_reserved.tokens[Token.YELLOW]):
+            return False
         color_costs = card.token_cost.tokens
         for color in color_costs:
             player_buying_power = (self.bonus_owned.tokens[color] +
-                                   self.token_reserved.tokens[color])
-            # If the card can be purchased without wildcards
-            if color_costs[color] <= player_buying_power:
-                continue
-            # If the card can be purchased with wildcards
-            # that weren't reserved for previous costs
-            # in the card requirements
-            elif color_costs[color] <= (player_buying_power +
-                                        self.token_reserved.tokens[Token.YELLOW]
-                                        - collateral_wildcards):
-                # Add the remainder of the cost to the number of
-                # collateral wildcards for the purchase
-                collateral_wildcards += (color_costs[color] -
-                                         player_buying_power)
-                continue
-            # Else the card can't be purchased
-            else:
+                                   self.token_reserved.tokens[color] +
+                                   wildcard_collaterals.get(color, 0))
+            if color_costs[color] > player_buying_power:
                 return False
         return True
 

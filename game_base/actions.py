@@ -195,7 +195,8 @@ class PurchaseCard(Action):
         reserved tokens of the player and wildcard tokens given as collateral
         is >= than the cost of tokens of the card for those colors.
         """
-        return player.can_purchase_card(self.card)
+        return player.can_purchase_card(self.card,
+                                        self.wildcard_collaterals)
 
     def _give_card(self, player: Player) -> None:
         """Give the card to the player."""
