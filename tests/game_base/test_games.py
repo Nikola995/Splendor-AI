@@ -13,25 +13,72 @@ from tests.game_base.test_cards import TestingCardManager
 class TestingGameAddPlayer:
     def test_game_adding_players(self) -> None:
         # Testing both can_add_player & add_player
-        raise NotImplementedError()
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+            assert game.num_players == i + 1
 
     def test_game_can_add_player_False_player_exists(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        player = Player(f'test_player')
+        assert game.can_add_player(player)
+        game.add_player(player)
+        assert not game.can_add_player(player)
 
     def test_game_can_add_player_False_game_in_progress(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        for i in range(3):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+            assert game.num_players == i + 1
+        game.initialize()
+        player = Player(f'test_player')
+        assert not game.can_add_player(player)
 
     def test_game_can_add_player_False_too_many_players(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+            assert game.num_players == i + 1
+        player = Player(f'test_player')
+        assert not game.can_add_player(player)
 
     def test_game_add_player_error_player_exists(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        player = Player(f'test_player')
+        assert game.can_add_player(player)
+        game.add_player(player)
+        with pytest.raises(ValueError) as e:
+            game.add_player(player)
 
     def test_game_add_player_error_game_in_progress(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        for i in range(3):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+            assert game.num_players == i + 1
+        game.initialize()
+        player = Player(f'test_player')
+        with pytest.raises(ValueError) as e:
+            game.add_player(player)
 
     def test_game_add_player_error_too_many_players(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+            assert game.num_players == i + 1
+        player = Player(f'test_player')
+        assert not game.can_add_player(player)
+        with pytest.raises(ValueError) as e:
+            game.add_player(player)
 
 
 class TestingGameRemovePlayer:
