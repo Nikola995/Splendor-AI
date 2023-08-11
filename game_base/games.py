@@ -115,7 +115,7 @@ class Game:
     def can_initialize(self) -> bool:
         """Checks if the game hasn't started and has at least 2 players."""
         return (self.meta_data.state == GameState.NOT_STARTED and
-                self.num_players < self._MIN_PLAYERS)
+                self.num_players >= self._MIN_PLAYERS)
 
     def initialize(self) -> None:
         """Initialize a new game for currently added players."""
