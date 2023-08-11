@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from players import Player
-from banks import Bank
-from nobles import Noble, NobleGenerator
-from cards import CardGenerator, CardManagerCollection
-from actions import Action
-from action_sets import ActionSet, StandardActionSet
+from game_base.players import Player
+from game_base.banks import Bank
+from game_base.nobles import Noble, NobleGenerator
+from game_base.cards import CardGenerator, CardManagerCollection
+from game_base.actions import Action
+from game_base.action_sets import ActionSet, StandardActionSet
 
 
 class GameState(Enum):
