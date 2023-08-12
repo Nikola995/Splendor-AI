@@ -181,13 +181,14 @@ class Player:
         removed_tokens = {Token.YELLOW: 0}
         color_costs = card.token_cost.tokens
         for color in color_costs:
-            removed_tokens[color] = max((color_costs[color] -
-                                         self.bonus_owned.tokens[color]), 0)
-            collatteral = max((color_costs[color] -
-                               (self.bonus_owned.tokens[color] +
-                                removed_tokens[color])), 0)
-            if collatteral:
-                removed_tokens[color] += collatteral
+            if color == Token.YELLOW:
+                continue
+            discounted_cost = max((color_costs[color] -
+                                   self.bonus_owned.tokens[color]), 0)
+            removed_tokens[color] = min(discounted_cost,
+                                        self.token_reserved.tokens[color])
+            removed_tokens[Token.YELLOW] += (discounted_cost -
+                                             removed_tokens[color])
         self.token_reserved.remove(removed_tokens)
         self.add_to_owned_cards(card)
         return removed_tokens
