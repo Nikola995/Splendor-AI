@@ -94,8 +94,7 @@ class Player:
                              f"cards of Player {self.id}")
         self.cards_reserved[self.cards_reserved.index(card)] = None
 
-    def can_purchase_card(self, card: Card,
-                          wildcard_collaterals: dict[Token, int] = {}) -> bool:
+    def can_purchase_card(self, card: Card) -> bool:
         """Check if the player can purchase the given card.
 
         Returns True if the sum of each color of owned bonuses,
@@ -106,19 +105,28 @@ class Player:
         ----------
         card : Card
             The card that the player wants to purchase.
-        wildcard_collaterals: dict[Token, int]
-            The number of Tokens that are replaced by wildcard tokens from the
-            player's reserved tokens as collaterals to purchase the card.
         """
-        if (sum(wildcard_collaterals.values()) >
-                self.token_reserved.tokens[Token.YELLOW]):
-            return False
+        collateral_wildcards = 0
         color_costs = card.token_cost.tokens
         for color in color_costs:
             player_buying_power = (self.bonus_owned.tokens[color] +
-                                   self.token_reserved.tokens[color] +
-                                   wildcard_collaterals.get(color, 0))
-            if color_costs[color] > player_buying_power:
+                                   self.token_reserved.tokens[color])
+            # If the card can be purchased without wildcards
+            if color_costs[color] <= player_buying_power:
+                continue
+            # If the card can be purchased with wildcards
+            # that weren't reserved for previous costs
+            # in the card requirements
+            elif color_costs[color] <= (player_buying_power +
+                                        self.token_reserved.tokens[Token.YELLOW]
+                                        - collateral_wildcards):
+                # Add the remainder of the cost to the number of
+                # collateral wildcards for the purchase
+                collateral_wildcards += (color_costs[color] -
+                                         player_buying_power)
+                continue
+            # Else the card can't be purchased
+            else:
                 return False
         return True
 
@@ -138,6 +146,51 @@ class Player:
         self.cards_owned.append(card)
         self.bonus_owned.add({card.bonus_color: 1})
         self.prestige_points += card.prestige_points
+
+    def purchase_card(self, card: Card) -> dict[Token, int]:
+        """Purchases the given card for the player.
+
+        The process of purchasing a card follows this process for each color
+        in the card's cost amounts:
+
+            1. The owned bonuses discount the price of the card
+            (the card can be purchased with just bonuses)
+
+            3. The reserved tokens are removed from the player's inventory
+            by the remaining amount of the card cost
+
+            2. Wildcard tokens are used as collateral for the remaining cost,
+            (if there is remaining cost) and remove the total amount from the
+            player's inventory.
+
+        Post-purchase, the card is added to the player's owned cards.
+
+        Parameters
+        ----------
+        card : Card
+            The card that the player wants to purchase.
+
+        Returns:
+            dict[Token, int]: The token amounts that are removed from the
+            player and are to be returned to the bank.
+        """
+        # Sanity check
+        if not self.can_purchase_card(card):
+            raise ValueError(f"Player {self.id} can't purchase {card}.")
+
+        removed_tokens = {Token.YELLOW: 0}
+        color_costs = card.token_cost.tokens
+        for color in color_costs:
+            removed_tokens[color] = max((color_costs[color] -
+                                         self.bonus_owned.tokens[color]), 0)
+            collatteral = max((color_costs[color] -
+                               (self.bonus_owned.tokens[color] +
+                                removed_tokens[color])), 0)
+            if collatteral:
+                removed_tokens[color] += collatteral
+        self.token_reserved.remove(removed_tokens)
+        self.add_to_owned_cards(card)
+        return removed_tokens
 
     def is_eligible_for_noble(self, noble: Noble) -> bool:
         """Check if the player is eligible to own the noble.

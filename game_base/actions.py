@@ -176,16 +176,6 @@ class PurchaseCard(Action):
         player's reserved tokens as collaterals to purchase the card.
     """
     card: Card
-    wildcard_collaterals: dict[Token, int] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        # Sanity checks
-        if Token.YELLOW in self.wildcard_collaterals:
-            raise ValueError("Wildcard tokens can only be used as collateral "
-                             "for regular color tokens")
-        for amount in self.wildcard_collaterals.values():
-            if amount < 0:
-                raise ValueError("Can't give a negative amount as collateral")
 
     def can_perform(self, player: Player, bank: Bank) -> bool:
         """Check if the player can purchase the given card.
@@ -195,15 +185,7 @@ class PurchaseCard(Action):
         reserved tokens of the player and wildcard tokens given as collateral
         is >= than the cost of tokens of the card for those colors.
         """
-        return player.can_purchase_card(self.card,
-                                        self.wildcard_collaterals)
-
-    def _give_card(self, player: Player) -> None:
-        """Give the card to the player."""
-        # If the card is reserved, remove from there
-        if self.card in player.cards_reserved:
-            player.cards_reserved.pop(self.card)
-        player.add_to_owned_cards(self.card)
+        return player.can_purchase_card(self.card)
 
     def perform(self, player: Player, bank: Bank) -> None:
         """Purchase the card for the player.
@@ -221,38 +203,11 @@ class PurchaseCard(Action):
             3. The reserved tokens are removed from the player's inventory
             by the remaining amount of the card cost
             (for the corresponding color)
+
+        The card is automatically added to the player's owned cards.
         """
-        remaining_cost = deepcopy(self.card.token_cost.tokens)
-        # 1. Reduce the cost by the owned bonuses
-        for color in remaining_cost:
-            remaining_cost[color] = max((remaining_cost[color] -
-                                         player.bonus_owned.tokens[color]), 0)
-        # Transfer the card if the total remaining cost == 0
-        if sum(remaining_cost.values()) == 0:
-            player.add_to_owned_cards(self.card)
-            return None
-        # 2. Reduce the cost by collateral wildcard tokens
-        for color in remaining_cost:
-            remaining_cost[color] = max((remaining_cost[color] -
-                                         self.wildcard_collaterals.get(color,
-                                                                       0)),
-                                        0)
-        # Transfer the collateral wildcard tokens from the player to the bank
-        player.remove_token(
-            {Token.YELLOW: sum(self.wildcard_collaterals.values())})
-        bank.add_token({Token.YELLOW: sum(self.wildcard_collaterals.values())})
-        # Transfer the card if the total remaining cost == 0
-        if sum(remaining_cost.values()) == 0:
-            player.add_to_owned_cards(self.card)
-            return None
-        # 3. Purchase the remaining cost with the player's reserved tokens
-        player.remove_token(remaining_cost)
-        bank.add_token(remaining_cost)
-        player.add_to_owned_cards(self.card)
+        removed_player_tokens = player.purchase_card(self.card)
+        bank.add_token(removed_player_tokens)
 
     def __str__(self) -> str:
-        return " ".join([f"purchased card {self.card.id} with wildcard tokens as",
-                        "collateral for",
-                         " & ".join([f"{amount} {color}" for color, amount in
-                                    self.wildcard_collaterals.items()]),
-                         "tokens"])
+        return " ".join([f"purchased card {self.card.id}."])
