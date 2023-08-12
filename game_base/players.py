@@ -44,7 +44,7 @@ class Player:
 
     def add_token(self, amount_to_add: dict[Token, int]) -> None:
         """Add tokens of given colors by the amount given for each.
-        Assumes can_remove_token check was made.
+        Assumes can_add_token check was made.
         Function call is only done when a player reserves a card or
         reserves tokens from the bank.
 
