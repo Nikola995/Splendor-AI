@@ -74,7 +74,7 @@ class Player:
         """Adds card to the first open slot in reserved cards.
         Assumes can_reserve_card check was made."""
         # Sanity check if you don't check before calling this fn
-        if not self.can_reserve_card():
+        if not self.can_reserve_card(card):
             raise ValueError(f"Player {self.id} has no open slots to reserve "
                              "another card.")
         # The wildcard token given when reserving a card should be handled

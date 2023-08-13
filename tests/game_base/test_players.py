@@ -82,7 +82,7 @@ class TestingPlayer:
         cards = TestingCardManager.card_list_for_testing()
         player = Player('test_player')
         assert player.num_reserved_cards == 0
-        assert player.can_reserve_card()
+        assert player.can_reserve_card(cards[0])
 
     def test_player_add_to_reserved_cards(self) -> None:
         cards = TestingCardManager.card_list_for_testing()
@@ -96,18 +96,24 @@ class TestingPlayer:
         cards = TestingCardManager.card_list_for_testing()
         player = Player('test_player')
         for i in range(3):
-            assert player.can_reserve_card()
+            assert player.can_reserve_card(cards[i])
             assert player.num_reserved_cards == i
             player.add_to_reserved_cards(cards[i])
             assert player.num_reserved_cards == i + 1
             assert player.cards_reserved[i] == cards[i]
 
-    def test_player_can_reserve_card_False(self) -> None:
+    def test_player_can_reserve_card_False_no_free_slot(self) -> None:
         cards = TestingCardManager.card_list_for_testing()
         player = Player('test_player')
         for i in range(3):
             player.add_to_reserved_cards(cards[i])
-        assert not player.can_reserve_card()
+        assert not player.can_reserve_card(cards[4])
+    
+    def test_player_can_reserve_card_False_already_reserved(self) -> None:
+        cards = TestingCardManager.card_list_for_testing()
+        player = Player('test_player')
+        player.add_to_reserved_cards(cards[0])
+        assert not player.can_reserve_card(cards[0])
 
     def test_player_remove_from_reserved_cards(self) -> None:
         cards = TestingCardManager.card_list_for_testing()

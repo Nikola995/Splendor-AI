@@ -143,7 +143,7 @@ class ReserveCard(Action):
         The action will be successful if :
             - the player has less than 3 reserved cards.
         """
-        return player.can_reserve_card()
+        return player.can_reserve_card(self.card)
 
     def perform(self, player: Player, bank: Bank) -> None:
         """Add the card to the player's reserved cards."""
