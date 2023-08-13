@@ -32,6 +32,7 @@ class Bank:
                 case 1:
                     if self.token_available.tokens[color] < 1:
                         return False
+                case 0: return True
                 case other_amount:
                     raise NotImplementedError("There are no ways to remove "
                                               f"{other_amount} tokens.")
