@@ -64,9 +64,11 @@ class Player:
         """The number of reserved card slot filled by a card."""
         return len([card for card in self.cards_reserved if card is not None])
 
-    def can_reserve_card(self) -> bool:
-        """Check if player has less than 3 reserved cards."""
-        return self.num_reserved_cards < 3
+    def can_reserve_card(self, card: Card) -> bool:
+        """Check if player has less than 3 reserved cards and
+        card is not already reserved by them."""
+        return (self.num_reserved_cards < 3 and
+                card not in self.cards_reserved)
 
     def add_to_reserved_cards(self, card: Card) -> None:
         """Adds card to the first open slot in reserved cards.
