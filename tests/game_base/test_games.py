@@ -325,16 +325,65 @@ class TestingGameMakeMoveReserve3UniqueColorTokens:
 class TestingGameMakeMoveReserve2SameColorTokens:
 
     def test_game_can_make_move_2_same_tokens_True(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        color = Token.GREEN
+        action = Reserve2SameColorTokens(color)
+        assert game.can_make_move_for_current_player(action)
+        
+    def test_game_can_make_move_2_same_tokens_False_game(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        color = Token.GREEN
+        action = Reserve2SameColorTokens(color)
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
 
     def test_game_can_make_move_2_same_tokens_False_player(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        color = Token.GREEN
+        action = Reserve2SameColorTokens(color)
+        game.current_player.token_reserved.add({Token.WHITE: 9})
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
 
     def test_game_can_make_move_2_same_tokens_False_bank(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        color = Token.GREEN
+        action = Reserve2SameColorTokens(color)
+        game.bank.remove_token({Token.GREEN: 1})
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
 
     def test_game_make_move_2_same_tokens(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        color = Token.GREEN
+        action = Reserve2SameColorTokens(color)
+        game.make_move_for_current_player(action)
+        token_amounts = {color: 2}
+        expected_bank = Bank(num_players)
+        expected_bank.remove_token(token_amounts)
+        assert game.current_player_idx == 1
+        assert game.current_player == players[1]
+        assert game.meta_data.turns_played == 0
+        assert not game.is_final_turn()
+        assert game.players[0].token_reserved == TokenBag().add(token_amounts)
+        assert game.bank == expected_bank
 
 
 class TestingGameMakeMoveReserveCard:
