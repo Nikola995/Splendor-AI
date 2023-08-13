@@ -1,4 +1,5 @@
 import pytest
+import random
 from game_base.cards import Card
 from game_base.tokens import TokenBag, Token
 from game_base.players import Player
@@ -9,6 +10,7 @@ from game_base.actions import (ReserveCard, PurchaseCard,
 from game_base.games import Game, GameState
 from tests.game_base.test_cards import TestingCardManager
 
+random.seed(42)
 
 class TestingGameAddPlayer:
     def test_game_adding_players(self) -> None:
@@ -389,22 +391,110 @@ class TestingGameMakeMoveReserve2SameColorTokens:
 class TestingGameMakeMoveReserveCard:
 
     def test_game_can_make_move_reserve_card_True(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = random.sample(game.cards.get_all_cards_on_tables(), 1)[0]
+        action = ReserveCard(card)
+        assert game.can_make_move_for_current_player(action)
+        
 
-    def test_game_can_make_move_reserve_card_False(self) -> None:
-        raise NotImplementedError()
+    def test_game_can_make_move_reserve_card_False_game(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        # There should be no cards available to get from the tables
+        assert len([card for card in game.cards.get_all_cards_on_tables()
+                    if card is not None]) == 0
 
-    def test_game_can_make_move_reserve_card_False_bank(self) -> None:
-        raise NotImplementedError()
+    def test_game_can_make_move_reserve_card_False_player_no_free_slots(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        sample_cards = random.sample(game.cards.get_all_cards_on_tables(), 4)
+        card_to_reserve = sample_cards[0]
+        action = ReserveCard(card_to_reserve)
+        for card in sample_cards[1:]:
+            game.current_player.add_to_reserved_cards(card)
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
+
+    def test_game_can_make_move_reserve_card_False_player_already_reserved(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = random.sample(game.cards.get_all_cards_on_tables(), 1)[0]
+        action = ReserveCard(card)
+        game.current_player.add_to_reserved_cards(card)
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
 
     def test_game_make_move_reserve_card(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = random.sample(game.cards.get_all_cards_on_tables(), 1)[0]
+        action = ReserveCard(card)
+        game.make_move_for_current_player(action)
+        token_amounts = {Token.YELLOW: 1}
+        expected_bank = Bank(num_players)
+        expected_bank.remove_token(token_amounts)
+        assert game.current_player_idx == 1
+        assert game.current_player == players[1]
+        assert game.meta_data.turns_played == 0
+        assert not game.is_final_turn()
+        assert game.players[0].token_reserved == TokenBag().add(token_amounts)
+        assert game.bank == expected_bank
+        assert card in game.players[0].cards_reserved
+        assert game.players[0].num_reserved_cards == 1
 
     def test_game_make_move_reserve_card_no_wildcard_bank(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = random.sample(game.cards.get_all_cards_on_tables(), 1)[0]
+        action = ReserveCard(card)
+        extra_tokens = {Token.WHITE: 10}
+        game.current_player.add_token(extra_tokens)
+        game.make_move_for_current_player(action)
+        expected_bank = Bank(num_players)
+        assert game.current_player_idx == 1
+        assert game.current_player == players[1]
+        assert game.meta_data.turns_played == 0
+        assert not game.is_final_turn()
+        assert game.players[0].token_reserved == TokenBag().add(extra_tokens)
+        assert game.bank == expected_bank
+        assert card in game.players[0].cards_reserved
+        assert game.players[0].num_reserved_cards == 1
 
     def test_game_make_move_reserve_card_no_wildcard_player(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = random.sample(game.cards.get_all_cards_on_tables(), 1)[0]
+        action = ReserveCard(card)
+        for _ in range(5):
+            game.bank.remove_token({Token.YELLOW: 1})
+        game.make_move_for_current_player(action)
+        expected_bank = Bank(num_players)
+        for _ in range(5):
+            expected_bank.remove_token({Token.YELLOW: 1})
+        assert game.current_player_idx == 1
+        assert game.current_player == players[1]
+        assert game.meta_data.turns_played == 0
+        assert not game.is_final_turn()
+        assert game.players[0].token_reserved == TokenBag()
+        assert game.bank == expected_bank
+        assert card in game.players[0].cards_reserved
+        assert game.players[0].num_reserved_cards == 1
 
 
 class TestingGameMakeMovePurchaseCard:
