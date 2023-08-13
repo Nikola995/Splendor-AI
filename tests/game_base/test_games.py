@@ -259,16 +259,67 @@ class TestingGameProperties:
 class TestingGameMakeMoveReserve3UniqueColorTokens:
 
     def test_game_can_make_move_3_unique_tokens_True(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        assert game.can_make_move_for_current_player(action)
+    
+    def test_game_make_move_3_unique_tokens(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        game.make_move_for_current_player(action)
+        token_amounts = dict.fromkeys(colors, 1)
+        expected_bank = Bank(num_players)
+        expected_bank.remove_token(token_amounts)
+        assert game.current_player_idx == 1
+        assert game.current_player == players[1]
+        assert game.meta_data.turns_played == 0
+        assert not game.is_final_turn()
+        assert game.players[0].token_reserved == TokenBag().add(token_amounts)
+        assert game.bank == expected_bank
+    
+    def test_game_can_make_move_3_unique_tokens_False_game(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
 
     def test_game_can_make_move_3_unique_tokens_False_player(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        game.current_player.token_reserved.add({Token.WHITE: 8})
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
 
     def test_game_can_make_move_3_unique_tokens_False_bank(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_make_move_3_unique_tokens(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        game.bank.remove_token({Token.GREEN: 2})
+        game.bank.remove_token({Token.GREEN: 1})
+        game.bank.remove_token({Token.GREEN: 1})
+        assert not game.can_make_move_for_current_player(action)
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
 
 
 class TestingGameMakeMoveReserve2SameColorTokens:
