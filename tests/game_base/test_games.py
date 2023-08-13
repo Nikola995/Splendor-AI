@@ -148,27 +148,92 @@ class TestingGameRemovePlayer:
 class TestingGameInit:
 
     def test_game_initialization_2_players(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        num_players = 2
+        for i in range(num_players):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+        assert game.num_players == num_players
+        assert game.can_initialize()
+        game.initialize()
+        assert game.bank == Bank(num_players)
+        assert len(game.nobles) == num_players + 1
+        assert len(game.cards.get_all_cards_on_tables()) == 12
 
     def test_game_initialization_3_players(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        num_players = 3
+        for i in range(num_players):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+        assert game.num_players == num_players
+        assert game.can_initialize()
+        game.initialize()
+        assert game.bank == Bank(num_players)
+        assert len(game.nobles) == num_players + 1
+        assert len(game.cards.get_all_cards_on_tables()) == 12
 
     def test_game_initialization_4_players(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        num_players = 4
+        for i in range(num_players):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+        assert game.num_players == num_players
+        assert game.can_initialize()
+        game.initialize()
+        assert game.bank == Bank(num_players)
+        assert len(game.nobles) == num_players + 1
+        assert len(game.cards.get_all_cards_on_tables()) == 12
 
     def test_game_can_initialize_False_min_players(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        num_players = 1
+        for i in range(num_players):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+        assert game.num_players == num_players
+        assert not game.can_initialize()
 
     def test_game_can_initialize_False_game_started(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        num_players = 4
+        for i in range(num_players):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+        assert game.num_players == num_players
+        assert game.can_initialize()
+        game.initialize()
+        assert not game.can_initialize()
 
     def test_game_initialization_error_min_players(self) -> None:
+        game = Game()
+        num_players = 1
+        for i in range(num_players):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+        assert game.num_players == num_players
         with pytest.raises(ValueError) as e:
-            raise NotImplementedError()
+            game.initialize()
 
     def test_game_initialization_error_game_started(self) -> None:
+        game = Game()
+        num_players = 4
+        for i in range(num_players):
+            player = Player(f'test_player_{i + 1}')
+            assert game.can_add_player(player)
+            game.add_player(player)
+        assert game.num_players == num_players
+        assert game.can_initialize()
+        game.initialize()
         with pytest.raises(ValueError) as e:
-            raise NotImplementedError()
+            game.initialize()
 
 
 class TestingGameProperties:
