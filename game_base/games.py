@@ -179,16 +179,16 @@ class Game:
             else:
                 # Continue the game for another turn
                 self.meta_data.turns_played += 1
-                self.current_player_idx = 0
+                self.meta_data.curr_player_index = 0
         else:
             # Continue the game with the next player to move
-            self.current_player_idx += 1
+            self.meta_data.curr_player_index += 1
 
     def can_make_move_for_current_player(self, action: Action) -> bool:
         """Checks if the given action can be performed for the current
         player's move.
         """
-        return (self.meta_data.state != GameState.IN_PROGRESS and
+        return (self.meta_data.state == GameState.IN_PROGRESS and
                 action.can_perform(self.current_player, self.bank))
 
     def make_move_for_current_player(self, action: Action) -> None:
