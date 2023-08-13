@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
+from typing import Optional
 from game_base.players import Player
 from game_base.banks import Bank
 from game_base.nobles import Noble, NobleGenerator
@@ -91,6 +92,13 @@ class Game:
         if not self.can_add_player(player):
             raise ValueError(f"Player {player.id} can't be added to the game.")
         self.players.append(player)
+
+    def get_player_by_id(self, id: str) -> Optional[Player]:
+        """Returns the player with the given id if they're in the game."""
+        for player in self.players:
+            if player.id == id:
+                return player
+        return None
 
     def can_remove_player(self, player: Player) -> bool:
         """Checks if the game hasn't started and
