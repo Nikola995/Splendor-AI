@@ -236,58 +236,6 @@ class TestingPlayer:
 class TestingPlayerCanPurchaseCard:
     def test_player_can_purchase_card_True_just_bonus(self) -> None:
         player = Player('test_player')
-        num_bonuses = 3
-        bonus_color = Token.GREEN
-        for _ in range(num_bonuses):
-            amounts = {Token.BLUE: 1}
-            card = Card(level=1, prestige_points=0, bonus_color=bonus_color,
-                        token_cost=TokenBag().add(amounts))
-            player.add_to_owned_cards(card)
-        expected_cost = TokenBag().add({bonus_color: num_bonuses})
-        card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
-                           token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy)
-
-    def test_player_can_purchase_card_True_no_wildcards(self) -> None:
-        player = Player('test_player')
-        num_bonuses = 2
-        bonus_color = Token.GREEN
-        for _ in range(num_bonuses):
-            card = Card(level=1, prestige_points=0, bonus_color=bonus_color,
-                        token_cost=TokenBag().add({Token.BLUE: 1}))
-            player.add_to_owned_cards(card)
-        num_tokens = 3
-        token_color = Token.RED
-        player.add_token({token_color: num_tokens})
-        expected_cost = TokenBag().add({bonus_color: num_bonuses,
-                                        token_color: num_tokens})
-        card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
-                           token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy)
-
-    def test_player_can_purchase_card_True_wildcards(self) -> None:
-        player = Player('test_player')
-        num_bonuses = 2
-        bonus_color = Token.GREEN
-        for _ in range(num_bonuses):
-            card = Card(level=1, prestige_points=0, bonus_color=bonus_color,
-                        token_cost=TokenBag().add({Token.BLUE: 1}))
-            player.add_to_owned_cards(card)
-        num_tokens = 3
-        token_color = Token.RED
-        num_wildcards = 1
-        player.add_token({token_color: num_tokens,
-                          Token.YELLOW: num_wildcards})
-        expected_cost = TokenBag().add({bonus_color: (num_bonuses +
-                                                      num_wildcards),
-                                        token_color: num_tokens})
-        card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
-                           token_cost=expected_cost)
-        wildcard_collaterals = {bonus_color: num_wildcards}
-        assert player.can_purchase_card(card_to_buy, wildcard_collaterals)
-
-    def test_player_can_purchase_card_True_just_bonus_multi(self) -> None:
-        player = Player('test_player')
         bonuses = {Token.GREEN: 3,
                    Token.BLUE: 2}
         for color in bonuses:
@@ -301,53 +249,46 @@ class TestingPlayerCanPurchaseCard:
                            token_cost=expected_cost)
         assert player.can_purchase_card(card_to_buy)
 
-    def test_player_can_purchase_card_True_no_wildcards_multi(self) -> None:
+    def test_player_can_purchase_card_True_just_token(self) -> None:
         player = Player('test_player')
-        bonuses = {Token.GREEN: 3,
-                   Token.BLUE: 2}
-        for color in bonuses:
-            for _ in range(bonuses[color]):
-                amounts = {Token.BLUE: 1}
-                card = Card(level=1, prestige_points=0, bonus_color=color,
-                            token_cost=TokenBag().add(amounts))
-                player.add_to_owned_cards(card)
-        tokens = {Token.BLUE: 1,
-                  Token.RED: 3}
+        tokens = {Token.GREEN: 3,
+                  Token.BLUE: 2}
         player.add_token(tokens)
-        expected_cost = TokenBag().add(bonuses).add(tokens)
+        expected_cost = TokenBag().add(tokens)
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
         assert player.can_purchase_card(card_to_buy)
 
-    def test_player_can_purchase_card_True_wildcards_multi(self) -> None:
+    def test_player_can_purchase_card_True_just_wildcard(self) -> None:
         player = Player('test_player')
-        bonuses = {Token.GREEN: 3,
-                   Token.BLUE: 2}
-        for color in bonuses:
-            for _ in range(bonuses[color]):
-                amounts = {Token.BLUE: 1}
-                card = Card(level=1, prestige_points=0, bonus_color=color,
-                            token_cost=TokenBag().add(amounts))
-                player.add_to_owned_cards(card)
-        tokens = {Token.BLUE: 1,
-                  Token.RED: 3,
-                  Token.YELLOW: 4}
-        player.add_token(tokens)
-        expected_cost = TokenBag().add(bonuses).add(tokens)
-        # Add the wildcard collaterals
-        expected_cost = expected_cost.remove(
-            {Token.YELLOW: tokens[Token.YELLOW]})
-        wildcard_collaterals = {Token.GREEN: 1, Token.RED: 1, Token.WHITE: 1}
-        expected_cost = expected_cost.add(wildcard_collaterals)
+        token_cost = {Token.BLUE: 1,
+                      Token.RED: 3}
+        expected_cost = TokenBag().add(token_cost)
+        player.add_token({Token.YELLOW: sum(token_cost.values())})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert player.can_purchase_card(card_to_buy, wildcard_collaterals)
+        assert player.can_purchase_card(card_to_buy)
 
-    def test_player_can_purchase_card_False_just_bonus(self) -> None:
+    def test_player_can_purchase_card_True_no_bonus(self) -> None:
         player = Player('test_player')
-        extra_cost_color = Token.BLACK
+        # Add the regular tokens
+        tokens = {Token.GREEN: 3,
+                  Token.BLUE: 2}
+        player.add_token(tokens)
+        # Add the wildcard tokens
+        collaterals = {Token.BLUE: 1,
+                       Token.RED: 3}
+        expected_cost = TokenBag().add(tokens).add(collaterals)
+        player.add_token({Token.YELLOW: sum(collaterals.values())})
+        card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
+                           token_cost=expected_cost)
+        assert player.can_purchase_card(card_to_buy)
+
+    def test_player_can_purchase_card_True_no_token(self) -> None:
+        player = Player('test_player')
+        # Add the bonuses
         bonuses = {Token.GREEN: 3,
-                   extra_cost_color: 2}
+                   Token.BLUE: 2}
         for color in bonuses:
             for _ in range(bonuses[color]):
                 amounts = {Token.BLUE: 1}
@@ -355,14 +296,18 @@ class TestingPlayerCanPurchaseCard:
                             token_cost=TokenBag().add(amounts))
                 player.add_to_owned_cards(card)
         expected_cost = TokenBag().add(bonuses)
-        expected_cost = expected_cost.add({extra_cost_color: 1})
+        # Add the wildcard tokens
+        collaterals = {Token.BLUE: 1,
+                       Token.RED: 3}
+        expected_cost = TokenBag().add(bonuses).add(collaterals)
+        player.add_token({Token.YELLOW: sum(collaterals.values())})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert not player.can_purchase_card(card_to_buy)
+        assert player.can_purchase_card(card_to_buy)
 
-    def test_player_can_purchase_card_False_no_wildcards(self) -> None:
+    def test_player_can_purchase_card_True_no_wildcard(self) -> None:
         player = Player('test_player')
-        extra_cost_color = Token.BLACK
+        # Add the bonuses
         bonuses = {Token.GREEN: 3,
                    Token.BLUE: 2}
         for color in bonuses:
@@ -371,17 +316,19 @@ class TestingPlayerCanPurchaseCard:
                 card = Card(level=1, prestige_points=0, bonus_color=color,
                             token_cost=TokenBag().add(amounts))
                 player.add_to_owned_cards(card)
-        tokens = {Token.BLUE: 1,
-                  extra_cost_color: 3}
+        expected_cost = TokenBag().add(bonuses)
+        # Add the regular tokens
+        tokens = {Token.GREEN: 3,
+                  Token.BLUE: 2}
         player.add_token(tokens)
         expected_cost = TokenBag().add(bonuses).add(tokens)
-        expected_cost = expected_cost.add({extra_cost_color: 1})
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
-        assert not player.can_purchase_card(card_to_buy)
+        assert player.can_purchase_card(card_to_buy)
 
-    def test_player_can_purchase_card_False_wildcards(self) -> None:
+    def test_player_can_purchase_card_True_all(self) -> None:
         player = Player('test_player')
+        # Add the bonuses
         bonuses = {Token.GREEN: 3,
                    Token.BLUE: 2}
         for color in bonuses:
@@ -390,21 +337,390 @@ class TestingPlayerCanPurchaseCard:
                 card = Card(level=1, prestige_points=0, bonus_color=color,
                             token_cost=TokenBag().add(amounts))
                 player.add_to_owned_cards(card)
-        tokens = {Token.BLUE: 1,
-                  Token.RED: 3,
-                  Token.YELLOW: 2}
+        expected_cost = TokenBag().add(bonuses)
+        # Add the regular tokens
+        tokens = {Token.GREEN: 3,
+                  Token.BLUE: 2}
         player.add_token(tokens)
-        expected_cost = TokenBag().add(bonuses).add(tokens)
-        # Add the wildcard collaterals
-        expected_cost = expected_cost.remove(
-            {Token.YELLOW: tokens[Token.YELLOW]})
-        wildcard_cost = {Token.GREEN: 1, Token.RED: 1}
-        expected_cost = expected_cost.add(wildcard_cost)
-        extra_cost = {Token.WHITE: 1}
-        expected_cost = expected_cost.add(extra_cost)
+        # Add the wildcard tokens
+        collaterals = {Token.BLUE: 1,
+                       Token.RED: 3}
+        player.add_token({Token.YELLOW: sum(collaterals.values())})
+        expected_cost = TokenBag().add(bonuses).add(tokens).add(collaterals)
+        card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
+                           token_cost=expected_cost)
+        assert player.can_purchase_card(card_to_buy)
+
+    def test_player_can_purchase_card_False_all(self) -> None:
+        player = Player('test_player')
+        bonuses = {Token.GREEN: 3,
+                   Token.BLUE: 2}
+        tokens = {Token.GREEN: 3,
+                  Token.BLUE: 2}
+        collaterals = {Token.BLUE: 1,
+                       Token.RED: 3}
+        expected_cost = (TokenBag().add(bonuses).add(tokens).add(collaterals)
+                         .add({Token.WHITE: 1}))
         card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
                            token_cost=expected_cost)
         assert not player.can_purchase_card(card_to_buy)
+        # Add the bonuses
+        for color in bonuses:
+            for _ in range(bonuses[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        expected_cost = TokenBag().add(bonuses)
+        assert not player.can_purchase_card(card_to_buy)
+        # Add the regular tokens
+        player.add_token(tokens)
+        assert not player.can_purchase_card(card_to_buy)
+        # Add the wildcard tokens
+        player.add_token({Token.YELLOW: sum(collaterals.values())})
+        assert not player.can_purchase_card(card_to_buy)
+
+
+class TestingPlayerPurchaseCard:
+    def test_player_purchase_card_just_bonus(self) -> None:
+        player = Player('test_player')
+        bonuses = {Token.GREEN: 3,
+                   Token.BLUE: 2}
+        bonus_card_prestige_points = 2
+        for color in bonuses:
+            for _ in range(bonuses[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, bonus_color=color,
+                            prestige_points=bonus_card_prestige_points,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        expected_cost = TokenBag().add(bonuses)
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        removed_tokens = player.purchase_card(card_to_buy)
+        assert removed_tokens == TokenBag().tokens
+        assert player.token_reserved == TokenBag()
+        assert card_to_buy in player.cards_owned
+        for color in bonuses:
+            assert player.bonus_owned.tokens[color] == bonuses[color]
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert (player.prestige_points ==
+                (bonus_card_prestige_points * sum(bonuses.values())
+                 + card_prestige_points))
+
+    def test_player_purchase_card_just_token(self) -> None:
+        player = Player('test_player')
+        token_cost = {Token.GREEN: 3,
+                      Token.BLUE: 2}
+        token_extra = {Token.GREEN: 1,
+                       Token.RED: 2}
+        player.add_token(token_cost)
+        player.add_token(token_extra)
+        expected_cost = TokenBag().add(token_cost)
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        removed_tokens = player.purchase_card(card_to_buy)
+        assert removed_tokens == TokenBag().add(token_cost).tokens
+        assert player.token_reserved == TokenBag().add(token_extra)
+        assert card_to_buy in player.cards_owned
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert player.prestige_points == card_prestige_points
+
+    def test_player_purchase_card_just_wildcard(self) -> None:
+        player = Player('test_player')
+        token_cost = {Token.BLUE: 1,
+                      Token.RED: 3}
+        expected_cost = TokenBag().add(token_cost)
+        extra_wildcard = 2
+        player.add_token({Token.YELLOW: (sum(token_cost.values()) +
+                                         extra_wildcard)})
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        removed_tokens = player.purchase_card(card_to_buy)
+        assert removed_tokens == (TokenBag()
+                                  .add({Token.YELLOW: sum(token_cost.values())})
+                                  .tokens)
+        assert player.token_reserved == (TokenBag()
+                                         .add({Token.YELLOW: extra_wildcard}))
+        assert card_to_buy in player.cards_owned
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert player.prestige_points == card_prestige_points
+
+    def test_player_purchase_card_no_bonus(self) -> None:
+        player = Player('test_player')
+        # Add the regular tokens
+        token_cost = {Token.GREEN: 2,
+                      Token.BLUE: 1}
+        token_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        player.add_token(token_cost)
+        player.add_token(token_extra)
+        # Add the wildcard tokens
+        wildcard_cost = {Token.BLUE: 1,
+                         Token.RED: 1}
+        extra_wildcard = 2
+        player.add_token({Token.YELLOW: (sum(wildcard_cost.values()) +
+                                         extra_wildcard)})
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        expected_cost = TokenBag().add(wildcard_cost).add(token_cost)
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        removed_tokens = player.purchase_card(card_to_buy)
+        expected_removed = (TokenBag()
+                            .add({Token.YELLOW: sum(wildcard_cost.values())})
+                            .add(token_cost))
+        assert removed_tokens == expected_removed.tokens
+        assert player.token_reserved == (TokenBag()
+                                         .add({Token.YELLOW: extra_wildcard})
+                                         .add(token_extra))
+        assert card_to_buy in player.cards_owned
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert player.prestige_points == card_prestige_points
+
+    def test_player_purchase_card_no_token(self) -> None:
+        player = Player('test_player')
+        # Add the bonuses
+        bonus_cost = {Token.GREEN: 3,
+                      Token.BLUE: 2}
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        bonus_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        for color in bonus_extra:
+            for _ in range(bonus_extra[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        for color in player.bonus_owned.tokens:
+            assert (player.bonus_owned.tokens[color] ==
+                    bonus_cost.get(color, 0) + bonus_extra.get(color, 0))
+        # Add the wildcard tokens
+        wildcard_cost = {Token.BLUE: 1,
+                         Token.RED: 1}
+        extra_wildcard = 2
+        player.add_token({Token.YELLOW: (sum(wildcard_cost.values()) +
+                                         extra_wildcard)})
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        expected_cost = TokenBag().add(wildcard_cost).add(bonus_cost)
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        removed_tokens = player.purchase_card(card_to_buy)
+        expected_removed = (TokenBag()
+                            .add({Token.YELLOW: sum(wildcard_cost.values())}))
+        assert removed_tokens == expected_removed.tokens
+        assert player.token_reserved == (TokenBag()
+                                         .add({Token.YELLOW: extra_wildcard}))
+        assert card_to_buy in player.cards_owned
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert player.prestige_points == card_prestige_points
+
+    def test_player_purchase_card_no_wildcard(self) -> None:
+        player = Player('test_player')
+        # Add the bonuses
+        bonus_cost = {Token.GREEN: 3,
+                      Token.BLUE: 2}
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        bonus_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        for color in bonus_extra:
+            for _ in range(bonus_extra[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        for color in player.bonus_owned.tokens:
+            assert (player.bonus_owned.tokens[color] ==
+                    bonus_cost.get(color, 0) + bonus_extra.get(color, 0))
+        # Add the regular tokens
+        token_cost = {Token.RED: 2,
+                      Token.BLUE: 1}
+        token_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        player.add_token(token_cost)
+        player.add_token(token_extra)
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        expected_cost = TokenBag().add(token_cost).add(bonus_cost)
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        removed_tokens = player.purchase_card(card_to_buy)
+        expected_removed = TokenBag().add(token_cost)
+        assert removed_tokens == expected_removed.tokens
+        assert player.token_reserved == TokenBag().add(token_extra)
+        assert card_to_buy in player.cards_owned
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert player.prestige_points == card_prestige_points
+
+    def test_player_purchase_card_all(self) -> None:
+        player = Player('test_player')
+        # Add the bonuses
+        bonus_cost = {Token.GREEN: 3,
+                      Token.BLUE: 2}
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        bonus_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        for color in bonus_extra:
+            for _ in range(bonus_extra[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        for color in player.bonus_owned.tokens:
+            assert (player.bonus_owned.tokens[color] ==
+                    bonus_cost.get(color, 0) + bonus_extra.get(color, 0))
+        # Add the regular tokens
+        token_cost = {Token.RED: 2,
+                      Token.BLUE: 1}
+        token_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        player.add_token(token_cost)
+        player.add_token(token_extra)
+        # Add the wildcard tokens
+        wildcard_cost = {Token.BLUE: 1,
+                         Token.RED: 1}
+        extra_wildcard = 2
+        player.add_token({Token.YELLOW: (sum(wildcard_cost.values()) +
+                                         extra_wildcard)})
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        expected_cost = (TokenBag().add(wildcard_cost)
+                         .add(bonus_cost).add(token_cost))
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        removed_tokens = player.purchase_card(card_to_buy)
+        expected_removed = (TokenBag()
+                            .add({Token.YELLOW: sum(wildcard_cost.values())})
+                            .add(token_cost))
+        assert removed_tokens == expected_removed.tokens
+        assert player.token_reserved == (TokenBag()
+                                         .add({Token.YELLOW: extra_wildcard})
+                                         .add(token_extra))
+        assert card_to_buy in player.cards_owned
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert player.prestige_points == card_prestige_points
+
+    def test_player_purchase_card_all_from_reserved(self) -> None:
+        player = Player('test_player')
+        # Add the bonuses
+        bonus_cost = {Token.GREEN: 3,
+                      Token.BLUE: 2}
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        bonus_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        for color in bonus_extra:
+            for _ in range(bonus_extra[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        for color in player.bonus_owned.tokens:
+            assert (player.bonus_owned.tokens[color] ==
+                    bonus_cost.get(color, 0) + bonus_extra.get(color, 0))
+        # Add the regular tokens
+        token_cost = {Token.RED: 2,
+                      Token.BLUE: 1}
+        token_extra = {Token.GREEN: 1,
+                       Token.WHITE: 1}
+        player.add_token(token_cost)
+        player.add_token(token_extra)
+        # Add the wildcard tokens
+        wildcard_cost = {Token.BLUE: 1,
+                         Token.RED: 1}
+        extra_wildcard = 2
+        player.add_token({Token.YELLOW: (sum(wildcard_cost.values()) +
+                                         extra_wildcard)})
+        card_bonus_color = Token.BLACK
+        card_prestige_points = 3
+        expected_cost = (TokenBag().add(wildcard_cost)
+                         .add(bonus_cost).add(token_cost))
+        card_to_buy = Card(level=1, prestige_points=card_prestige_points,
+                           bonus_color=card_bonus_color,
+                           token_cost=expected_cost)
+        # Reserve the card before purchase
+        player.add_to_reserved_cards(card_to_buy)
+        assert player.num_reserved_cards == 1
+        assert card_to_buy in player.cards_reserved
+        removed_tokens = player.purchase_card(card_to_buy)
+        expected_removed = (TokenBag()
+                            .add({Token.YELLOW: sum(wildcard_cost.values())})
+                            .add(token_cost))
+        assert removed_tokens == expected_removed.tokens
+        assert player.token_reserved == (TokenBag()
+                                         .add({Token.YELLOW: extra_wildcard})
+                                         .add(token_extra))
+        assert card_to_buy in player.cards_owned
+        assert player.num_reserved_cards == 0
+        assert card_to_buy not in player.cards_reserved
+        assert player.bonus_owned.tokens[card_bonus_color] == 1
+        assert player.prestige_points == card_prestige_points
+
+    def test_player_purchase_card_all_error(self) -> None:
+        player = Player('test_player')
+        bonuses = {Token.GREEN: 3,
+                   Token.BLUE: 2}
+        tokens = {Token.GREEN: 3,
+                  Token.BLUE: 2}
+        collaterals = {Token.BLUE: 1,
+                       Token.RED: 3}
+        expected_cost = (TokenBag().add(bonuses).add(tokens).add(collaterals)
+                         .add({Token.WHITE: 1}))
+        card_to_buy = Card(level=1, prestige_points=0, bonus_color=Token.BLUE,
+                           token_cost=expected_cost)
+        with pytest.raises(ValueError) as e:
+            player.purchase_card(card_to_buy)
+        # Add the bonuses
+        for color in bonuses:
+            for _ in range(bonuses[color]):
+                amounts = {Token.BLUE: 1}
+                card = Card(level=1, prestige_points=0, bonus_color=color,
+                            token_cost=TokenBag().add(amounts))
+                player.add_to_owned_cards(card)
+        expected_cost = TokenBag().add(bonuses)
+        with pytest.raises(ValueError) as e:
+            player.purchase_card(card_to_buy)
+        # Add the regular tokens
+        player.add_token(tokens)
+        with pytest.raises(ValueError) as e:
+            player.purchase_card(card_to_buy)
+        # Add the wildcard tokens
+        player.add_token({Token.YELLOW: sum(collaterals.values())})
+        with pytest.raises(ValueError) as e:
+            player.purchase_card(card_to_buy)
 
 
 class TestingPlayerStr:
