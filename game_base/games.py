@@ -188,6 +188,9 @@ class Game:
         """Checks if the given action can be performed for the current
         player's move.
         """
+        if hasattr(action, 'card'):
+            if action.card not in self.cards.get_all_cards_on_tables():
+                return False
         return (self.meta_data.state == GameState.IN_PROGRESS and
                 action.can_perform(self.current_player, self.bank))
 
