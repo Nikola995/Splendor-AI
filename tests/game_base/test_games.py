@@ -83,20 +83,66 @@ class TestingGameAddPlayer:
 
 class TestingGameRemovePlayer:
     def test_game_removing_players(self) -> None:
-        # Testing both can_remove_player & remove_player
-        raise NotImplementedError()
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            game.add_player(player)
+        assert game.num_players == 4
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            game.remove_player(player)
+            assert game.num_players == 4 - (i + 1)
+
+    def test_game_removing_players_by_id(self) -> None:
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            game.add_player(player)
+        assert game.num_players == 4
+        for i in range(4):
+            player = game.get_player_by_id(f'test_player_{i + 1}')
+            game.remove_player(player)
+            assert game.num_players == 4 - (i + 1)
 
     def test_game_can_remove_player_False_not_player_exists(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            game.add_player(player)
+        assert game.num_players == 4
+        player = Player(f'test_player_5')
+        assert not game.can_remove_player(player)
 
     def test_game_can_remove_player_False_game_in_progress(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            game.add_player(player)
+        assert game.num_players == 4
+        player = Player(f'test_player_1')
+        game.meta_data.change_game_state(GameState.IN_PROGRESS)
+        assert not game.can_remove_player(player)
 
-    def test_game_can_remove_player_False_not_player_exists(self) -> None:
-        raise NotImplementedError()
+    def test_game_remove_player_error_not_player_exists(self) -> None:
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            game.add_player(player)
+        assert game.num_players == 4
+        player = Player(f'test_player_5')
+        with pytest.raises(ValueError) as e:
+            game.remove_player(player)
 
     def test_game_remove_player_error_game_in_progress(self) -> None:
-        raise NotImplementedError()
+        game = Game()
+        for i in range(4):
+            player = Player(f'test_player_{i + 1}')
+            game.add_player(player)
+        assert game.num_players == 4
+        player = Player(f'test_player_1')
+        game.meta_data.change_game_state(GameState.IN_PROGRESS)
+        with pytest.raises(ValueError) as e:
+            game.remove_player(player)
 
 
 class TestingGameInit:
