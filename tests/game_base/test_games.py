@@ -173,13 +173,22 @@ class TestingGameInit:
 
 class TestingGameProperties:
     def test_game_property_num_players(self) -> None:
-        raise NotImplementedError()
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players)
+        assert game.num_players == num_players
 
     def test_game_property_current_player_idx(self) -> None:
-        raise NotImplementedError()
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players)
+        assert game.current_player_idx == 0
 
     def test_game_property_current_player(self) -> None:
-        raise NotImplementedError()
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players)
+        assert game.current_player == Player(f'test_player_1')
 
 
 class TestingGameMakeMoveReserve3UniqueColorTokens:
