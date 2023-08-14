@@ -159,8 +159,7 @@ class Game:
     def noble_check_for_current_player(self) -> None:
         """Automatically add a noble for the current player after their move.
         (Assumes the player is eligible.)"""
-        # TODO: Add the usecase of multiple available nobles in one turn
-        # # Currently just returns the first one
+        # BUG: Usecase of multiple available nobles at the same time.
         for noble in self.nobles:
             if self.current_player.is_eligible_for_noble(noble):
                 self.current_player.add_noble(noble)
@@ -170,16 +169,14 @@ class Game:
     def _end_player_turn(self) -> None:
         """Updates everything turn-related automatically after player
         performs an action."""
-        # TODO: Test this
         # If all the players made their turn
         if self.current_player_idx + 1 == self.num_players:
             if self.is_final_turn():
                 # End the game if it is the final turn
                 self.meta_data.change_game_state(GameState.FINISHED)
-            else:
-                # Continue the game for another turn
-                self.meta_data.turns_played += 1
-                self.meta_data.curr_player_index = 0
+            # Update the meta-data for the finished turn
+            self.meta_data.turns_played += 1
+            self.meta_data.curr_player_index = 0
         else:
             # Continue the game with the next player to move
             self.meta_data.curr_player_index += 1
