@@ -12,6 +12,7 @@ from tests.game_base.test_cards import TestingCardManager
 
 random.seed(42)
 
+
 class TestingGameAddPlayer:
     def test_game_adding_players(self) -> None:
         # Testing both can_add_player & add_player
@@ -268,7 +269,7 @@ class TestingGameMakeMoveReserve3UniqueColorTokens:
         colors = (Token.GREEN, Token.BLACK, Token.BLUE)
         action = Reserve3UniqueColorTokens(colors)
         assert game.can_make_move_for_current_player(action)
-    
+
     def test_game_make_move_3_unique_tokens(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
@@ -280,13 +281,9 @@ class TestingGameMakeMoveReserve3UniqueColorTokens:
         token_amounts = dict.fromkeys(colors, 1)
         expected_bank = Bank(num_players)
         expected_bank.remove_token(token_amounts)
-        assert game.current_player_idx == 1
-        assert game.current_player == players[1]
-        assert game.meta_data.turns_played == 0
-        assert not game.is_final_turn()
         assert game.players[0].token_reserved == TokenBag().add(token_amounts)
         assert game.bank == expected_bank
-    
+
     def test_game_can_make_move_3_unique_tokens_False_game(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
@@ -334,7 +331,7 @@ class TestingGameMakeMoveReserve2SameColorTokens:
         color = Token.GREEN
         action = Reserve2SameColorTokens(color)
         assert game.can_make_move_for_current_player(action)
-        
+
     def test_game_can_make_move_2_same_tokens_False_game(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
@@ -380,10 +377,6 @@ class TestingGameMakeMoveReserve2SameColorTokens:
         token_amounts = {color: 2}
         expected_bank = Bank(num_players)
         expected_bank.remove_token(token_amounts)
-        assert game.current_player_idx == 1
-        assert game.current_player == players[1]
-        assert game.meta_data.turns_played == 0
-        assert not game.is_final_turn()
         assert game.players[0].token_reserved == TokenBag().add(token_amounts)
         assert game.bank == expected_bank
 
@@ -398,7 +391,6 @@ class TestingGameMakeMoveReserveCard:
         card = random.sample(game.cards.get_all_cards_on_tables(), 1)[0]
         action = ReserveCard(card)
         assert game.can_make_move_for_current_player(action)
-        
 
     def test_game_can_make_move_reserve_card_False_game(self) -> None:
         num_players = 2
@@ -445,10 +437,6 @@ class TestingGameMakeMoveReserveCard:
         token_amounts = {Token.YELLOW: 1}
         expected_bank = Bank(num_players)
         expected_bank.remove_token(token_amounts)
-        assert game.current_player_idx == 1
-        assert game.current_player == players[1]
-        assert game.meta_data.turns_played == 0
-        assert not game.is_final_turn()
         assert game.players[0].token_reserved == TokenBag().add(token_amounts)
         assert game.bank == expected_bank
         assert card in game.players[0].cards_reserved
@@ -465,10 +453,6 @@ class TestingGameMakeMoveReserveCard:
         game.current_player.add_token(extra_tokens)
         game.make_move_for_current_player(action)
         expected_bank = Bank(num_players)
-        assert game.current_player_idx == 1
-        assert game.current_player == players[1]
-        assert game.meta_data.turns_played == 0
-        assert not game.is_final_turn()
         assert game.players[0].token_reserved == TokenBag().add(extra_tokens)
         assert game.bank == expected_bank
         assert card in game.players[0].cards_reserved
@@ -487,14 +471,40 @@ class TestingGameMakeMoveReserveCard:
         expected_bank = Bank(num_players)
         for _ in range(5):
             expected_bank.remove_token({Token.YELLOW: 1})
-        assert game.current_player_idx == 1
-        assert game.current_player == players[1]
-        assert game.meta_data.turns_played == 0
-        assert not game.is_final_turn()
         assert game.players[0].token_reserved == TokenBag()
         assert game.bank == expected_bank
         assert card in game.players[0].cards_reserved
         assert game.players[0].num_reserved_cards == 1
+
+
+class TestingGameMakeMoveEndTurn:
+    def test_game_end_player_turn_default(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        game.make_move_for_current_player(action)
+        assert game.current_player_idx == 1
+        assert game.current_player == players[1]
+        assert game.meta_data.turns_played == 0
+        assert not game.is_final_turn()
+
+    def test_game_end_player_turn_multiple_players(self) -> None:
+        raise NotImplementedError()
+
+    def test_game_end_player_turn_another_turn(self) -> None:
+        raise NotImplementedError()
+
+    def test_game_end_player_turn_final_turn(self) -> None:
+        raise NotImplementedError()
+
+    def test_game_end_player_turn_final_turn_winner(self) -> None:
+        raise NotImplementedError()
+
+    def test_game_end_player_turn_final_turn_multiple_eligible_winner(self) -> None:
+        raise NotImplementedError()
 
 
 class TestingGameMakeMovePurchaseCard:
@@ -532,24 +542,4 @@ class TestingGameMakeMovePurchaseCard:
         raise NotImplementedError()
 
     def test_game_make_move_purchase_card_eligible_for_noble(self) -> None:
-        raise NotImplementedError()
-
-
-class TestingGameMakeMoveEndTurn:
-    def test_game_end_player_turn_default(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_end_player_turn_multiple_players(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_end_player_turn_another_turn(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_end_player_turn_final_turn(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_end_player_turn_final_turn_winner(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_end_player_turn_final_turn_multiple_eligible_winner(self) -> None:
         raise NotImplementedError()
