@@ -547,7 +547,18 @@ class TestingGameMakeMoveEndTurn:
         assert game.meta_data.state == GameState.FINISHED
 
     def test_game_end_player_turn_final_turn_winner(self) -> None:
-        raise NotImplementedError()
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        random_winner_idx = random.randint(0, 3)
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        game.players[random_winner_idx].prestige_points = 15
+        for _ in range(num_players):
+            game.make_move_for_current_player(action)
+        assert game.meta_data.state == GameState.FINISHED
+        assert game.get_winner() == game.players[random_winner_idx]
 
     def test_game_end_player_turn_final_turn_multiple_eligible_winner(self) -> None:
         raise NotImplementedError()
