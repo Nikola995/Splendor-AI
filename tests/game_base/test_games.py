@@ -617,7 +617,39 @@ class TestingGameMakeMovePurchaseCard:
         assert game.can_make_move_for_current_player(action)
 
     def test_game_can_make_move_purchase_card_False_all(self) -> None:
-        raise NotImplementedError()
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
+        assert not game.can_make_move_for_current_player(action)
+        # Add bonuses
+        for color in card_cost:
+            mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                             token_cost=TokenBag().add({Token.RED: 1}))
+            game.current_player.add_to_owned_cards(mock_card)
+        assert not game.can_make_move_for_current_player(action)
+        # Add regular tokens
+        for color in card_cost:
+            # The lacking token to purchase the card
+            if color == Token.WHITE:
+                continue
+            game.current_player.add_token({color: 1})
+            game.bank.remove_token({color: 1})
+        assert not game.can_make_move_for_current_player(action)
+        # Add wildcard tokens
+        game.current_player.add_token({Token.YELLOW: 1})
+        game.bank.remove_token({Token.YELLOW: 1})
+        assert not game.can_make_move_for_current_player(action)
 
     def test_game_make_move_purchase_card_just_bonuses(self) -> None:
         raise NotImplementedError()
