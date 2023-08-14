@@ -524,7 +524,6 @@ class TestingGameMakeMoveEndTurn:
         assert game.current_player == players[0]
         assert game.meta_data.turns_played == 1
         assert not game.is_final_turn()
-        
 
     def test_game_end_player_turn_final_turn(self) -> None:
         num_players = 4
@@ -561,7 +560,30 @@ class TestingGameMakeMoveEndTurn:
         assert game.get_winner() == game.players[random_winner_idx]
 
     def test_game_end_player_turn_final_turn_multiple_eligible_winner(self) -> None:
-        raise NotImplementedError()
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        # Add prestige points and cards to players
+        game.players[0].prestige_points = 14
+        game.players[1].prestige_points = 16
+        game.players[2].prestige_points = 15
+        game.players[3].prestige_points = 16
+        test_cards = TestingCardManager.card_list_for_testing()
+        for _ in range(2):
+            card = test_cards.pop()
+            game.players[1].add_to_owned_cards(card)
+        for _ in range(3):
+            card = test_cards.pop()
+            game.players[3].add_to_owned_cards(card)
+        assert game.players[1].prestige_points == 16
+        assert game.players[3].prestige_points == 16
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        for _ in range(num_players):
+            game.make_move_for_current_player(action)
+        assert game.meta_data.state == GameState.FINISHED
+        assert game.get_winner() == game.players[1]
 
 
 class TestingGameMakeMovePurchaseCard:
