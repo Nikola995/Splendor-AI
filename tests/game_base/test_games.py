@@ -492,7 +492,20 @@ class TestingGameMakeMoveEndTurn:
         assert not game.is_final_turn()
 
     def test_game_end_player_turn_multiple_players(self) -> None:
-        raise NotImplementedError()
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        colors = (Token.GREEN, Token.BLACK, Token.BLUE)
+        action = Reserve3UniqueColorTokens(colors)
+        for i in range(num_players - 1):
+            assert game.current_player_idx == i
+            assert game.current_player == players[i]
+            game.make_move_for_current_player(action)
+            assert game.current_player_idx == i + 1
+            assert game.current_player == players[i + 1]
+            assert game.meta_data.turns_played == 0
+            assert not game.is_final_turn()
 
     def test_game_end_player_turn_another_turn(self) -> None:
         raise NotImplementedError()
