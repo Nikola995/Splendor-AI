@@ -3,6 +3,7 @@ import random
 from game_base.cards import Card, CardGenerator
 from game_base.tokens import TokenBag, Token
 from game_base.players import Player
+from game_base.nobles import Noble
 from game_base.banks import Bank
 from game_base.actions import (ReserveCard, PurchaseCard,
                                Reserve2SameColorTokens,
@@ -1087,13 +1088,47 @@ class TestingGameMakeMovePurchaseCard:
         card_cost = {Token.GREEN: 2,
                      Token.WHITE: 1,
                      Token.BLUE: 4}
+        # The last bonus required is gotten from the card purchase
         card_bonus = Token.RED
         card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
+        # Noble is valid, but injected to eliminate randomness
+        noble = Noble({Token.GREEN: 4, Token.WHITE: 0, Token.BLUE: 0,
+                       Token.BLACK: 0, Token.RED: 4})
+        if noble not in game.nobles:
+            game.nobles[0] = noble
         action = PurchaseCard(card)
-        raise NotImplementedError()
+        # Add tokens
+        token_cost = {Token.WHITE: 1,
+                      Token.BLUE: 4}
+        for color in token_cost:
+            for _ in range(token_cost[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
+        # Add bonuses
+        bonus_cost = {Token.GREEN: 2}
+        bonus_noble = {Token.GREEN: 3,
+                       Token.RED: 3}
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                                 token_cost=TokenBag().add({Token.RED: 1}))
+                game.current_player.add_to_owned_cards(mock_card)
+        for color in bonus_noble:
+            for _ in range(bonus_noble[color]):
+                mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                                 token_cost=TokenBag().add({Token.RED: 1}))
+                game.current_player.add_to_owned_cards(mock_card)
+        assert not game.current_player.is_eligible_for_noble(noble)
+        game.make_move_for_current_player(action)
+        assert noble in game.players[0].nobles_owned
+        assert noble not in game.nobles
+        # game starts with n + 1 nobles for n players
+        assert len(game.nobles) == num_players
+        assert game.players[0].prestige_points == (card.prestige_points +
+                                                   noble.prestige_points)
 
     def test_game_make_move_purchase_card_all_error(self) -> None:
         num_players = 2
@@ -1121,7 +1156,7 @@ class TestingGameMakeMovePurchaseCard:
         # Add bonuses
         bonus_cost = {Token.GREEN: 1,
                       Token.WHITE: 1,
-                      Token.BLUE: 1} # One missing Token.BLUE
+                      Token.BLUE: 1}  # One missing Token.BLUE
         for color in bonus_cost:
             for _ in range(bonus_cost[color]):
                 mock_card = Card(level=1, prestige_points=0, bonus_color=color,
