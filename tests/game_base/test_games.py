@@ -651,32 +651,170 @@ class TestingGameMakeMovePurchaseCard:
         game.bank.remove_token({Token.YELLOW: 1})
         assert not game.can_make_move_for_current_player(action)
 
-    def test_game_make_move_purchase_card_just_bonuses(self) -> None:
+    def test_game_make_move_purchase_card_just_bonus(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
+        raise NotImplementedError()
+
+    def test_game_make_move_purchase_card_just_token(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
 
     def test_game_make_move_purchase_card_just_wildcard(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[0]
+        card_cost = {Token.BLUE: 4}
+        card_bonus = Token.BLACK
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
 
-    def test_game_make_move_purchase_card_just_tokens(self) -> None:
+    def test_game_make_move_purchase_card_no_bonus(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
 
-    def test_game_make_move_purchase_card_bonuses_and_wildcard(self) -> None:
+    def test_game_make_move_purchase_card_no_token(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
 
-    def test_game_make_move_purchase_card_bonuses_and_tokens(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_make_move_purchase_card_wildcard_and_tokens_choose_wildcard(self) -> None:
-        raise NotImplementedError()
-
-    def test_game_make_move_purchase_card_wildcard_and_tokens_choose_token(self) -> None:
+    def test_game_make_move_purchase_card_no_wildcard(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
 
     def test_game_make_move_purchase_card_all(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
 
     def test_game_make_move_purchase_card_all_from_reserved(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
 
     def test_game_make_move_purchase_card_eligible_for_noble(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
+        raise NotImplementedError()
+    
+    def test_game_make_move_purchase_card_all_error(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players)
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_cost = {Token.WHITE: 2,
+                     Token.BLUE: 3,
+                     Token.BLACK: 2}
+        card_bonus = Token.GREEN
+        card_prestige_points = 1
+        assert card.token_cost == TokenBag().add(card_cost)
+        assert card.bonus_color == card_bonus
+        assert card.prestige_points == card_prestige_points
+        action = PurchaseCard(card)
         raise NotImplementedError()
