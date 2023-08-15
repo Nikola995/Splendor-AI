@@ -604,14 +604,21 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         # Add bonuses
-        for color in card_cost:
-            mock_card = Card(level=1, prestige_points=0, bonus_color=color,
-                             token_cost=TokenBag().add({Token.RED: 1}))
-            game.current_player.add_to_owned_cards(mock_card)
+        bonus_cost = {Token.GREEN: 1,
+                      Token.BLUE: 2}
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                                 token_cost=TokenBag().add({Token.RED: 1}))
+                game.current_player.add_to_owned_cards(mock_card)
         # Add regular tokens
-        for color in card_cost:
-            game.current_player.add_token({color: 1})
-            game.bank.remove_token({color: 1})
+        token_cost = {Token.GREEN: 1,
+                      Token.WHITE: 1,
+                      Token.BLUE: 1}
+        for color in token_cost:
+            for _ in range(token_cost[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
         # Add wildcard tokens
         game.current_player.add_token({Token.YELLOW: 1})
         game.bank.remove_token({Token.YELLOW: 1})
@@ -635,18 +642,22 @@ class TestingGameMakeMovePurchaseCard:
         action = PurchaseCard(card)
         assert not game.can_make_move_for_current_player(action)
         # Add bonuses
-        for color in card_cost:
-            mock_card = Card(level=1, prestige_points=0, bonus_color=color,
-                             token_cost=TokenBag().add({Token.RED: 1}))
-            game.current_player.add_to_owned_cards(mock_card)
+        bonus_cost = {Token.GREEN: 1,
+                      Token.BLUE: 1}  # One missing Token.BLUE
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                                 token_cost=TokenBag().add({Token.RED: 1}))
+                game.current_player.add_to_owned_cards(mock_card)
         assert not game.can_make_move_for_current_player(action)
         # Add regular tokens
-        for color in card_cost:
-            # The lacking token to purchase the card
-            if color == Token.WHITE:
-                continue
-            game.current_player.add_token({color: 1})
-            game.bank.remove_token({color: 1})
+        token_cost = {Token.GREEN: 1,
+                      Token.WHITE: 1,
+                      Token.BLUE: 1}
+        for color in token_cost:
+            for _ in range(token_cost[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
         assert not game.can_make_move_for_current_player(action)
         # Add wildcard tokens
         game.current_player.add_token({Token.YELLOW: 1})
@@ -670,8 +681,18 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         # Add bonuses
-        for color in card_cost:
-            for _ in range(card_cost[color]):
+        bonus_cost = {Token.GREEN: 2,
+                      Token.WHITE: 1,
+                      Token.BLUE: 4}
+        bonus_extra = {Token.BLACK: 1,
+                       Token.WHITE: 1}
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                                 token_cost=TokenBag().add({Token.RED: 1}))
+                game.current_player.add_to_owned_cards(mock_card)
+        for color in bonus_extra:
+            for _ in range(bonus_extra[color]):
                 mock_card = Card(level=1, prestige_points=0, bonus_color=color,
                                  token_cost=TokenBag().add({Token.RED: 1}))
                 game.current_player.add_to_owned_cards(mock_card)
@@ -701,16 +722,26 @@ class TestingGameMakeMovePurchaseCard:
         action = PurchaseCard(card)
         extra_tokens_per_color = 1
         # Add tokens
-        for color in card_cost:
-            for _ in range(card_cost[color] + extra_tokens_per_color):
+        token_cost = {Token.GREEN: 2,
+                      Token.WHITE: 1,
+                      Token.BLUE: 4}
+        token_extra = {Token.RED: 1,
+                       Token.WHITE: 1}
+        for color in token_cost:
+            for _ in range(token_cost[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
+        for color in token_extra:
+            for _ in range(token_extra[color]):
                 game.current_player.add_token({color: 1})
                 game.bank.remove_token({color: 1})
         game.make_move_for_current_player(action)
         expected_player_tokens = TokenBag()
         expected_bank = Bank(num_players)
-        for color in card_cost:
-            expected_player_tokens.add({color: 1})
-            expected_bank.remove_token(({color: 1}))
+        for color in token_extra:
+            for _ in range(token_extra[color]):
+                expected_player_tokens.add({color: 1})
+                expected_bank.remove_token({color: 1})
         assert game.players[0].token_reserved == expected_player_tokens
         assert game.bank == expected_bank
         assert card in game.players[0].cards_owned
@@ -767,9 +798,9 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         # Add tokens
-        token_cost = {Token.WHITE: 2,
-                      Token.BLUE: 3,
-                      Token.BLACK: 1}
+        token_cost = {Token.GREEN: 2,
+                      Token.WHITE: 1,
+                      Token.BLUE: 3}
         token_extra = {Token.RED: 1,
                        Token.WHITE: 1}
         for color in token_cost:
@@ -816,10 +847,10 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         # Add bonuses
-        bonus_cost = {Token.WHITE: 2,
-                      Token.BLUE: 3,
-                      Token.BLACK: 1}
-        bonus_extra = {Token.RED: 1,
+        bonus_cost = {Token.GREEN: 2,
+                      Token.WHITE: 1,
+                      Token.BLUE: 3}
+        bonus_extra = {Token.BLACK: 1,
                        Token.WHITE: 1}
         for color in bonus_cost:
             for _ in range(bonus_cost[color]):
@@ -867,22 +898,23 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         # Add tokens
-        token_cost = {Token.WHITE: 0,
-                      Token.BLUE: 1,
-                      Token.BLACK: 1}
-        token_extra = {Token.RED: 1,
+        token_cost = {Token.GREEN: 1,
+                      Token.BLUE: 1}
+        token_extra = {Token.GREEN: 2,
                        Token.WHITE: 1}
         for color in token_cost:
             for _ in range(token_cost[color]):
                 game.current_player.add_token({color: 1})
                 game.bank.remove_token({color: 1})
-        game.current_player.add_token(token_extra)
-        game.bank.remove_token(token_extra)
+        for color in token_extra:
+            for _ in range(token_extra[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
         # Add bonuses
-        bonus_cost = {Token.WHITE: 2,
-                      Token.BLUE: 2,
-                      Token.BLACK: 1}
-        bonus_extra = {Token.RED: 1,
+        bonus_cost = {Token.GREEN: 1,
+                      Token.WHITE: 1,
+                      Token.BLUE: 3}
+        bonus_extra = {Token.BLACK: 1,
                        Token.WHITE: 1}
         for color in bonus_cost:
             for _ in range(bonus_cost[color]):
@@ -923,21 +955,23 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         # Add tokens
-        token_cost = {Token.WHITE: 0,
-                      Token.BLUE: 1,
-                      Token.BLACK: 1}
-        token_extra = {Token.RED: 1,
+        token_cost = {Token.GREEN: 1,
+                      Token.BLUE: 1}
+        token_extra = {Token.GREEN: 2,
                        Token.WHITE: 1}
         for color in token_cost:
             for _ in range(token_cost[color]):
                 game.current_player.add_token({color: 1})
                 game.bank.remove_token({color: 1})
-        game.current_player.add_token(token_extra)
-        game.bank.remove_token(token_extra)
+        for color in token_extra:
+            for _ in range(token_extra[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
         # Add bonuses
-        bonus_cost = {Token.WHITE: 2,
+        bonus_cost = {Token.GREEN: 1,
+                      Token.WHITE: 1,
                       Token.BLUE: 2}
-        bonus_extra = {Token.RED: 1,
+        bonus_extra = {Token.BLACK: 1,
                        Token.WHITE: 1}
         for color in bonus_cost:
             for _ in range(bonus_cost[color]):
@@ -987,21 +1021,23 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         # Add tokens
-        token_cost = {Token.WHITE: 0,
-                      Token.BLUE: 1,
-                      Token.BLACK: 1}
-        token_extra = {Token.RED: 1,
+        token_cost = {Token.GREEN: 1,
+                      Token.BLUE: 1}
+        token_extra = {Token.GREEN: 2,
                        Token.WHITE: 1}
         for color in token_cost:
             for _ in range(token_cost[color]):
                 game.current_player.add_token({color: 1})
                 game.bank.remove_token({color: 1})
-        game.current_player.add_token(token_extra)
-        game.bank.remove_token(token_extra)
+        for color in token_extra:
+            for _ in range(token_extra[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
         # Add bonuses
-        bonus_cost = {Token.WHITE: 2,
+        bonus_cost = {Token.GREEN: 1,
+                      Token.WHITE: 1,
                       Token.BLUE: 2}
-        bonus_extra = {Token.RED: 1,
+        bonus_extra = {Token.BLACK: 1,
                        Token.WHITE: 1}
         for color in bonus_cost:
             for _ in range(bonus_cost[color]):
