@@ -666,7 +666,19 @@ class TestingGameMakeMovePurchaseCard:
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
-        raise NotImplementedError()
+        # Add bonuses
+        for color in card_cost:
+            for _ in range(card_cost[color]):
+                mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                                 token_cost=TokenBag().add({Token.RED: 1}))
+                game.current_player.add_to_owned_cards(mock_card)
+        game.make_move_for_current_player(action)
+        assert game.players[0].token_reserved == TokenBag()
+        assert game.bank == Bank(num_players)
+        assert card in game.players[0].cards_owned
+        assert not game.cards.is_card_in_tables(card)
+        assert game.players[0].prestige_points == card_prestige_points
+        assert game.players[0].bonus_owned.tokens[card_bonus] == 1
 
     def test_game_make_move_purchase_card_just_token(self) -> None:
         num_players = 2
@@ -801,7 +813,7 @@ class TestingGameMakeMovePurchaseCard:
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
         raise NotImplementedError()
-    
+
     def test_game_make_move_purchase_card_all_error(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
