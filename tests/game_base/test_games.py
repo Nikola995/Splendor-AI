@@ -1,6 +1,6 @@
 import pytest
 import random
-from game_base.cards import Card
+from game_base.cards import Card, CardGenerator
 from game_base.tokens import TokenBag, Token
 from game_base.players import Player
 from game_base.banks import Bank
@@ -590,14 +590,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_can_make_move_purchase_card_True_all(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -619,14 +620,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_can_make_move_purchase_card_False_all(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -654,14 +656,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_just_bonus(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -683,14 +686,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_just_token(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -717,11 +721,12 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_just_wildcard(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[0]
-        card_cost = {Token.BLUE: 4}
-        card_bonus = Token.BLACK
+        card_cost = {Token.WHITE: 4}
+        card_bonus = Token.RED
         card_prestige_points = 1
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
@@ -748,14 +753,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_no_bonus(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -796,14 +802,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_no_token(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -846,14 +853,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_no_wildcard(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -901,14 +909,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_all(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -964,14 +973,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_all_from_reserved(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -1034,14 +1044,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_eligible_for_noble(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
@@ -1051,14 +1062,15 @@ class TestingGameMakeMovePurchaseCard:
     def test_game_make_move_purchase_card_all_error(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
-        game = Game(players)
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
         game.initialize()
         card = game.cards.get_all_cards_on_tables()[7]
-        card_cost = {Token.WHITE: 2,
-                     Token.BLUE: 3,
-                     Token.BLACK: 2}
-        card_bonus = Token.GREEN
-        card_prestige_points = 1
+        card_cost = {Token.GREEN: 2,
+                     Token.WHITE: 1,
+                     Token.BLUE: 4}
+        card_bonus = Token.RED
+        card_prestige_points = 2
         assert card.token_cost == TokenBag().add(card_cost)
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
