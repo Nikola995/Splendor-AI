@@ -163,7 +163,7 @@ class Game:
         for noble in self.nobles:
             if self.current_player.is_eligible_for_noble(noble):
                 self.current_player.add_noble(noble)
-                self.nobles.pop(noble)
+                self.nobles.remove(noble)
                 break
 
     def _end_player_turn(self) -> None:
