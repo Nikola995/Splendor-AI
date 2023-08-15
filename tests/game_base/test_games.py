@@ -695,7 +695,24 @@ class TestingGameMakeMovePurchaseCard:
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
-        raise NotImplementedError()
+        extra_tokens_per_color = 1
+        # Add tokens
+        for color in card_cost:
+            for _ in range(card_cost[color] + extra_tokens_per_color):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
+        game.make_move_for_current_player(action)
+        expected_player_tokens = TokenBag()
+        expected_bank = Bank(num_players)
+        for color in card_cost:
+            expected_player_tokens.add({color: 1})
+            expected_bank.remove_token(({color: 1}))
+        assert game.players[0].token_reserved == expected_player_tokens
+        assert game.bank == expected_bank
+        assert card in game.players[0].cards_owned
+        assert not game.cards.is_card_in_tables(card)
+        assert game.players[0].prestige_points == card_prestige_points
+        assert game.players[0].bonus_owned.tokens[card_bonus] == 1
 
     def test_game_make_move_purchase_card_just_wildcard(self) -> None:
         num_players = 2
@@ -710,7 +727,23 @@ class TestingGameMakeMovePurchaseCard:
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
-        raise NotImplementedError()
+        # Add wildcards
+        extra_wildcard = 1
+        for _ in range(sum(card_cost.values()) + extra_wildcard):
+            game.current_player.add_token({Token.YELLOW: 1})
+            game.bank.remove_token({Token.YELLOW: 1})
+        game.make_move_for_current_player(action)
+        expected_player_tokens = TokenBag()
+        expected_bank = Bank(num_players)
+        for _ in range(extra_wildcard):
+            expected_player_tokens.add({Token.YELLOW: 1})
+            expected_bank.remove_token({Token.YELLOW: 1})
+        assert game.players[0].token_reserved == expected_player_tokens
+        assert game.bank == expected_bank
+        assert card in game.players[0].cards_owned
+        assert not game.cards.is_card_in_tables(card)
+        assert game.players[0].prestige_points == card_prestige_points
+        assert game.players[0].bonus_owned.tokens[card_bonus] == 1
 
     def test_game_make_move_purchase_card_no_bonus(self) -> None:
         num_players = 2
