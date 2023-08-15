@@ -1111,4 +1111,24 @@ class TestingGameMakeMovePurchaseCard:
         assert card.bonus_color == card_bonus
         assert card.prestige_points == card_prestige_points
         action = PurchaseCard(card)
-        raise NotImplementedError()
+        # Add tokens
+        token_cost = {Token.GREEN: 1,
+                      Token.BLUE: 1}
+        for color in token_cost:
+            for _ in range(token_cost[color]):
+                game.current_player.add_token({color: 1})
+                game.bank.remove_token({color: 1})
+        # Add bonuses
+        bonus_cost = {Token.GREEN: 1,
+                      Token.WHITE: 1,
+                      Token.BLUE: 1} # One missing Token.BLUE
+        for color in bonus_cost:
+            for _ in range(bonus_cost[color]):
+                mock_card = Card(level=1, prestige_points=0, bonus_color=color,
+                                 token_cost=TokenBag().add({Token.RED: 1}))
+                game.current_player.add_to_owned_cards(mock_card)
+        # Add wildcards
+        wildcard_cost = 1
+        game.current_player.add_token({Token.YELLOW: wildcard_cost})
+        with pytest.raises(ValueError) as e:
+            game.make_move_for_current_player(action)
