@@ -197,22 +197,22 @@ class CLI(GameInterface):
     def can_add_player_cmd(self, player_name: str) -> bool:
         """Checks if a player by the given name
         can be added to the game."""
-        return super().can_add_player(Player(player_name))
+        return super(CLI, self).can_add_player(Player(player_name))
 
     def add_player_cmd(self, player_name: str) -> None:
         """Adds a player by the given name to the game."""
         self.commands['remove'].valid_parameters.append(player_name)
-        return super().add_player(Player(player_name))
+        return super(CLI, self).add_player(Player(player_name))
 
     def can_remove_player_cmd(self, player_name: str) -> bool:
         """Checks if a player by the given name
         can be removed from the game."""
-        return super().can_remove_player(Player(player_name))
+        return super(CLI, self).can_remove_player(Player(player_name))
 
     def remove_player_cmd(self, player_name: str) -> None:
         """Removes a player by the given name from the game."""
         self.commands['remove'].valid_parameters.remove(player_name)
-        return super().remove_player(Player(player_name))
+        return super(CLI, self).remove_player(Player(player_name))
 
     def can_start_game_cmd(self) -> bool:
         """Checks if the game can be started."""
@@ -256,13 +256,14 @@ class CLI(GameInterface):
                 params = command.current_valid_parameters()
                 # If there is at least one valid combination of params
                 if params:
-                    print(f"{command}: {command.description}. "
-                          f"Takes {command.num_parameters} "
+                    print(f"{command_name}: {command.description}\n"
+                          f"\tTakes {command.num_parameters} "
                           "of the valid parameters as arguments.\n"
-                          f"Current valid parameters: {params}")
+                          f"\tCurrent valid parameters: {params}")
             # If no parameters as input, only executable cmds
             elif command.can_execute_fn():
-                print(f"{command}: {self.commands[command].description}")
+                print(f"{command_name}: "
+                      f"{self.commands[command_name].description}")
             else:
                 continue
 
