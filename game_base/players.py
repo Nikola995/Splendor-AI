@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from cards import Card
-from nobles import Noble
+from game_base.cards import Card
+from game_base.nobles import Noble
 from game_base.tokens import Token, TokenBag
 
 

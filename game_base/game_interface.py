@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from itertools import combinations
 from typing import Any, Callable
-from games import Game, GameState
-from players import Player
+from game_base.games import Game, GameState
+from game_base.players import Player
 
 
 @dataclass(slots=True)
@@ -11,24 +11,20 @@ class GameInterface(ABC):
     """Abstract class for an interface that can interact with a game"""
     game: Game = field(default_factory=Game)
 
-    @abstractmethod
     def can_add_player(self, player: Player) -> bool:
         """Method for checking if a player can be added
         to the game before starting."""
         return self.game.can_add_player(player)
 
-    @abstractmethod
     def add_player(self, player: Player) -> None:
         """Method for adding a player to the game before starting."""
         self.game.add_player(player)
 
-    @abstractmethod
     def can_remove_player(self, player: Player) -> bool:
         """Method for checking if a player can be removed
         from the game before starting."""
         return self.game.can_remove_player(player)
 
-    @abstractmethod
     def remove_player(self, player: Player) -> None:
         """Method for removing a player from the game before starting."""
         self.game.remove_player(player)
@@ -122,9 +118,9 @@ class CLI(GameInterface):
                               self.reserve_2_tokens_cmd,
                               "Reserves 2 same color tokens from the bank.",
                               1, ['green', 'white', 'blue', 'black', 'red']),
-            'res': Command(self.can_reserve_card, self.reserve_card,
+            'res': Command(self.can_reserve_card_cmd, self.reserve_card_cmd,
                            "Reserves a card from the table.", 1, []),
-            'buy': Command(self.can_purchase_card, self.purchase_card,
+            'buy': Command(self.can_purchase_card_cmd, self.purchase_card_cmd,
                            "Purchases a card from the table.", 1, []),
         }
 
@@ -226,6 +222,30 @@ class CLI(GameInterface):
         """Starts the game."""
         return self.game.initialize()
 
+    def can_reserve_3_tokens_cmd(self) -> bool:
+        return False
+
+    def reserve_3_tokens_cmd(self) -> None:
+        pass
+
+    def can_reserve_2_tokens_cmd(self) -> bool:
+        return False
+
+    def reserve_2_tokens_cmd(self) -> None:
+        pass
+
+    def can_reserve_card_cmd(self) -> bool:
+        return False
+
+    def reserve_card_cmd(self) -> None:
+        pass
+
+    def can_purchase_card_cmd(self) -> bool:
+        return False
+
+    def purchase_card_cmd(self) -> None:
+        pass
+
     def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
         print("Available commands:")
@@ -262,7 +282,7 @@ class CLI(GameInterface):
     def run(self) -> None:
         """Runs the console interface, waiting for user input and executing
         commands accordingly."""
-        print("----------Welcome to Splendor----------"
+        print("----------Welcome to Splendor----------\n"
               "Add players before starting the game")
         while True:
             user_input = input("Enter your command "
@@ -277,15 +297,6 @@ class CLI(GameInterface):
                     self.inexecutable_command()
             else:
                 self.invalid_command()
-
-        # if self.meta_data.state == GameState.NOT_STARTED:
-        #     raise ValueError("Game can't run if not initialized")
-        # if self.meta_data.state == GameState.FINISHED:
-        #     raise ValueError("Game can't run if finished")
-        # while (self.meta_data.state != GameState.FINISHED):
-        #     for idx, player in enumerate(self.game.players):
-        #         self.current_player_idx = idx
-        #         self.player_turn()
 
 
 @dataclass

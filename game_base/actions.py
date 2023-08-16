@@ -1,9 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from players import Player
-from banks import Bank
+from game_base.players import Player
+from game_base.banks import Bank
 from game_base.tokens import Token
-from cards import Card
+from game_base.cards import Card
 from copy import deepcopy
 
 

@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from itertools import combinations
-from actions import (Action, ReserveCard, PurchaseCard,
+from game_base.actions import (Action, ReserveCard, PurchaseCard,
                      Reserve2SameColorTokens,
                      Reserve3UniqueColorTokens)
-from players import Player
-from banks import Bank
-from cards import Card
+from game_base.players import Player
+from game_base.banks import Bank
+from game_base.cards import Card
 from game_base.tokens import Token
 
 
