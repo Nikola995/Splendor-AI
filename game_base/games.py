@@ -202,8 +202,9 @@ class Game:
         player's move.
         """
         if hasattr(action, 'card'):
-            if (action.card not in self.cards.get_all_cards_on_tables() and
-                    action.card not in self.current_player.cards_reserved):
+            if ((action.card not in self.cards.get_all_cards_on_tables() and
+                 action.card not in self.current_player.cards_reserved) or
+                    action.card is None):
                 return False
         return (self.meta_data.state == GameState.IN_PROGRESS and
                 action.can_perform(self.current_player, self.bank))
