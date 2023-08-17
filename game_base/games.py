@@ -72,14 +72,18 @@ class Game:
         return self.players[self.current_player_idx]
 
     def get_card_by_id(self, card_id: str) -> Optional[Card]:
-        """Returns the card from the table with the given id."""
+        """Returns the card from the table with the given id.
+        (Used for human players.)
+        """
         for card in self.cards.get_all_cards_on_tables():
-            if card.id == card_id:
+            if card is not None and card.id == card_id:
                 return card
         return None
 
     def get_card_by_idx(self, card_idx: int) -> Optional[Card]:
-        """Returns the card from the table with the given index."""
+        """Returns the card from the table with the given index.
+        (Used for agents.)
+        """
         return self.cards.get_all_cards_on_tables()[card_idx]
 
     def __post_init__(self) -> None:
