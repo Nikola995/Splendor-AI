@@ -4,7 +4,10 @@ from itertools import combinations
 from typing import Any, Callable
 from game_base.games import Game, GameState
 from game_base.players import Player
-from game_base.actions import Action
+from game_base.actions import (Action, ReserveCard, PurchaseCard,
+                               Reserve2SameColorTokens,
+                               Reserve3UniqueColorTokens)
+from game_base.tokens import Token
 
 
 @dataclass(slots=True)
@@ -138,7 +141,6 @@ class CLI(GameInterface):
                               1, []),
             'start': Command(self.can_start_game_cmd, self.start_game_cmd,
                              "Starts the game."),
-            # TODO: Implement all of the action cmds
             'token3': Command(self.can_reserve_3_tokens_cmd,
                               self.reserve_3_tokens_cmd,
                               "Reserves 3 unique color tokens from the bank.",
@@ -231,7 +233,7 @@ class CLI(GameInterface):
     def add_player_cmd(self, player_name: str) -> None:
         """Adds a player by the given name to the game."""
         self.commands['remove'].valid_parameters.append(player_name)
-        return super(CLI, self).add_player(Player(player_name))
+        super(CLI, self).add_player(Player(player_name))
 
     def can_remove_player_cmd(self, player_name: str) -> bool:
         """Checks if a player by the given name
@@ -241,39 +243,62 @@ class CLI(GameInterface):
     def remove_player_cmd(self, player_name: str) -> None:
         """Removes a player by the given name from the game."""
         self.commands['remove'].valid_parameters.remove(player_name)
-        return super(CLI, self).remove_player(Player(player_name))
+        super(CLI, self).remove_player(Player(player_name))
 
     def can_start_game_cmd(self) -> bool:
         """Checks if the game can be started."""
-        return self.game.can_initialize()
+        return super(CLI, self).can_initialize()
 
     def start_game_cmd(self) -> None:
         """Starts the game."""
-        return self.game.initialize()
+        super(CLI, self).initialize()
+        for card in self.game.cards.get_all_cards_on_tables():
+            self.commands['res'].valid_parameters.append(card.id)
+            self.commands['buy'].valid_parameters.append(card.id)
 
-    def can_reserve_3_tokens_cmd(self) -> bool:
-        return False
+    def can_reserve_3_tokens_cmd(self, colors: tuple[Token]) -> bool:
+        return (super(CLI, self)
+                .can_make_move_for_current_player(
+                    Reserve3UniqueColorTokens(colors)))
 
-    def reserve_3_tokens_cmd(self) -> None:
-        pass
+    def reserve_3_tokens_cmd(self, colors: tuple[Token]) -> None:
+        (super(CLI, self)
+         .make_move_for_current_player(
+            Reserve3UniqueColorTokens(colors)))
 
-    def can_reserve_2_tokens_cmd(self) -> bool:
-        return False
+    def can_reserve_2_tokens_cmd(self, color: Token) -> bool:
+        return (super(CLI, self)
+                .can_make_move_for_current_player(
+                    Reserve2SameColorTokens(color)))
 
-    def reserve_2_tokens_cmd(self) -> None:
-        pass
+    def reserve_2_tokens_cmd(self, color: Token) -> None:
+        (super(CLI, self)
+         .can_make_move_for_current_player(
+            Reserve2SameColorTokens(color)))
 
-    def can_reserve_card_cmd(self) -> bool:
-        return False
+    def can_reserve_card_cmd(self, card_id: str) -> bool:
+        card = self.game.get_card_by_id(card_id)
+        return (super(CLI, self)
+                .can_make_move_for_current_player(
+                    ReserveCard(card)))
 
-    def reserve_card_cmd(self) -> None:
-        pass
+    def reserve_card_cmd(self, card_id: str) -> None:
+        card = self.game.get_card_by_id(card_id)
+        (super(CLI, self)
+         .make_move_for_current_player(
+            ReserveCard(card)))
 
-    def can_purchase_card_cmd(self) -> bool:
-        return False
+    def can_purchase_card_cmd(self, card_id: str) -> bool:
+        card = self.game.get_card_by_id(card_id)
+        return (super(CLI, self)
+                .can_make_move_for_current_player(
+                    PurchaseCard(card)))
 
-    def purchase_card_cmd(self) -> None:
-        pass
+    def purchase_card_cmd(self, card_id: str) -> None:
+        card = self.game.get_card_by_id(card_id)
+        (super(CLI, self)
+         .make_move_for_current_player(
+            PurchaseCard(card)))
 
     def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
