@@ -256,25 +256,31 @@ class CLI(GameInterface):
             self.commands['res'].valid_parameters.append(card.id)
             self.commands['buy'].valid_parameters.append(card.id)
 
-    def can_reserve_3_tokens_cmd(self, colors: tuple[Token]) -> bool:
+    def can_reserve_3_tokens_cmd(self, color_1: str, color_2: str,
+                                 color_3: str) -> bool:
+        colors = (Token[color_1.upper()], Token[color_2.upper()],
+                  Token[color_3.upper()])
         return (super(CLI, self)
                 .can_make_move_for_current_player(
                     Reserve3UniqueColorTokens(colors)))
 
-    def reserve_3_tokens_cmd(self, colors: tuple[Token]) -> None:
+    def reserve_3_tokens_cmd(self, color_1: str, color_2: str,
+                                 color_3: str) -> None:
+        colors = (Token[color_1.upper()], Token[color_2.upper()],
+                  Token[color_3.upper()])
         (super(CLI, self)
          .make_move_for_current_player(
             Reserve3UniqueColorTokens(colors)))
 
-    def can_reserve_2_tokens_cmd(self, color: Token) -> bool:
+    def can_reserve_2_tokens_cmd(self, color: str) -> bool:
         return (super(CLI, self)
                 .can_make_move_for_current_player(
-                    Reserve2SameColorTokens(color)))
+                    Reserve2SameColorTokens(Token[color.upper()])))
 
-    def reserve_2_tokens_cmd(self, color: Token) -> None:
+    def reserve_2_tokens_cmd(self, color: str) -> None:
         (super(CLI, self)
          .can_make_move_for_current_player(
-            Reserve2SameColorTokens(color)))
+            Reserve2SameColorTokens(Token[color.upper()])))
 
     def can_reserve_card_cmd(self, card_id: str) -> bool:
         card = self.game.get_card_by_id(card_id)
