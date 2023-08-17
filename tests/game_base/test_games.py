@@ -260,6 +260,47 @@ class TestingGameProperties:
         assert game.current_player == Player(f'test_player_1')
 
 
+class TestingGameGettingCard:
+    def test_game_getting_card_by_id_True(self) -> None:
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
+        game.initialize()
+        card = game.cards.get_all_cards_on_tables()[7]
+        card_id = '21400'
+        assert card.id == card_id
+        assert game.get_card_by_id(card_id) == card
+
+    def test_game_getting_card_by_id_False(self) -> None:
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
+        card_id = '21400'
+        assert game.get_card_by_id(card_id) is None
+
+    def test_game_getting_card_by_idx_True(self) -> None:
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
+        game.initialize()
+        for _ in range(100):
+            card_idx = random.randint(0, 11)
+            card = game.cards.get_all_cards_on_tables()[card_idx]
+            assert game.get_card_by_idx(card_idx) == card
+
+    def test_game_getting_card_by_id_False(self) -> None:
+        num_players = 4
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players,
+                    cards=CardGenerator.generate_cards(shuffled=False))
+        for _ in range(100):
+            card_idx = random.randint(0, 11)
+            assert game.get_card_by_idx(card_idx) is None
+
+
 class TestingGameMakeMoveReserve3UniqueColorTokens:
 
     def test_game_can_make_move_3_unique_tokens_True(self) -> None:
