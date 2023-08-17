@@ -6,6 +6,7 @@ from game_base.banks import Bank
 from game_base.nobles import Noble, NobleGenerator
 from game_base.cards import CardGenerator, CardManagerCollection
 from game_base.actions import Action
+from game_base.cards import Card
 from game_base.action_sets import ActionSet, StandardActionSet
 
 
@@ -69,6 +70,17 @@ class Game:
     def current_player(self) -> Player:
         """Return the current player."""
         return self.players[self.current_player_idx]
+
+    def get_card_by_id(self, card_id: str) -> Optional[Card]:
+        """Returns the card from the table with the given id."""
+        for card in self.cards.get_all_cards_on_tables():
+            if card.id == card_id:
+                return card
+        return None
+
+    def get_card_by_idx(self, card_idx: int) -> Optional[Card]:
+        """Returns the card from the table with the given index."""
+        return self.cards.get_all_cards_on_tables()[card_idx]
 
     def __post_init__(self) -> None:
         if self.num_players > self._MAX_PLAYERS:
@@ -187,7 +199,7 @@ class Game:
         """
         if hasattr(action, 'card'):
             if (action.card not in self.cards.get_all_cards_on_tables() and
-                action.card not in self.current_player.cards_reserved):
+                    action.card not in self.current_player.cards_reserved):
                 return False
         return (self.meta_data.state == GameState.IN_PROGRESS and
                 action.can_perform(self.current_player, self.bank))
