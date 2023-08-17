@@ -279,7 +279,7 @@ class CLI(GameInterface):
 
     def reserve_2_tokens_cmd(self, color: str) -> None:
         (super(CLI, self)
-         .can_make_move_for_current_player(
+         .make_move_for_current_player(
             Reserve2SameColorTokens(Token[color.upper()])))
 
     def can_reserve_card_cmd(self, card_id: str) -> bool:
