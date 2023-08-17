@@ -141,6 +141,9 @@ class CLI(GameInterface):
                               1, []),
             'start': Command(self.can_start_game_cmd, self.start_game_cmd,
                              "Starts the game."),
+            'new': Command(lambda: True, self.new_game_cmd,
+                           "Ends the current game and starts a new "
+                           "uninitialized game."),
             'token3': Command(self.can_reserve_3_tokens_cmd,
                               self.reserve_3_tokens_cmd,
                               "Reserves 3 unique color tokens from the bank.",
@@ -256,6 +259,10 @@ class CLI(GameInterface):
             self.commands['res'].valid_parameters.append(card.id)
             self.commands['buy'].valid_parameters.append(card.id)
 
+    def new_game_cmd(self) -> None:
+        """Ends the current game and starts a new uninitialized game."""
+        super(CLI, self).new_game()
+
     def can_reserve_3_tokens_cmd(self, color_1: str, color_2: str,
                                  color_3: str) -> bool:
         colors = (Token[color_1.upper()], Token[color_2.upper()],
@@ -265,7 +272,7 @@ class CLI(GameInterface):
                     Reserve3UniqueColorTokens(colors)))
 
     def reserve_3_tokens_cmd(self, color_1: str, color_2: str,
-                                 color_3: str) -> None:
+                             color_3: str) -> None:
         colors = (Token[color_1.upper()], Token[color_2.upper()],
                   Token[color_3.upper()])
         (super(CLI, self)
