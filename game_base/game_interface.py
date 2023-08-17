@@ -4,6 +4,7 @@ from itertools import combinations
 from typing import Any, Callable
 from game_base.games import Game, GameState
 from game_base.players import Player
+from game_base.actions import Action
 
 
 @dataclass(slots=True)
@@ -28,6 +29,34 @@ class GameInterface(ABC):
     def remove_player(self, player: Player) -> None:
         """Method for removing a player from the game before starting."""
         self.game.remove_player(player)
+
+    def can_initialize(self) -> bool:
+        """Checks if the game can be initialized."""
+        return self.game.can_initialize()
+
+    def initialize(self) -> None:
+        """Initialize a new game for currently added players."""
+        self.game.initialize()
+
+    def can_make_move_for_current_player(self, action: Action) -> bool:
+        """Checks if the given action can be performed for the current
+        player's move.
+        """
+        return self.game.can_make_move_for_current_player(action)
+
+    def make_move_for_current_player(self, action: Action) -> None:
+        """Performs the given action as the player's move and iterate the
+        current player index.
+        """
+        self.game.make_move_for_current_player(action)
+
+    def get_winner(self) -> Player:
+        """Gets the winner if the game is finished."""
+        return self.game.get_winner()
+
+    def new_game(self) -> None:
+        """Starts a new game."""
+        self.game = Game()
 
     @abstractmethod
     def run(self) -> None:
@@ -218,7 +247,7 @@ class CLI(GameInterface):
         """Checks if the game can be started."""
         return self.game.can_initialize()
 
-    def start_game_cmd(self) -> bool:
+    def start_game_cmd(self) -> None:
         """Starts the game."""
         return self.game.initialize()
 
