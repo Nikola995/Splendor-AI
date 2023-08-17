@@ -365,6 +365,13 @@ class CLI(GameInterface):
                     self.inexecutable_command()
             else:
                 self.invalid_command()
+            if (self.game.meta_data.state == GameState.IN_PROGRESS and
+                    self.game.is_final_turn()):
+                print("A player has reached the winning threshold!\n"
+                      "The game will end this turn!")
+            if self.game.meta_data.state == GameState.FINISHED:
+                print("The game has ended.\n"
+                      "To start a new game enter 'new' as a command.")
 
 
 @dataclass
