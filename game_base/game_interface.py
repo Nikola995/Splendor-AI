@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from itertools import combinations
@@ -316,9 +317,15 @@ class CLI(GameInterface):
     def purchase_card_cmd(self, card_id: str) -> None:
         card = self.game.get_card_by_id(card_id)
         action = PurchaseCard(card)
+        nobles_pre_purchase = deepcopy(self.game.nobles)
+        player = self.game.current_player
         self._display_action_cmd(action)
         super(CLI, self).make_move_for_current_player(action)
         self._update_card_action_cmd_params(['res', 'buy'])
+        for noble in nobles_pre_purchase:
+            if noble in player.nobles_owned:
+                print(f"{player.id} was eligible and acquired {noble}")
+                break
 
     def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
