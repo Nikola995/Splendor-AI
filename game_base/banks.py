@@ -1,127 +1,70 @@
-from dataclasses import dataclass, field
-from utils import IncorrectInputError
+from dataclasses import dataclass, field, InitVar
+from game_base.tokens import TokenBag, Token
 
 
-# TODO Make it a singleton (refactor) (maybe?)
-@dataclass
+@dataclass(slots=True)
 class Bank:
     """A representation of the unreserved tokens in the game."""
 
-    # Available tokens per color (type)
-    token_available: dict[str, int] = field(default_factory=lambda: (
-        {"green": 7,
-         "white": 7,
-         "blue": 7,
-         "black": 7,
-         "red": 7,
-         # Yellow is the wildcard
-         "yellow": 5}))
+    token_available: TokenBag = field(init=False)
+    initial_regular_token_amount: int = field(init=False)
+    initial_wildcard_token_amount: int = field(init=False)
+    num_players: InitVar[int] = 4
 
-    def _can_remove_token(self, amount_to_remove: dict[str, int],
-                          threshold=0) -> bool:
+    def __post_init__(self, num_players: int):
+        match num_players:
+            case 4: self.initial_regular_token_amount = 7
+            case 3: self.initial_regular_token_amount = 5
+            case 2: self.initial_regular_token_amount = 4
+            case _: raise ValueError("Cannot initialize a bank for "
+                                     f"{num_players}, only 2, 3 or 4")
+        self.initial_wildcard_token_amount = 5
+        self.token_available = TokenBag(self.initial_regular_token_amount,
+                                        self.initial_wildcard_token_amount)
+
+    def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
         for color in amount_to_remove:
-            if (self.token_available[color] - amount_to_remove[color]
-                    < threshold):
-                return False
+            match amount_to_remove[color]:
+                case 2:
+                    if self.token_available.tokens[color] < 4:
+                        return False
+                case 1:
+                    if self.token_available.tokens[color] < 1:
+                        return False
+                case 0: return True
+                case other_amount:
+                    raise NotImplementedError("There are no ways to remove "
+                                              f"{other_amount} tokens.")
         return True
 
-    def _remove_token(self, amount_to_remove: dict[str, int],
-                      threshold=0, verbose=0) -> bool:
-        """Remove an amount of tokens for given colors.
-
-        (*Use in action functions only for wildcard (yellow), other colors
-         have already implemented methods)
+    def remove_token(self, amount_to_remove: dict[Token, int]) -> None:
+        """Remove an amount of tokens for each given colors from the bank.
 
         Parameters
         ----------
-        amount_to_remove : dict[str, int]
-            A dict of colors (keys) and amount of tokens to remove (values)
-
-        Raises
-        ------
-        IncorrectInputError
-            Raise if invalid color names are given
-
-        TokenThresholdError
-            Raise if the amount of tokens removed for a given color leaves the
-            bank with negative amount ( < 0)
+        amount_to_remove : dict[Token, int]
+            A dict of colors and corresponding amount of tokens to remove.
         """
-        if not set(amount_to_remove.keys()).issubset(
-                self.token_available.keys()):
-            raise IncorrectInputError("Invalid colors were given")
-        if self._can_remove_token(amount_to_remove, threshold):
-            for color in amount_to_remove:
-                self.token_available[color] -= amount_to_remove[color]
-            return True
-        else:
-            return False
-# =============================================================================
-#             raise TokenThresholdError("Tried to take more tokens"
-#                                       "than available in the bank")
-# =============================================================================
+        # Sanity check
+        if not self.can_remove_token(amount_to_remove):
+            raise ValueError("The amounts given can't be removed from "
+                             "the bank")
+        self.token_available.remove(amount_to_remove)
 
-    # TODO If a maximum threshold is added, add a False scenario
-    def add_token(self, amount_to_add: dict[str, int]) -> bool:
-        """Add an amount of tokens for given colors.
+    # TODO: create can_add_token method
+    # TODO: add can_add_token check inside add_token
+    def add_token(self, amount_to_add: dict[Token, int]) -> None:
+        """Add an amount of tokens for given colors to the bank.
+        Function call is only done while a player purchases a card.
 
         Parameters
         ----------
-        amount_to_add : dict[str,int]
-            A dict of colors (keys) and amount of tokens to add (values)
-
-        Raises
-        ------
-        IncorrectInputError
-            Raised if invalid color names are given
+        amount_to_add : dict[Token, int]
+            A dict of colors and corresponding amount of tokens to add.
         """
-        if not set(amount_to_add.keys()).issubset(self.token_available.keys()):
-            raise IncorrectInputError("Invalid colors were given")
-        for color in amount_to_add:
-            self.token_available[color] += amount_to_add[color]
-        return True
+        self.token_available.add(amount_to_add)
 
-    def remove_3_different_color_tokens(self, color_list: list[str],
-                                        verbose=0) -> bool:
-        """Remove 3 tokens of different color from the bank.
-
-        Parameters
-        ----------
-        color_list : list[str]
-            List of size 3 of colors
-
-        Raises
-        ------
-        IncorrectInputError
-            Raised if 3 colors are not given, or an incorrect color is given,
-            or 'yellow' is given
-        """
-        if len(color_list) != 3:
-            raise IncorrectInputError("3 colors were not given")
-        if 'yellow' in color_list:
-            raise IncorrectInputError("Yellow token cannot be removed without"
-                                      " reserving a card")
-        return self._remove_token(dict.fromkeys(color_list, 1))
-
-    def remove_2_same_color_tokens(self, color: str, verbose=0) -> bool:
-        """Remove 2 tokens of the same color from the bank.
-
-        Only if the bank has 4 tokens of that color available.
-
-        Parameters
-        ----------
-        color_list : str
-            Color for 2 tokens
-
-        Raises
-        ------
-        IncorrectInputError
-            Raised if an incorrect color is given,
-            or 'yellow' is given
-        TokenThresholdError
-            Bank has less than 4 tokens of a given color, can't remove 2.
-        """
-        if color == 'yellow':
-            raise IncorrectInputError("Yellow token cannot be removed without"
-                                      " reserving a card")
-        return self._remove_token({color: 2}, threshold=2)
+    def __str__(self) -> str:
+        return ("Available Bank tokens:\n"
+                f"{self.token_available}")

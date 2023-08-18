@@ -1,228 +1,213 @@
 from dataclasses import dataclass, field
-from cards import Card
-from nobles import Noble
-from utils import IncorrectInputError
+from game_base.cards import Card
+from game_base.nobles import Noble
+from game_base.tokens import Token, TokenBag
 
-@dataclass(order=True)
+
+@dataclass(slots=True)
 class Player:
     """A representation of a player entity within the game."""
 
     # TODO make it a user account with elo (in the future)
     # For now just use a string name
-    player_id: str
-    # Reserved tokens per color (type)
-    token_reserved: dict[str, int] = field(default_factory=lambda: (
-        {"green": 0,
-         "white": 0,
-         "blue": 0,
-         "black": 0,
-         "red": 0,
-         "yellow": 0}))
-    # Owned Cards
+    id: str
+    token_reserved: TokenBag = field(default_factory=TokenBag)
+    cards_reserved: list[Card] = field(default_factory=lambda: [None] * 3)
     cards_owned: list[Card] = field(default_factory=list)
-    # Reserved Cards
-    cards_reserved: dict[str, Card] = field(default_factory=dict)
-    # Owned Nobles
+    # Bonuses from Owned Cards, Wildcard in TokenBag is unused
+    bonus_owned: TokenBag = field(default_factory=TokenBag)
     nobles_owned: list[Noble] = field(default_factory=list)
-    # Bonuses per color (type)
-    bonus_owned: dict[str, int] = field(default_factory=lambda: ({"green": 0,
-                                                                  "white": 0,
-                                                                  "blue": 0,
-                                                                  "black": 0,
-                                                                  "red": 0}))
-    # Prestige points
+    # Metric for winning the game. >= 15 is eligible to win the game
     prestige_points: int = 0
 
-    def _can_remove_token(self, amount_to_remove: dict[str, int]) -> bool:
+    def can_remove_token(self, amount_to_remove: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be removed."""
-        for color in amount_to_remove:
-            if (self.token_reserved[color] - amount_to_remove[color] < 0):
-                return False
-        return True
+        return all([(self.token_reserved.tokens[color] - amount_to_remove[color]
+                     >= 0) for color in amount_to_remove])
 
-    def remove_token(self, amount_to_remove: dict[str, int]) -> bool:
+    def remove_token(self, amount_to_remove: dict[Token, int]) -> None:
         """Remove tokens of given colors by the amount given for each.
-
-        Will be unsuccessful if the given amount for any given color is
-        more than the amount reserved by the player (for that color).
+        Assumes can_remove_token check was made.
+        Function call is only done while a player purchases a card.
 
         Parameters
         ----------
-        amount_to_remove : dict[str, int]
-            A dict of colors (keys) and amount of tokens to remove (values)
-
-        Raises
-        ------
-        IncorrectInputError
-            Raise if an invalid color was given in amount_to_remove.
-
-        Returns
-        -------
-        bool
-            Whether or not the tokens were removed from the player.
+        amount_to_remove : dict[Token, int]
+            A dict of colors and corresponding amount of tokens to remove.
         """
-        if not set(amount_to_remove.keys()).issubset(
-                self.token_reserved.keys()):
-            raise IncorrectInputError("Invalid colors were given")
-        if self._can_remove_token(amount_to_remove):
-            for color in amount_to_remove:
-                self.token_reserved[color] -= amount_to_remove[color]
-            return True
-        else:
-            return False
-# =============================================================================
-#             raise TokenThresholdError("Tried to take more tokens"
-#                                       f"from {self.player_id} than"
-#                                       "available")
-# =============================================================================
+        self.token_reserved.remove(amount_to_remove)
 
-    def _can_add_token(self, amount_to_add: dict[str, int]) -> bool:
+    def can_add_token(self, amount_to_add: dict[Token, int]) -> bool:
         """Check if tokens of given colors can be added."""
-        if (sum(self.token_reserved.values()) +
-                sum(amount_to_add.values()) > 10):
-            return False
-        else:
-            return True
+        return (sum(self.token_reserved.tokens.values()) +
+                sum(amount_to_add.values()) <= 10)
 
-    def add_token(self, amount_to_add: dict[str, int]) -> bool:
+    def add_token(self, amount_to_add: dict[Token, int]) -> None:
         """Add tokens of given colors by the amount given for each.
-
-        Will be unsuccessful if sum amount of all tokens added plus the sum
-        amount of all tokens reserved by the player is more than 10.
+        Assumes can_add_token check was made.
+        Function call is only done when a player reserves a card or
+        reserves tokens from the bank.
 
         Parameters
         ----------
-        amount_to_add : dict[str, int]
-            A dict of colors (keys) and amount of tokens to add (values).
-
-        Raises
-        ------
-        IncorrectInputError
-            Raise if an invalid color was given in amount_to_add.
-
-        Returns
-        -------
-        bool
-            Whether or not the tokens were added to the player.
+        amount_to_add : dict[Token, int]
+            A dict of colors and corresponding amount of tokens to add.
         """
-        if not set(amount_to_add.keys()).issubset(self.token_reserved.keys()):
-            raise IncorrectInputError("Invalid colors were given")
-        if self._can_add_token(amount_to_add):
-            for color in amount_to_add:
-                self.token_reserved[color] += amount_to_add[color]
-            return True
-        else:
-            return False
-# =============================================================================
-#             raise TooManyTokensForPlayerError("A player cannot have more"
-#                                               " than 10 tokens in total"
-#                                               " reserved")
-# =============================================================================
+        # Sanity check if you don't check before calling this fn
+        if not self.can_add_token(amount_to_add):
+            raise ValueError("Too many tokens were given to"
+                             f" the player {self.id}")
+        self.token_reserved.add(amount_to_add)
 
-    def can_reserve_card(self) -> bool:
-        """Check if player has less than 3 reserved cards."""
-        # Should never have more than 3 reserved cards, but just in case use >=
-        if len(self.cards_reserved) >= 3:
-            return False
-        else:
-            return True
-# =============================================================================
-#             raise ActionNotPossibleError("Player has 3 reserved cards, "
-#                                          "can't reserve more")
-# =============================================================================
+    @property
+    def num_reserved_cards(self) -> int:
+        """The number of reserved card slot filled by a card."""
+        return len([card for card in self.cards_reserved if card is not None])
 
-    def add_to_reserved_cards(self, card: Card, card_id: str) -> None:
-        """Add card to dict of reserved cards."""
-        # The card is reserved even if there isn't a wildcard token to reserve
-        self.cards_reserved[card_id] = (card)
+    def can_reserve_card(self, card: Card) -> bool:
+        """Check if player has less than 3 reserved cards and
+        card is not already reserved by them."""
+        return (self.num_reserved_cards < 3 and
+                card not in self.cards_reserved)
 
-    def can_purchase_card(self, card: Card,
-                          yellow_replaces: dict[str, int]) -> bool:
+    def add_to_reserved_cards(self, card: Card) -> None:
+        """Adds card to the first open slot in reserved cards.
+        Assumes can_reserve_card check was made."""
+        # Sanity check if you don't check before calling this fn
+        if not self.can_reserve_card(card):
+            raise ValueError(f"Player {self.id} has no open slots to reserve "
+                             "another card.")
+        # The wildcard token given when reserving a card should be handled
+        # in the Action, this method just reserves the card for the player
+        for i in range(len(self.cards_reserved)):
+            if self.cards_reserved[i] is None:
+                self.cards_reserved[i] = card
+                break
+
+    def remove_from_reserved_cards(self, card: Card) -> None:
+        """Removes card from its slot in reserved cards.
+
+        Raises:
+            ValueError: If the card is not in the Player's reserved cards
+        """
+        # Sanity check
+        if card not in self.cards_reserved:
+            raise ValueError(f"Card {card} was not found in the reserved "
+                             f"cards of Player {self.id}")
+        self.cards_reserved[self.cards_reserved.index(card)] = None
+
+    def can_purchase_card(self, card: Card) -> bool:
         """Check if the player can purchase the given card.
 
         Returns True if the sum of each color of owned bonuses,
-        yellow tokens given as collateral and reserved tokens of the player
+        reserved tokens of the player and wildcard tokens given as collateral
         is >= than the cost of tokens of the card for those colors.
 
         Parameters
         ----------
         card : Card
             The card that the player wants to purchase.
-        yellow_replaces : dict[str, int]
-            A dict of colors (keys) and amount of yellow tokens
-            given to replace tokens for each given color (values).
-
-        Raises
-        ------
-        IncorrectInputError
-            Raises in two case:
-                If an invalid color was given in yellow_replaces.
-                if the sum of tokens (values) in yellow_replaces is more
-                than the amount of tokens in token_reserved['yellow']
-
-        Returns
-        -------
-        bool
-            Whether or not the player can purchase the card.
         """
-        if not set(yellow_replaces.keys()).issubset(
-                self.token_reserved.keys()):
-            raise IncorrectInputError("Invalid colors were given")
-        if sum(yellow_replaces.values()) > self.token_reserved['yellow']:
-            raise IncorrectInputError(f"{sum(yellow_replaces.values())} yellow"
-                                      " tokens given as collateral, but only "
-                                      f"{self.token_reserved['yellow']} yellow"
-                                      " tokens available")
-        player_buying_power = 0
-        for color in card.token_cost:
-            player_buying_power = (self.bonus_owned[color] +
-                                   self.token_reserved[color] +
-                                   yellow_replaces[color])
-            if card.token_cost[color] > player_buying_power:
+        collateral_wildcards = 0
+        color_costs = card.token_cost.tokens
+        for color in color_costs:
+            player_buying_power = (self.bonus_owned.tokens[color] +
+                                   self.token_reserved.tokens[color])
+            # If the card can be purchased without wildcards
+            if color_costs[color] <= player_buying_power:
+                continue
+            # If the card can be purchased with wildcards
+            # that weren't reserved for previous costs
+            # in the card requirements
+            elif color_costs[color] <= (player_buying_power +
+                                        self.token_reserved.tokens[Token.YELLOW]
+                                        - collateral_wildcards):
+                # Add the remainder of the cost to the number of
+                # collateral wildcards for the purchase
+                collateral_wildcards += (color_costs[color] -
+                                         player_buying_power)
+                continue
+            # Else the card can't be purchased
+            else:
                 return False
         return True
 
-    # TODO: add an input type check, and with that change output to bool
     def add_to_owned_cards(self, card: Card) -> None:
         """Add card to list of owned cards.
 
-        Automatically adds bonus and prestige points from card
+        Automatically removes card from reserved cards if found there.
+        Automatically adds bonus and prestige points from card.
 
         Parameters
         ----------
         card : Card
             Card to add to owned cards
         """
+        if card in self.cards_reserved:
+            self.remove_from_reserved_cards(card)
         self.cards_owned.append(card)
-        self.bonus_owned[card.bonus_color] += 1
+        self.bonus_owned.add({card.bonus_color: 1})
         self.prestige_points += card.prestige_points
 
-    # TODO: add an input type check
-    def is_eligible_for_noble(self, noble: Noble, verbose=0) -> bool:
-        """Check if the player is eligible to own the noble.
+    def purchase_card(self, card: Card) -> dict[Token, int]:
+        """Purchases the given card for the player.
 
-        If the player's owned bonuses are more or equal to the
-        required bonuses of the noble, they are eligible.
+        The process of purchasing a card follows this process for each color
+        in the card's cost amounts:
+
+            1. The owned bonuses discount the price of the card
+            (the card can be purchased with just bonuses)
+
+            3. The reserved tokens are removed from the player's inventory
+            by the remaining amount of the card cost
+
+            2. Wildcard tokens are used as collateral for the remaining cost,
+            (if there is remaining cost) and remove the total amount from the
+            player's inventory.
+
+        Post-purchase, the card is added to the player's owned cards.
+
+        Parameters
+        ----------
+        card : Card
+            The card that the player wants to purchase.
+
+        Returns:
+            dict[Token, int]: The token amounts that are removed from the
+            player and are to be returned to the bank.
+        """
+        # Sanity check
+        if not self.can_purchase_card(card):
+            raise ValueError(f"Player {self.id} can't purchase {card}.")
+
+        removed_tokens = {Token.YELLOW: 0}
+        color_costs = card.token_cost.tokens
+        for color in color_costs:
+            if color == Token.YELLOW:
+                continue
+            discounted_cost = max((color_costs[color] -
+                                   self.bonus_owned.tokens[color]), 0)
+            removed_tokens[color] = min(discounted_cost,
+                                        self.token_reserved.tokens[color])
+            removed_tokens[Token.YELLOW] += (discounted_cost -
+                                             removed_tokens[color])
+        self.token_reserved.remove(removed_tokens)
+        self.add_to_owned_cards(card)
+        return removed_tokens
+
+    def is_eligible_for_noble(self, noble: Noble) -> bool:
+        """Check if the player is eligible to own the noble.
 
         Parameters
         ----------
         noble : Noble
             The noble whose bonuses we check against
-
-        Returns
-        -------
-        bool
-            Eligibility of the player to own the noble
         """
-        for color in noble.bonus_required:
-            # If the player doesn't have enough bonuses for the noble
-            if self.bonus_owned[color] < noble.bonus_required[color]:
-                return False
-        # If all the checks pass, that must mean the player is eligible
-        return True
+        return all([(self.bonus_owned.tokens[color] >=
+                     noble.bonus_required.tokens[color])
+                    for color in noble.bonus_required.tokens])
 
-    # TODO: add an input type check, and with that change output to bool
-    def add_to_owned_nobles(self, noble: Noble) -> None:
+    def add_noble(self, noble: Noble) -> None:
         """Add noble to list of owned nobles.
 
         Automatically adds bonus and prestige points from card
@@ -232,5 +217,42 @@ class Player:
         noble : Noble
             Noble to add to owned nobles
         """
+        if not self.is_eligible_for_noble(noble):
+            raise ValueError(f"Player {self.id} is not eligible for "
+                             f"Noble {noble}")
         self.nobles_owned.append(noble)
         self.prestige_points += noble.prestige_points
+
+    def __lt__(self, other):
+        """Used for sorting in Game to get the winner.
+        If there's more than one eligible player to win,
+        sort by most prestige points, then least owned cards."""
+        if isinstance(other, Player):
+            return ((self.prestige_points, -len(self.cards_owned)) <
+                    (other.prestige_points, -len(other.cards_owned)))
+        raise TypeError(
+            f"Comparison not supported between 'Player' and {type(other)}")
+
+    def __eq__(self, other):
+        """Used for sorting in Game to get the winner.
+        If there's more than one eligible player to win,
+        sort by most prestige points, then least owned cards."""
+        if isinstance(other, Player):
+            return ((self.id, self.prestige_points, -len(self.cards_owned)) ==
+                    (other.id, other.prestige_points, -len(other.cards_owned)))
+        return False
+
+    def __str__(self) -> str:
+        return '\n'.join([f"Player ID: {self.id}",
+                          f"Prestige points: {self.prestige_points}",
+                          "Number of purchased cards: "
+                          f"{len(self.cards_owned)}",
+                          f"Number of nobles: {len(self.nobles_owned)}",
+                          "Number of reserved cards: "
+                          f"{self.num_reserved_cards}",
+                          "--Reserved cards--",
+                          *[str(card) for card in self.cards_reserved],
+                          "--Bonuses from purchased cards--",
+                          str(self.bonus_owned),
+                          "--Reserved tokens--",
+                          str(self.token_reserved),])
