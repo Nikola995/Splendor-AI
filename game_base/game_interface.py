@@ -326,6 +326,9 @@ class CLI(GameInterface):
             if noble in player.nobles_owned:
                 print(f"{player.id} was eligible and acquired {noble}")
                 break
+        if self.game.is_final_turn():
+            print(f"{player.id} has reached the winning threshold!\n"
+                  "The game will end this turn!")
 
     def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
@@ -379,10 +382,6 @@ class CLI(GameInterface):
                     self.inexecutable_command()
             else:
                 self.invalid_command()
-            if (self.game.meta_data.state == GameState.IN_PROGRESS and
-                    self.game.is_final_turn()):
-                print("A player has reached the winning threshold!\n"
-                      "The game will end this turn!")
             if self.game.meta_data.state == GameState.IN_PROGRESS:
                 print("Current player to move is "
                       f"{self.game.current_player.id}.")
