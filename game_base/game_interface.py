@@ -252,12 +252,18 @@ class CLI(GameInterface):
         """Checks if the game can be started."""
         return super(CLI, self).can_initialize()
 
+    def _update_card_action_cmd_params(self, cmds: list[str]) -> None:
+        """Updates the card cmds params with the current cards on tables."""
+        card_ids = [card.id
+                    for card in self.game.cards.get_all_cards_on_tables()]
+        for cmd_name in cmds:
+            self.commands[cmd_name].valid_parameters = card_ids
+        
+    
     def start_game_cmd(self) -> None:
         """Starts the game."""
         super(CLI, self).initialize()
-        for card in self.game.cards.get_all_cards_on_tables():
-            self.commands['res'].valid_parameters.append(card.id)
-            self.commands['buy'].valid_parameters.append(card.id)
+        self._update_card_action_cmd_params(['res', 'buy'])
 
     def new_game_cmd(self) -> None:
         """Ends the current game and starts a new uninitialized game."""
@@ -300,6 +306,7 @@ class CLI(GameInterface):
         (super(CLI, self)
          .make_move_for_current_player(
             ReserveCard(card)))
+        self._update_card_action_cmd_params(['res', 'buy'])
 
     def can_purchase_card_cmd(self, card_id: str) -> bool:
         card = self.game.get_card_by_id(card_id)
@@ -312,6 +319,7 @@ class CLI(GameInterface):
         (super(CLI, self)
          .make_move_for_current_player(
             PurchaseCard(card)))
+        self._update_card_action_cmd_params(['res', 'buy'])
 
     def show_help_cmd(self) -> None:
         """Displays all currently available commands and their descriptions."""
