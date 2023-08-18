@@ -258,8 +258,11 @@ class CLI(GameInterface):
                     for card in self.game.cards.get_all_cards_on_tables()]
         for cmd_name in cmds:
             self.commands[cmd_name].valid_parameters = card_ids
-        
-    
+
+    def _display_action_cmd(self, action: Action) -> None:
+        """Shows the executed action by the current player."""
+        print(f"{self.game.current_player.id} {action}")
+
     def start_game_cmd(self) -> None:
         """Starts the game."""
         super(CLI, self).initialize()
@@ -273,52 +276,48 @@ class CLI(GameInterface):
                                  color_3: str) -> bool:
         colors = (Token[color_1.upper()], Token[color_2.upper()],
                   Token[color_3.upper()])
-        return (super(CLI, self)
-                .can_make_move_for_current_player(
-                    Reserve3UniqueColorTokens(colors)))
+        action = Reserve3UniqueColorTokens(colors)
+        return super(CLI, self).can_make_move_for_current_player(action)
 
     def reserve_3_tokens_cmd(self, color_1: str, color_2: str,
                              color_3: str) -> None:
         colors = (Token[color_1.upper()], Token[color_2.upper()],
                   Token[color_3.upper()])
-        (super(CLI, self)
-         .make_move_for_current_player(
-            Reserve3UniqueColorTokens(colors)))
+        action = Reserve3UniqueColorTokens(colors)
+        self._display_action_cmd(action)
+        super(CLI, self).make_move_for_current_player(action)
 
     def can_reserve_2_tokens_cmd(self, color: str) -> bool:
-        return (super(CLI, self)
-                .can_make_move_for_current_player(
-                    Reserve2SameColorTokens(Token[color.upper()])))
+        action = Reserve2SameColorTokens(Token[color.upper()])
+        return super(CLI, self).can_make_move_for_current_player(action)
 
     def reserve_2_tokens_cmd(self, color: str) -> None:
-        (super(CLI, self)
-         .make_move_for_current_player(
-            Reserve2SameColorTokens(Token[color.upper()])))
+        action = Reserve2SameColorTokens(Token[color.upper()])
+        self._display_action_cmd(action)
+        super(CLI, self).make_move_for_current_player(action)
 
     def can_reserve_card_cmd(self, card_id: str) -> bool:
         card = self.game.get_card_by_id(card_id)
-        return (super(CLI, self)
-                .can_make_move_for_current_player(
-                    ReserveCard(card)))
+        action = ReserveCard(card)
+        return super(CLI, self).can_make_move_for_current_player(action)
 
     def reserve_card_cmd(self, card_id: str) -> None:
         card = self.game.get_card_by_id(card_id)
-        (super(CLI, self)
-         .make_move_for_current_player(
-            ReserveCard(card)))
+        action = ReserveCard(card)
+        self._display_action_cmd(action)
+        super(CLI, self).make_move_for_current_player(action)
         self._update_card_action_cmd_params(['res', 'buy'])
 
     def can_purchase_card_cmd(self, card_id: str) -> bool:
         card = self.game.get_card_by_id(card_id)
-        return (super(CLI, self)
-                .can_make_move_for_current_player(
-                    PurchaseCard(card)))
+        action = PurchaseCard(card)
+        return super(CLI, self).can_make_move_for_current_player(action)
 
     def purchase_card_cmd(self, card_id: str) -> None:
         card = self.game.get_card_by_id(card_id)
-        (super(CLI, self)
-         .make_move_for_current_player(
-            PurchaseCard(card)))
+        action = PurchaseCard(card)
+        self._display_action_cmd(action)
+        super(CLI, self).make_move_for_current_player(action)
         self._update_card_action_cmd_params(['res', 'buy'])
 
     def show_help_cmd(self) -> None:
