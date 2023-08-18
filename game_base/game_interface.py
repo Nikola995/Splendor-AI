@@ -369,6 +369,9 @@ class CLI(GameInterface):
                     self.game.is_final_turn()):
                 print("A player has reached the winning threshold!\n"
                       "The game will end this turn!")
+            if self.game.meta_data.state == GameState.IN_PROGRESS:
+                print("Current player to move is "
+                      f"{self.game.current_player.id}.")
             if self.game.meta_data.state == GameState.FINISHED:
                 print("The game has ended.\n"
                       "To start a new game enter 'new' as a command.")
