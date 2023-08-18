@@ -374,7 +374,7 @@ class CLI(GameInterface):
             command = self.commands.get(user_cmd)
             if command:
                 if command.execute(*user_params):
-                    continue
+                    pass
                 else:
                     self.inexecutable_command()
             else:
