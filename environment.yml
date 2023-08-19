@@ -2,9 +2,9 @@ name: splendor
 channels:
   - defaults
 dependencies:
-  - python
+  - python ==3.10
   - pandas
-  - spyder
+  - pytest
   - pip:
     - pygame
 
