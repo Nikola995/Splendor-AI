@@ -235,3 +235,10 @@ class Game:
             self.possible_actions.update_card_actions(
                 cards=self.cards.get_all_cards_on_tables(),
                 player=self.current_player)
+
+    # %% Game state representation
+
+    def state_matrix(self, dense: bool = True) -> list[int]:
+        """Returns the entire game state information in matrix form."""
+        # TODO: fill the matrix
+        return []
