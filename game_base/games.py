@@ -150,6 +150,9 @@ class Game:
         self.nobles = NobleGenerator.generate_nobles(self.num_players)
         self.meta_data.change_game_state(GameState.IN_PROGRESS)
         self.cards.fill_tables()
+        self.possible_actions.update_card_actions(
+            cards=self.cards.get_all_cards_on_tables(),
+            player=self.current_player)
 
     # %% Active game methods
     def is_final_turn(self) -> bool:
@@ -209,6 +212,12 @@ class Game:
         return (self.meta_data.state == GameState.IN_PROGRESS and
                 action.can_perform(self.current_player, self.bank))
 
+    def all_actions_legality(self) -> list[bool]:
+        """Returns the legality of all possible actions in
+        the current game state."""
+        return [self.can_make_move_for_current_player(action)
+                for action in self.possible_actions.all_actions()]
+
     def make_move_for_current_player(self, action: Action) -> None:
         """Performs the given action as the player's move and iterate the
         current player index.
@@ -217,9 +226,12 @@ class Game:
         if not self.can_make_move_for_current_player(action):
             raise ValueError(f"Player {self.current_player.id} can't {action}")
         action.perform(player=self.current_player, bank=self.bank)
+        self.noble_check_for_current_player()
+        self._end_player_turn()
         # If action with card wasn't purchasing a reserved card.
         if hasattr(action, 'card'):
             if self.cards.is_card_in_tables(action.card):
                 self.cards.remove_card_from_tables(action.card)
-        self.noble_check_for_current_player()
-        self._end_player_turn()
+            self.possible_actions.update_card_actions(
+                cards=self.cards.get_all_cards_on_tables(),
+                player=self.current_player)
