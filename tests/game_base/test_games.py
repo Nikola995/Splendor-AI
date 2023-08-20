@@ -291,7 +291,7 @@ class TestingGameGettingCard:
             card = game.cards.get_all_cards_on_tables()[card_idx]
             assert game.get_card_by_idx(card_idx) == card
 
-    def test_game_getting_card_by_id_False(self) -> None:
+    def test_game_getting_card_by_idx_False(self) -> None:
         num_players = 4
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
         game = Game(players=players,
