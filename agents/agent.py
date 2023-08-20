@@ -26,7 +26,7 @@ class Agent:
             action = game.possible_actions.get_action_by_idx(idx)
             if game.can_make_move_for_current_player(action):
                 return (action, idx)
-        return None
+        return (None, -1)
     
     def __str__(self) -> str:
         return f"Agent with {self.model} model"
