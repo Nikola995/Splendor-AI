@@ -57,3 +57,15 @@ class TestingStandardActionSet:
         # Last card action for player cards
         assert (action_set.card_actions_player[-1] is
                 action_set.all_actions()[41])
+
+    def test_standard_action_set_get_action_by_idx(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players)
+        game.initialize()
+        action_set = game.possible_actions
+        assert isinstance(action_set, StandardActionSet)
+        for idx, action in enumerate(action_set.all_actions()):
+            assert action_set.get_action_by_idx(idx) is action
+        # Out of range action
+        assert action_set.get_action_by_idx(42) is None
