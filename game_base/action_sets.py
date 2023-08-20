@@ -2,10 +2,9 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from itertools import combinations
 from game_base.actions import (Action, ReserveCard, PurchaseCard,
-                     Reserve2SameColorTokens,
-                     Reserve3UniqueColorTokens)
+                               Reserve2SameColorTokens,
+                               Reserve3UniqueColorTokens)
 from game_base.players import Player
-from game_base.banks import Bank
 from game_base.cards import Card
 from game_base.tokens import Token
 
@@ -15,20 +14,26 @@ class ActionSet(ABC):
     """Abstract class for working with game actions"""
 
     @abstractmethod
-    def possible_actions(self, player: Player, **kwargs) -> list[Action]:
-        """Abstract method for checking all possible actions for a player."""
+    def update_card_actions(self, cards: list[Card], player: Player) -> None:
+        """Abstract method for updating the possible card actions."""
         pass
 
     @abstractmethod
-    def legal_actions(self, player: Player, **kwargs) -> list[Action]:
-        """Abstract method for checking all legal actions for a player."""
+    def all_actions(self) -> list[Action]:
+        """Abstract method for getting all possible actions."""
+        pass
+
+    @abstractmethod
+    def get_action_by_idx(self, idx: int) -> list[Action]:
+        """Abstract method for getting action from all possible actions
+        by idx."""
         pass
 
 
 def generate_3_unique_token_actions() -> list[Action]:
     """Creates a list of all possible 3 unique color token actions."""
-    color_combos = combinations([Token.GREEN, Token.WHITE, Token.BLUE,
-                                 Token.BLACK, Token.RED], 3)
+    normal_colors = [x for x in Token if x != Token.YELLOW]
+    color_combos = combinations(normal_colors, 3)
     return [Reserve3UniqueColorTokens(combo) for combo in color_combos]
 
 
@@ -49,25 +54,45 @@ class StandardActionSet(ActionSet):
     # List of possible actions with tokens (immutable during entire game)
     token_actions: list[Action] = field(
         default_factory=generate_standard_token_actions)
+    card_actions: list[Action] = field(default_factory=list)
+    card_actions_player: list[Action] = field(default_factory=list)
 
-    def possible_card_actions(self, player: Player,
-                              cards: list[Card]) -> list[Action]:
-        """Creates a list of actions for all available cards."""
+    def update_card_actions_table(self, cards: list[Card]) -> None:
+        """Updates the list of card actions with the given cards."""
         reserve_cards = [ReserveCard(card) for card in cards]
-        # Add all of the cards on the tables.
         purchase_cards = [PurchaseCard(card) for card in cards]
-        # Add the already reserved cards in the player's inventory
-        purchase_cards += [PurchaseCard(card) for
-                           card in player.cards_reserved]
-        return reserve_cards + purchase_cards
+        self.card_actions = reserve_cards + purchase_cards
 
-    def possible_actions(self, player: Player,
-                         cards: list[Card]) -> list[Action]:
-        """Returns all possible actions for the given player."""
-        return self.token_actions + self.possible_card_actions(player, cards)
+    def update_card_actions_player(self, player: Player) -> None:
+        """Updates the list of card actions for the player's reserved cards."""
+        # Add the reserved card slots from the player's inventory
+        self.card_actions_player = [PurchaseCard(card) for
+                                    card in player.cards_reserved]
 
-    def legal_actions(self, player: Player, bank: Bank,
-                      cards: list[Card]) -> list[Action]:
-        """Returns all legal actions for the given player."""
-        return [action for action in self.possible_actions(player, cards)
-                if action.can_perform(player=player, bank=bank)]
+    def update_card_actions(self, cards: list[Card], player: Player) -> None:
+        """Updates the list of card actions."""
+        self.update_card_actions_table(cards)
+        self.update_card_actions_player(player)
+
+    def get_action_by_idx(self, idx: int) -> Action:
+        """Gets the action from the list of actions by its index."""
+        if idx < len(self.token_actions):
+            # If the action idx is in token_actions
+            return self.token_actions[idx]
+        elif idx < len(self.token_actions) + len(self.card_actions):
+            # If the action idx is in card_actions
+            return self.card_actions[idx - len(self.token_actions)]
+        elif idx < (len(self.token_actions) +
+                    len(self.card_actions) +
+                    len(self.card_actions_player)):
+            # If the action idx is in card_actions_player
+            return self.card_actions_player[idx - (len(self.token_actions) +
+                                                   len(self.card_actions))]
+        else:
+            return None
+
+    def all_actions(self) -> list[Action]:
+        """Returns all possible actions in the current action set."""
+        return (self.token_actions +
+                self.card_actions +
+                self.card_actions_player)
