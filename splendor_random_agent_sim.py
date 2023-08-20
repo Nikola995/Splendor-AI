@@ -6,6 +6,7 @@ from game_base.players import Player
 
 def simulate_game(agent: Agent, num_players_in_game: int = 4) -> bool:
     """Simulates an entire game of given number of players with given agent."""
+    # TODO: Add logger for action choices
     players = [Player(f'random_{i + 1}') for i in range(num_players_in_game)]
     game = Game(players=players)
     game.initialize()
@@ -18,6 +19,7 @@ def simulate_game(agent: Agent, num_players_in_game: int = 4) -> bool:
         game.make_move_for_current_player(action)
     # if game.meta_data.state == GameState.FINISHED:
     #     print(f"The winner is {game.get_winner()}")
+    # TODO: Return is_stalemate, num_turns, avg_action_idx, 
     return game.meta_data.state == GameState.FINISHED
 
 
@@ -30,7 +32,9 @@ def main():
                                    num_players_in_game=4)
         if not ended_game:
             num_stalemates += 1
+        # TODO: Use tqdm library
         print('\r'+f"Game {i} finished", end='\r')
+    # TODO: Save data to data\simulations\random_choice.csv
     print(f"From {num_simulations} simulations using {agent}, "
           f"{num_stalemates} games were stalemated, or "
           f"{(num_stalemates * 100)/num_simulations: .2f}% of games")
