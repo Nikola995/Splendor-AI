@@ -7,9 +7,9 @@ from os import path
 from game_base.tokens import Token, TokenBag
 
 # Set the files path to be relative to this file
-CARDS_FILE_PATH_CSV: Path = (Path(__file__).parent /
+CARDS_FILE_PATH_CSV: Path = (Path(__file__).parent.parent / 'data' / 'assets' /
                              'splendor_cards_list.csv').resolve()
-CARDS_FILE_PATH_PKL: Path = (Path(__file__).parent /
+CARDS_FILE_PATH_PKL: Path = (Path(__file__).parent.parent / 'data' / 'assets' /
                              'cards_manager_collection.pkl').resolve()
 
 
