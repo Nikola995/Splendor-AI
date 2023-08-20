@@ -25,7 +25,7 @@ class TestingStandardActionSet:
         assert len(action_set.token_actions) == 15
         assert len(action_set.card_actions) == 0
         assert len(action_set.card_actions_player) == 0
-    
+
     def test_standard_action_set_game_initialization(self) -> None:
         num_players = 2
         players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
@@ -37,4 +37,23 @@ class TestingStandardActionSet:
         assert len(action_set.card_actions) == 24
         assert len(action_set.card_actions_player) == 3
         assert len(action_set.all_actions()) == 42
-    
+
+    def test_standard_action_set_all_actions(self) -> None:
+        num_players = 2
+        players = [Player(f'test_player_{i + 1}') for i in range(num_players)]
+        game = Game(players=players)
+        game.initialize()
+        action_set = game.possible_actions
+        assert isinstance(action_set, StandardActionSet)
+        # Last token action
+        assert action_set.token_actions[-1] is action_set.all_actions()[14]
+        # First card action
+        assert action_set.card_actions[0] is action_set.all_actions()[15]
+        # Last card action
+        assert action_set.card_actions[-1] is action_set.all_actions()[38]
+        # First card action for player cards
+        assert (action_set.card_actions_player[0] is
+                action_set.all_actions()[39])
+        # Last card action for player cards
+        assert (action_set.card_actions_player[-1] is
+                action_set.all_actions()[41])
