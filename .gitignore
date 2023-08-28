@@ -17,3 +17,6 @@ ipython_config.py
 
 #vscode settings
 .vscode/
+
+#simulation files
+data/simulations/*
