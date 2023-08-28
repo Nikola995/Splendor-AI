@@ -36,6 +36,19 @@ def simulate_game(agent: Agent, num_players_in_game: int = 4) -> bool:
             (idx_sum/num_moves))
 
 
+def run_simulations(agent: Agent, num_agents: int = 4,
+                    num_simulations: int = 100) -> list[tuple]:
+    """Runs the given number of simulations of games with given number of 
+    players with given Agent type.
+
+    Returns:
+        list[tuple]: Each tuple is the result from a simulated game.
+    """
+    return [simulate_game(agent=agent, num_players_in_game=num_agents)
+            for _ in tqdm(range(num_simulations), unit=' games',
+                          desc=f'Simulation for {num_agents} {agent}')]
+
+
 def show_simulations_analysis(agent: Agent, num_agents: int = 4) -> None:
     simulations_df = (pd.read_csv(SIMULATIONS_PATH_CSV, header=0, index_col=0)
                       .query(f"Num_Players == {num_agents}"))
@@ -55,16 +68,9 @@ def show_simulations_analysis(agent: Agent, num_agents: int = 4) -> None:
 def main():
     num_simulations = 100
     num_agents = 4
+    print(list(range(2, 5)))
     agent = Agent(RandomModel())
-    simulation_results = []
-    pbar = tqdm(desc='Simulated Games', unit=' games', initial=0,
-                total=num_simulations, leave=False)
-    for _ in range(num_simulations):
-        simulation_result = simulate_game(agent=agent,
-                                          num_players_in_game=num_agents)
-        simulation_results.append(simulation_result)
-        pbar.update(1)
-    pbar.close()
+    simulation_results = run_simulations(agent, num_agents, num_simulations)
     (pd.DataFrame(simulation_results,
                   columns=['Game_Ended', 'Num_Turns', 'Avg_Action_Idx'])
      .assign(Num_Players=num_agents)
