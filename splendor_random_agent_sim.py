@@ -3,6 +3,7 @@ from agents.agent import Agent
 from agents.models import RandomModel
 from game_base.players import Player
 from pathlib import Path
+from os import path
 import pandas as pd
 from tqdm import tqdm
 
@@ -53,6 +54,21 @@ def run_simulations(agent: Agent, num_agents: int = 4,
                           desc=f'Simulation for {num_agents} {agent}')]
 
 
+def save_simulation_results(results: pd.DataFrame, num_players: int) -> None:
+    """Converts the results to a dataframe and saves to the simulations .csv
+    filepath."""
+    if path.exists(SIMULATIONS_PATH_CSV):
+        (pd.DataFrame(results,
+                      columns=['Game_Ended', 'Num_Turns', 'Avg_Action_Idx'])
+         .assign(Num_Players=num_players)
+         .to_csv(SIMULATIONS_PATH_CSV, mode='a', header=False))
+    else:
+        (pd.DataFrame(results,
+                      columns=['Game_Ended', 'Num_Turns', 'Avg_Action_Idx'])
+         .assign(Num_Players=num_players)
+         .to_csv(SIMULATIONS_PATH_CSV))
+
+
 def show_simulations_analysis(agent: Agent, num_agents: int = 4) -> None:
     simulations_df = (pd.read_csv(SIMULATIONS_PATH_CSV, header=0, index_col=0)
                       .query(f"Num_Players == {num_agents}"))
@@ -70,16 +86,14 @@ def show_simulations_analysis(agent: Agent, num_agents: int = 4) -> None:
 
 
 def main():
-    num_simulations = 100
-    num_agents = 4
-    print(list(range(2, 5)))
+    num_simulations = 100_000
     agent = Agent(RandomModel())
-    simulation_results = run_simulations(agent, num_agents, num_simulations)
-    (pd.DataFrame(simulation_results,
-                  columns=['Game_Ended', 'Num_Turns', 'Avg_Action_Idx'])
-     .assign(Num_Players=num_agents)
-     .to_csv(SIMULATIONS_PATH_CSV))
-    show_simulations_analysis(agent, num_agents)
+    for num_agents in range(2, 5):
+        simulation_results = run_simulations(agent, num_agents,
+                                             num_simulations)
+        save_simulation_results(simulation_results, num_agents)
+    for num_agents in range(2, 5):
+        show_simulations_analysis(agent, num_agents)
 
 
 if __name__ == '__main__':
