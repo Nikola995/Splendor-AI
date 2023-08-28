@@ -11,8 +11,13 @@ SIMULATIONS_PATH_CSV: Path = (Path(__file__).parent / 'data' / 'simulations' /
                               'random_choice.csv').resolve()
 
 
-def simulate_game(agent: Agent, num_players_in_game: int = 4) -> bool:
-    """Simulates an entire game of given number of players with given agent."""
+def simulate_game(agent: Agent, num_players_in_game: int = 4) -> tuple:
+    """Simulates an entire game of given number of players with given agent.
+
+    Returns:
+        tuple: (Did the game finish, The number of turns played,
+        The average number of illegal moves before the action was chosen.)
+    """
     # TODO: Add logger for action choices
     players = [Player(f'random_{i + 1}') for i in range(num_players_in_game)]
     game = Game(players=players)
@@ -30,7 +35,6 @@ def simulate_game(agent: Agent, num_players_in_game: int = 4) -> bool:
     #     print(f"The winner is {game.get_winner()}")
     num_moves = (game.meta_data.turns_played * num_players_in_game +
                  game.meta_data.curr_player_index)
-    # Return (is_stalemate, num_turns, avg_action_idx)
     return (game.meta_data.state == GameState.FINISHED,
             game.meta_data.turns_played,
             (idx_sum/num_moves))
