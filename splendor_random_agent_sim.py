@@ -36,6 +36,22 @@ def simulate_game(agent: Agent, num_players_in_game: int = 4) -> bool:
             (idx_sum/num_moves))
 
 
+def show_simulations_analysis(agent: Agent, num_agents: int = 4) -> None:
+    simulations_df = (pd.read_csv(SIMULATIONS_PATH_CSV, header=0, index_col=0)
+                      .query(f"Num_Players == {num_agents}"))
+    num_simulations = simulations_df.shape[0]
+    num_stalemates = simulations_df['Game_Ended'].value_counts()[False]
+    num_turns_sum = simulations_df['Num_Turns'].sum()
+    action_index_sum = simulations_df['Avg_Action_Idx'].sum()
+    print(f"From {num_simulations} simulations using {num_agents} {agent}, "
+          f"{num_stalemates} games were stalemated, or "
+          f"{(num_stalemates * 100)/num_simulations:.2f}% of games")
+    print(f"Games lasted on average {num_turns_sum/ num_simulations:.2f} "
+          "turns")
+    print("The actions chosen were on average the "
+          f"{action_index_sum/num_simulations:.2f} legal move")
+
+
 def main():
     num_simulations = 100
     num_agents = 4
@@ -51,14 +67,9 @@ def main():
     pbar.close()
     (pd.DataFrame(simulation_results,
                   columns=['Game_Ended', 'Num_Turns', 'Avg_Action_Idx'])
+     .assign(Num_Players=num_agents)
      .to_csv(SIMULATIONS_PATH_CSV))
-    # print(f"From {num_simulations} simulations using {num_agents} {agent}, "
-    #       f"{num_stalemates} games were stalemated, or "
-    #       f"{(num_stalemates * 100)/num_simulations:.2f}% of games")
-    # print(f"Games lasted on average {num_turns_sum/ num_simulations:.2f} "
-    #       "turns")
-    # print("The actions chosen were on average the "
-    #       f"{action_index_sum/num_simulations:.2f} legal move")
+    show_simulations_analysis(agent, num_agents)
 
 
 if __name__ == '__main__':
