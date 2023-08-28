@@ -20,7 +20,7 @@ mkl_random=1.2.2=py310h4ed8f06_0
 numexpr=2.8.4=py310hd213c9f_0
 numpy=1.24.3=py310hdc03b94_0
 numpy-base=1.24.3=py310h3caf3d7_0
-openssl=1.1.1u=h2bbff1b_0
+openssl=1.1.1v=h2bbff1b_0
 packaging=23.0=py310haa95532_0
 pandas=1.5.3=py310h4ed8f06_0
 pip=23.2.1=py310haa95532_0
@@ -37,6 +37,7 @@ sqlite=3.40.1=h2bbff1b_0
 tk=8.6.12=h2bbff1b_0
 toml=0.10.2=pyhd3eb1b0_0
 tomli=2.0.1=py310haa95532_0
+tqdm=4.65.0=py310h9909e9c_0
 tzdata=2022g=h04d1e81_0
 vc=14.2=h21ff451_1
 vs2015_runtime=14.27.29016=h5e58377_2

@@ -2,6 +2,7 @@ from game_base.games import Game, GameState
 from agents.agent import Agent
 from agents.models import RandomModel
 from game_base.players import Player
+from tqdm import tqdm
 
 
 def simulate_game(agent: Agent, num_players_in_game: int = 4) -> bool:
